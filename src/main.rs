@@ -3,7 +3,7 @@ use reqwest::{
     header::USER_AGENT,
 };
 use serde_json::Value;
-use std::{env, fs::File, io::Write, path::PathBuf};
+use std::{env, fs::File, io, io::Write, path::PathBuf};
 
 fn get_url(str: &str, client: &Client) -> Response {
     let res = client
@@ -51,7 +51,24 @@ fn main() {
             .expect("Failed to read text from response");
 
         let mut path = PathBuf::from(env::current_dir().unwrap());
-        path.push("Test.gitignore");
+        path.push(".gitignore");
+
+        if path.exists() {
+            print!(
+                "{} already exists. Would you like to continue? (y/N)",
+                path.display()
+            );
+
+            io::stdout().flush().unwrap();
+
+            let mut input = String::new();
+
+            io::stdin().read_line(&mut input).unwrap();
+
+            if input.trim().to_lowercase() != "y" {
+                return;
+            }
+        }
 
         let mut file = File::create(path).unwrap();
         file.write(body.as_bytes()).unwrap();
