@@ -3,7 +3,7 @@ use reqwest::{
     header::USER_AGENT,
 };
 use serde_json::Value;
-use std::{env, fs::File, io, io::Write, path::PathBuf,collections::HashMap};
+use std::{collections::HashMap, env, fs::File, io, io::Write, path::PathBuf};
 
 fn get_url(str: &str, client: &Client) -> Response {
     let res = client
@@ -19,38 +19,57 @@ fn get_url(str: &str, client: &Client) -> Response {
     res
 }
 
-let mut templates_collection = HashMap::new();
+fn get_templates(client: &Client) -> (Value, HashMap<String, String>) {
+    let mut hashmap: HashMap<String, String> = HashMap::new();
 
-fn get_templates(client: &Client) -> Value {
     let templates_url = "https://api.github.com/repos/github/gitignore/git/trees/main";
 
-    let templates = get_url(templates_url, client).json().expect("Failed to read JSON from response");
+    let body: Value = get_url(templates_url, client)
+        .json()
+        .expect("Failed to read JSON from response");
 
-            let tree = templates["tree"].as_array().unwrap().iter().filter(|el| {
-            let name = el["path"].as_str().unwrap();
-            name.ends_with(".gitignore")
-        });
+    let tree = body["tree"].as_array().unwrap().iter().filter(|el| {
+        let name = el["path"].as_str().unwrap();
+        name.ends_with(".gitignore")
+    });
 
-        tree
+    for item in tree {
+        let base_path = item["path"].to_string();
+        let path = base_path.split(".").nth(0).unwrap();
+        let lowercase = &path.to_lowercase();
+
+        hashmap.insert(path.to_string(), lowercase.to_string());
+    }
+
+    (body, hashmap)
 }
 
 fn main() {
     let client = Client::new();
 
-    let mut args: env::Args = env::args();
-    let command = args.nth(1).expect("No command given");
+    let args = env::args().collect::<Vec<String>>();
+    let command = &args.get(1).expect("No command given").to_string();
+
+    println!("Grabbing templates...");
+    let (templates, template_map) = get_templates(&client);
 
     if command == "pull" {
-        let mut template = args.nth(0).expect("No template given");
-        template = template
+        let template = &args
+            .get(2)
+            .expect("No template given")
+            .to_string()
             .split('.')
             .nth(0)
             .expect("No template given")
             .to_string();
 
+        let template_path = template_map
+            .get(&template.to_lowercase())
+            .expect("Failed to find template in collection");
+
         let url = format!(
             "https://raw.githubusercontent.com/github/gitignore/main/{}.gitignore",
-            template
+            template_path
         );
 
         let body = get_url(&url, &client)
@@ -80,11 +99,14 @@ fn main() {
         let mut file = File::create(path).unwrap();
         file.write(body.as_bytes()).unwrap();
     } else if command == "ls" || command == "list" {
-        let templates = get_templates(&client);
+        let tree = templates["tree"].as_array().unwrap().iter().filter(|el| {
+            let name = el["path"].as_str().unwrap();
+            name.ends_with(".gitignore")
+        });
 
         println!("Available templates:");
 
-        for item in templates {
+        for item in tree {
             let name = item["path"]
                 .as_str()
                 .unwrap()
@@ -96,8 +118,7 @@ fn main() {
             println!("  {}", name);
         }
 
-        println!("\nEnter one of the above names. Example: Rust");
-        println!("NOTE: CASE SENSITIVE. Working on this :)");
+        println!("\nEnter one of the above names eg. Rust");
         println!("These are simply the Github templates. If you would like a different one, look elsewhere.");
     }
 }
