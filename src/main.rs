@@ -5,10 +5,8 @@ use spinners_rs::{Spinner, Spinners};
 use std::{env, fs::File, io, io::Write, path::PathBuf};
 
 fn print_usage() {
-    println!(
-        "Usage: {} <command>",
-        env::args().collect::<Vec<String>>()[0]
-    );
+    let cmd = env::args().collect::<Vec<String>>()[0];
+    println!("Usage: {} <command>", cmd);
     println!("Commands:");
     println!("  list");
     println!("  pull <template>");
