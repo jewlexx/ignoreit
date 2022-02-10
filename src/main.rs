@@ -3,7 +3,7 @@ use reqwest::{
     header::USER_AGENT,
 };
 use serde_json::Value;
-use std::{env, fs::File, io, io::Write, path::PathBuf};
+use std::{env, fs::File, io, io::Write, path::PathBuf,collections::HashMap};
 
 fn get_url(str: &str, client: &Client) -> Response {
     let res = client
@@ -19,12 +19,19 @@ fn get_url(str: &str, client: &Client) -> Response {
     res
 }
 
+let mut templates_collection = HashMap::new();
+
 fn get_templates(client: &Client) -> Value {
     let templates_url = "https://api.github.com/repos/github/gitignore/git/trees/main";
 
-    let body = get_url(templates_url, client);
+    let templates = get_url(templates_url, client).json().expect("Failed to read JSON from response");
 
-    body.json().expect("Failed to read JSON from response")
+            let tree = templates["tree"].as_array().unwrap().iter().filter(|el| {
+            let name = el["path"].as_str().unwrap();
+            name.ends_with(".gitignore")
+        });
+
+        tree
 }
 
 fn main() {
@@ -75,14 +82,9 @@ fn main() {
     } else if command == "ls" || command == "list" {
         let templates = get_templates(&client);
 
-        let tree = templates["tree"].as_array().unwrap().iter().filter(|el| {
-            let name = el["path"].as_str().unwrap();
-            name.ends_with(".gitignore")
-        });
-
         println!("Available templates:");
 
-        for item in tree {
+        for item in templates {
             let name = item["path"]
                 .as_str()
                 .unwrap()
