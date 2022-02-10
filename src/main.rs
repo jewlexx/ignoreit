@@ -1,6 +1,7 @@
 mod lib;
 use lib::{get_templates, get_url};
 use reqwest::blocking::Client;
+use spinners_rs::{Spinner, Spinners};
 use std::{env, fs::File, io, io::Write, path::PathBuf};
 
 fn main() {
@@ -9,8 +10,9 @@ fn main() {
     let args = env::args().collect::<Vec<String>>();
     let command = &args.get(1).expect("No command given").to_string();
 
-    println!("Grabbing templates...");
+    let sp = Spinner::new(&Spinners::Dots12, "Fetching templates...".into());
     let (templates, template_map) = get_templates(&client);
+    sp.stop();
 
     if command == "pull" {
         let template = &args

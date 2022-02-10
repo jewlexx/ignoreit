@@ -38,9 +38,6 @@ pub fn get_templates(client: &Client) -> (Value, HashMap<String, String>) {
         let path = base_path.split(".").nth(0).unwrap();
         let lowercase = &path.to_lowercase();
 
-        println!("{}", &lowercase);
-        println!("{}", &path);
-
         hashmap.insert(lowercase.to_string(), path.to_string());
     }
 
