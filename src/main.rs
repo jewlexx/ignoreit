@@ -5,8 +5,7 @@ use spinners_rs::{Spinner, Spinners};
 use std::{env, fs::File, io, io::Write, path::PathBuf};
 
 fn print_usage() {
-    let cmd = env::args().collect::<Vec<String>>()[0];
-    println!("Usage: {} <command>", cmd);
+    println!("Usage: gitignore <command>");
     println!("Commands:");
     println!("  list");
     println!("  pull <template>");
