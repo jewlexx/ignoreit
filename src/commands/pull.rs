@@ -19,16 +19,14 @@ pub fn pull_template() -> anyhow::Result<()> {
 
     let template_path = template_map
         .get(&template.to_lowercase())
-        .expect("Failed to find template in collection");
+        .with_context(|| "Template not found")?;
 
     let url = format!(
         "https://raw.githubusercontent.com/github/gitignore/main/{}.gitignore",
         template_path
     );
 
-    let body = get_url(&url)
-        .text()
-        .expect("Failed to read text from response");
+    let body = get_url(&url)?.text()?;
 
     let mut path = env::current_dir().with_context(|| "Failed to get current directory")?;
     path.push(".gitignore");

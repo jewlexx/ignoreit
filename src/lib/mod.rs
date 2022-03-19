@@ -8,26 +8,26 @@ const TEMPLATES_URL: &str = "https://api.github.com/repos/github/gitignore/git/t
 #[macro_use]
 pub mod macros;
 
-pub fn get_url(str: &str) -> Response {
+pub fn get_url(str: &str) -> anyhow::Result<Response> {
     let client = create_client!();
 
     let res = client
         .get(str)
         .header(USER_AGENT, "Gitignore Generator")
         .send()
-        .expect("Failed to send HTTP request");
+        .with_context(|| "Failed to send request")?;
 
     if !res.status().is_success() {
         panic!("Failed to get response: {}", res.status())
     }
 
-    res
+    Ok(res)
 }
 
 pub fn get_templates() -> anyhow::Result<HashMap<String, String>> {
     let mut hashmap: HashMap<String, String> = HashMap::new();
 
-    let body: Value = get_url(TEMPLATES_URL)
+    let body: Value = get_url(TEMPLATES_URL)?
         .json()
         .with_context(|| "Failed to read JSON from response")?;
 
