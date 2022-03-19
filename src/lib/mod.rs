@@ -5,9 +5,8 @@ use std::collections::HashMap;
 
 const TEMPLATES_URL: &str = "https://api.github.com/repos/github/gitignore/git/trees/main";
 
-pub mod macros;
 #[macro_use]
-mod client;
+pub mod macros;
 
 pub fn get_url(str: &str) -> Response {
     let client = create_client!();
