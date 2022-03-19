@@ -1,5 +1,3 @@
-use anyhow::Result;
-
 mod commands;
 mod lib;
 
@@ -9,7 +7,7 @@ use commands::{
     pull::pull_template,
 };
 
-fn main() -> Result<()> {
+fn main() -> anyhow::Result<()> {
     let args = parse();
 
     if args.command == Commands::List {

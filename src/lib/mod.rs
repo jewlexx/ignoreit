@@ -1,11 +1,13 @@
-use reqwest::{
-    blocking::{Client, Response},
-    header::USER_AGENT,
-};
+use reqwest::{blocking::Response, header::USER_AGENT};
 use serde_json::Value;
 use std::collections::HashMap;
 
-pub fn get_url(str: &str, client: &Client) -> Response {
+mod client;
+use crate::create_client;
+
+pub fn get_url(str: &str) -> Response {
+    let client = create_client!();
+
     let res = client
         .get(str)
         .header(USER_AGENT, "Gitignore Generator")
@@ -19,12 +21,12 @@ pub fn get_url(str: &str, client: &Client) -> Response {
     res
 }
 
-pub fn get_templates(client: &Client) -> HashMap<String, String> {
+pub fn get_templates() -> HashMap<String, String> {
     let mut hashmap: HashMap<String, String> = HashMap::new();
 
     let templates_url = "https://api.github.com/repos/github/gitignore/git/trees/main";
 
-    let body: Value = get_url(templates_url, client)
+    let body: Value = get_url(templates_url)
         .json()
         .expect("Failed to read JSON from response");
 

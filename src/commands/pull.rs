@@ -1,5 +1,3 @@
-use anyhow::Result;
-use reqwest::blocking::Client;
 use std::{
     env,
     fs::File,
@@ -8,11 +6,9 @@ use std::{
 
 use crate::lib::{get_templates, get_url};
 
-pub fn pull_template() -> Result<()> {
-    let client = Client::new();
-
+pub fn pull_template() -> anyhow::Result<()> {
     let template = env::args().nth(2).unwrap();
-    let template_map = get_templates(&client);
+    let template_map = get_templates();
 
     let template_path = template_map
         .get(&template.to_lowercase())
@@ -23,7 +19,7 @@ pub fn pull_template() -> Result<()> {
         template_path
     );
 
-    let body = get_url(&url, &client)
+    let body = get_url(&url)
         .text()
         .expect("Failed to read text from response");
 
