@@ -35,7 +35,7 @@ pub fn get_templates(client: &Client) -> (Value, HashMap<String, String>) {
 
     for item in tree {
         let base_path = item["path"].as_str().unwrap();
-        let path = base_path.split(".").nth(0).unwrap();
+        let path = base_path.split('.').next().unwrap();
         let lowercase = &path.to_lowercase();
 
         hashmap.insert(lowercase.to_string(), path.to_string());
