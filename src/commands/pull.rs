@@ -11,7 +11,7 @@ use crate::lib::{get_templates, get_url};
 pub fn pull_template() -> Result<()> {
     let client = Client::new();
 
-    let template = env::args().nth(3).unwrap();
+    let template = env::args().nth(2).unwrap();
     let template_map = get_templates(&client);
 
     let template_path = template_map
