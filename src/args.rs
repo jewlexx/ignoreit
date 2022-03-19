@@ -20,3 +20,7 @@ pub enum Commands {
     ])]
     Pull,
 }
+
+pub fn parse() -> Args {
+    Args::parse()
+}
