@@ -15,6 +15,8 @@ pub fn pull_template() -> anyhow::Result<()> {
         .nth(2)
         .with_context(|| "Please provide a template name")?;
 
+    let output = env::args().nth(3).unwrap_or_else(|| ".gitignore".into());
+
     let template_map = get_templates()?;
 
     let template_path = template_map
@@ -28,8 +30,9 @@ pub fn pull_template() -> anyhow::Result<()> {
 
     let body = get_url(&url)?.text()?;
 
-    let mut path = env::current_dir().with_context(|| "Failed to get current directory")?;
-    path.push(".gitignore");
+    let path = env::current_dir()
+        .with_context(|| "Failed to get current directory")?
+        .join(output);
 
     if path.exists() {
         print!(

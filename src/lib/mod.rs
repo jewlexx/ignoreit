@@ -36,17 +36,28 @@ pub fn get_templates() -> anyhow::Result<HashMap<String, String>> {
         .with_context(|| "Failed to parse tree")?;
 
     let tree = tree.iter().filter(|el| {
-        let name = el["path"].to_string();
+        let name = el["path"]
+            .as_str()
+            .with_context(|| "Failed to parse path")
+            .unwrap();
+
         name.ends_with(".gitignore")
     });
 
     for item in tree {
-        let base_path = item["path"].to_string();
+        let base_path = item["path"]
+            .as_str()
+            .with_context(|| "Failed to parse path")
+            .unwrap();
+
         let path = base_path
             .split('.')
             .next()
             .with_context(|| "Failed to parse path")?;
+
         let lowercase = &path.to_lowercase();
+
+        println!("{}", lowercase);
 
         hashmap.insert(lowercase.to_string(), path.to_string());
     }
