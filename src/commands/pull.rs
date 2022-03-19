@@ -10,6 +10,15 @@ use crate::{
     lib::{get_templates, get_url},
 };
 
+macro_rules! parse_url {
+    ($url:tt) => {{
+        format!(
+            "https://raw.githubusercontent.com/github/gitignore/main/{}.gitignore",
+            $url
+        )
+    }};
+}
+
 pub fn pull_template() -> anyhow::Result<()> {
     let template = env::args()
         .nth(2)
@@ -23,10 +32,7 @@ pub fn pull_template() -> anyhow::Result<()> {
         .get(&template.to_lowercase())
         .with_context(|| "Template not found")?;
 
-    let url = format!(
-        "https://raw.githubusercontent.com/github/gitignore/main/{}.gitignore",
-        template_path
-    );
+    let url = parse_url!(template_path);
 
     let body = get_url(&url)?.text()?;
 
