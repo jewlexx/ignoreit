@@ -34,8 +34,6 @@ pub fn pull_template() -> anyhow::Result<()> {
 
     let url = parse_url!(template_path);
 
-    let body = get_url(&url)?.text()?;
-
     let path = env::current_dir()
         .with_context(|| "Failed to get current directory")?
         .join(output);
@@ -58,6 +56,8 @@ pub fn pull_template() -> anyhow::Result<()> {
             return Ok(());
         }
     }
+
+    let body = get_url(&url)?.text()?;
 
     let mut file = File::create(path).with_context(|| "Failed to create file")?;
     file.write_all(body.as_bytes())
