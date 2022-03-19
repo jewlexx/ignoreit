@@ -25,8 +25,6 @@ pub fn get_url(str: &str) -> anyhow::Result<Response> {
 }
 
 pub fn get_templates() -> anyhow::Result<HashMap<String, String>> {
-    let mut hashmap: HashMap<String, String> = HashMap::new();
-
     let body: Value = get_url(TEMPLATES_URL)?
         .json()
         .with_context(|| "Failed to read JSON from response")?;
@@ -43,6 +41,8 @@ pub fn get_templates() -> anyhow::Result<HashMap<String, String>> {
 
         name.ends_with(".gitignore")
     });
+
+    let mut hashmap: HashMap<String, String> = HashMap::new();
 
     for item in tree {
         let base_path = item["path"]
