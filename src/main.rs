@@ -1,11 +1,13 @@
 use anyhow::Result;
 
-mod args;
 mod commands;
 mod lib;
 
-use args::{parse, Commands};
-use commands::{list::list_templates, pull::pull_template};
+use commands::{
+    args::{parse, Commands},
+    list::list_templates,
+    pull::pull_template,
+};
 
 fn main() -> Result<()> {
     let args = parse();
