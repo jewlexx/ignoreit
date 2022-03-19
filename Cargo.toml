@@ -6,6 +6,8 @@ description = "Quickly download .gitignore templates for nearly any project"
 license = "MIT"
 repository = "https://github.com/jewlexx/ignoreit"
 readme = "README.md"
+keywords = ["git", "ignore"]
+categories = ["command-line-utilities"]
 
 [dependencies]
 reqwest = { version = "0.11.10", features = ["blocking", "json"] }
