@@ -4,7 +4,7 @@ version = "1.0.0"
 edition = "2021"
 description = "Quickly download .gitignore templates for nearly any project"
 license = "MIT"
-repository = "https://github.com/jewlexx/ignoreit.git"
+repository = "https://github.com/jewlexx/ignoreit"
 readme = "README.md"
 
 [dependencies]
