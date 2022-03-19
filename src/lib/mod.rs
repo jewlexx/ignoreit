@@ -19,7 +19,7 @@ pub fn get_url(str: &str, client: &Client) -> Response {
     res
 }
 
-pub fn get_templates(client: &Client) -> (Value, HashMap<String, String>) {
+pub fn get_templates(client: &Client) -> HashMap<String, String> {
     let mut hashmap: HashMap<String, String> = HashMap::new();
 
     let templates_url = "https://api.github.com/repos/github/gitignore/git/trees/main";
@@ -41,5 +41,5 @@ pub fn get_templates(client: &Client) -> (Value, HashMap<String, String>) {
         hashmap.insert(lowercase.to_string(), path.to_string());
     }
 
-    (body, hashmap)
+    hashmap
 }

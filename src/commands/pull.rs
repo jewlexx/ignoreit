@@ -15,7 +15,6 @@ pub fn pull_template() -> Result<()> {
     let template_map = get_templates(&client);
 
     let template_path = template_map
-        .1
         .get(&template.to_lowercase())
         .expect("Failed to find template in collection");
 
