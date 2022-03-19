@@ -57,8 +57,6 @@ pub fn get_templates() -> anyhow::Result<HashMap<String, String>> {
 
         let lowercase = &path.to_lowercase();
 
-        println!("{}", lowercase);
-
         hashmap.insert(lowercase.to_string(), path.to_string());
     }
 
