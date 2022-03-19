@@ -205,17 +205,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "gitignore"
-version = "1.0.0"
-dependencies = [
- "anyhow",
- "clap",
- "reqwest",
- "serde_json",
- "spinners",
-]
-
-[[package]]
 name = "h2"
 version = "0.3.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -335,6 +324,17 @@ dependencies = [
  "matches",
  "unicode-bidi",
  "unicode-normalization",
+]
+
+[[package]]
+name = "ignoreit"
+version = "1.0.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "reqwest",
+ "serde_json",
+ "spinners",
 ]
 
 [[package]]
