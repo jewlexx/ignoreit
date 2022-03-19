@@ -1,9 +1,13 @@
+use anyhow::Context as _;
 use reqwest::{blocking::Response, header::USER_AGENT};
 use serde_json::Value;
 use std::collections::HashMap;
 
+const TEMPLATES_URL: &str = "https://api.github.com/repos/github/gitignore/git/trees/main";
+
+pub mod macros;
+#[macro_use]
 mod client;
-use crate::create_client;
 
 pub fn get_url(str: &str) -> Response {
     let client = create_client!();
@@ -21,27 +25,32 @@ pub fn get_url(str: &str) -> Response {
     res
 }
 
-pub fn get_templates() -> HashMap<String, String> {
+pub fn get_templates() -> anyhow::Result<HashMap<String, String>> {
     let mut hashmap: HashMap<String, String> = HashMap::new();
 
-    let templates_url = "https://api.github.com/repos/github/gitignore/git/trees/main";
-
-    let body: Value = get_url(templates_url)
+    let body: Value = get_url(TEMPLATES_URL)
         .json()
-        .expect("Failed to read JSON from response");
+        .with_context(|| "Failed to read JSON from response")?;
 
-    let tree = body["tree"].as_array().unwrap().iter().filter(|el| {
-        let name = el["path"].as_str().unwrap();
+    let tree = body["tree"]
+        .as_array()
+        .with_context(|| "Failed to parse tree")?;
+
+    let tree = tree.iter().filter(|el| {
+        let name = el["path"].to_string();
         name.ends_with(".gitignore")
     });
 
     for item in tree {
-        let base_path = item["path"].as_str().unwrap();
-        let path = base_path.split('.').next().unwrap();
+        let base_path = item["path"].to_string();
+        let path = base_path
+            .split('.')
+            .next()
+            .with_context(|| "Failed to parse path")?;
         let lowercase = &path.to_lowercase();
 
         hashmap.insert(lowercase.to_string(), path.to_string());
     }
 
-    hashmap
+    Ok(hashmap)
 }

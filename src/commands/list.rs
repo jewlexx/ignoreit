@@ -4,7 +4,7 @@ use crate::lib::get_templates;
 
 pub fn list_templates() -> anyhow::Result<()> {
     let sp = Spinner::new(Spinners::Dots12, "Fetching templates...".into());
-    let map = get_templates();
+    let map = get_templates()?;
     sp.stop();
 
     println!("Available templates:");
