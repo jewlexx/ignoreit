@@ -5,9 +5,6 @@ use clap::{Arg, Parser, Subcommand};
 pub struct Args {
     #[clap(subcommand)]
     pub command: Commands,
-
-    #[clap(short, long, default_value = ".gitignore")]
-    pub output: String,
 }
 
 #[derive(Subcommand, Debug, PartialEq)]
