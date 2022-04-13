@@ -40,19 +40,22 @@ pub fn get_templates() -> anyhow::Result<HashMap<String, String>> {
             .map(|e| {
                 let entry = e.unwrap();
                 let file_name = entry.file_name();
-                let name = file_name.to_str().unwrap().to_owned();
+                let name = file_name
+                    .to_str()
+                    .unwrap()
+                    .split('.')
+                    .next()
+                    .unwrap()
+                    .to_owned();
 
-                (
-                    name.to_lowercase(),
-                    name.split('.').next().unwrap().to_owned(),
-                )
+                (name.to_lowercase(), name)
             })
             .collect::<Vec<(String, String)>>();
 
         let mut ignores = HashMap::<String, String>::new();
 
-        for (path, lower) in ignores_tuple {
-            ignores.insert(path, lower);
+        for (lower, path) in ignores_tuple {
+            ignores.insert(lower, path);
         }
 
         return Ok(ignores);
