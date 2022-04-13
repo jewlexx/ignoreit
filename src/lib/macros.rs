@@ -15,3 +15,10 @@ macro_rules! create_client {
         Client::new()
     }};
 }
+
+#[macro_export]
+macro_rules! sleep_for {
+    ($time:expr) => {
+        std::thread::sleep(std::time::Duration::from_millis($time));
+    };
+}

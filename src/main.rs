@@ -13,11 +13,14 @@ use commands::{
 };
 
 fn main() -> anyhow::Result<()> {
-    let args = parse();
-
     if CACHE_ENABLED.to_owned() {
         init_cache()?;
+    } else {
+        println!("Cache is disabled");
+        sleep_for!(1000);
     }
+
+    let args = parse();
 
     if args.command == Commands::List {
         list_templates()?

@@ -1,7 +1,12 @@
 use anyhow::Context;
 use directories::BaseDirs;
 use git2::Repository;
-use std::path::PathBuf;
+use spinners::{Spinner, Spinners};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+    time::SystemTime,
+};
 
 lazy_static! {
     pub static ref DIRS: Option<BaseDirs> = BaseDirs::new();
@@ -19,19 +24,34 @@ lazy_static! {
 
 const IGNORE_URL: &str = "https://github.com/github/gitignore.git";
 
+fn clone_cache(dir: &Path) -> anyhow::Result<Repository> {
+    let sp = Spinner::new(Spinners::Dots12, "Initializing Cache...".into());
+
+    fs::remove_dir_all(&dir).with_context(|| "Failed to remove cache directory")?;
+    let repo = Repository::clone(IGNORE_URL, &dir)
+        .with_context(|| "Failed to clone gitignore repository")?;
+
+    sp.stop_with_newline();
+
+    Ok(repo)
+}
+
 pub fn init_cache() -> anyhow::Result<PathBuf> {
     if let Some(cache_dir) = CACHE_DIR.to_owned() {
         if !cache_dir.exists() {
-            std::fs::create_dir_all(&cache_dir)
-                .with_context(|| "Failed to create cache directory")?;
+            fs::create_dir_all(&cache_dir).with_context(|| "Failed to create cache directory")?;
+            clone_cache(&cache_dir)?;
         }
-
-        Repository::clone(IGNORE_URL, &cache_dir)
-            .with_context(|| "Failed to clone gitignore repository")?;
 
         let fetch_head = cache_dir.join(".git/FETCH_HEAD");
         let meta = fetch_head.metadata()?;
         let last_modified = meta.modified()?;
+        let since_modified = SystemTime::now().duration_since(last_modified)?;
+
+        // If the cache is older than a day, fetch the latest version
+        if since_modified.as_secs() > 60 * 60 * 24 {
+            clone_cache(&cache_dir)?;
+        }
 
         Ok(cache_dir)
     } else {
