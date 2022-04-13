@@ -7,9 +7,7 @@ use std::{
 
 use crate::{
     cache::{CACHE_DIR, CACHE_ENABLED},
-    flush_stdout,
-    lib::{get_templates, get_url},
-    parse_url,
+    lib::get_templates,
 };
 
 pub fn pull_template() -> anyhow::Result<()> {

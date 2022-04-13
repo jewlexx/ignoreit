@@ -5,6 +5,9 @@ mod lib;
 #[macro_use]
 extern crate lazy_static;
 
+#[macro_use]
+extern crate macros;
+
 use cache::{init_cache, CACHE_ENABLED};
 use colored::Colorize;
 use commands::{

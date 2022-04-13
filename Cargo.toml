@@ -9,6 +9,9 @@ edition = "2021"
 keywords = ["git", "ignore", "developer", "tools"]
 categories = ["Command line  utilities", "Development tools"]
 
+[workspace]
+members = ["cached", "remote", "macros"]
+
 [dependencies]
 anyhow = "1.0.56"
 directories = "4.0.1"
@@ -17,6 +20,8 @@ lazy_static = "1.4.0"
 serde_json = "1.0.79"
 spinners = "3.1.0"
 colored = "2.0.0"
+
+macros = { path = "./macros" }
 
 [dependencies.clap]
 features = ["derive"]
