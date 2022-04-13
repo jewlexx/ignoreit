@@ -15,7 +15,7 @@ pub use purge::purge;
 extern crate lazy_static;
 
 lazy_static! {
-    pub static ref DIRS: Option<BaseDirs> = BaseDirs::new();
+    static ref DIRS: Option<BaseDirs> = BaseDirs::new();
     pub static ref CACHE_ENABLED: bool = {
         if let Some(dirs) = DIRS.to_owned() {
             dirs.cache_dir().exists()
