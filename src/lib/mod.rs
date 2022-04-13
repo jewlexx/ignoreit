@@ -51,8 +51,8 @@ pub fn get_templates() -> anyhow::Result<HashMap<String, String>> {
 
         let mut ignores = HashMap::<String, String>::new();
 
-        for (name, contents) in ignores_tuple {
-            ignores.insert(name, contents);
+        for (path, lower) in ignores_tuple {
+            ignores.insert(path, lower);
         }
 
         return Ok(ignores);

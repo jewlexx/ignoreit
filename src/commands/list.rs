@@ -5,7 +5,10 @@ pub fn list_templates() -> anyhow::Result<()> {
 
     println!("Available templates:");
 
-    for item in map.values() {
+    let mut values = map.values().collect::<Vec<&String>>();
+    values.sort();
+
+    for item in values {
         println!("  {}", item);
     }
 
