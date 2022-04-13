@@ -1,6 +1,6 @@
 [package]
 categories = ["command-line-utilities"]
-description = "Quickly download .gitignore templates for nearly any project"
+description = "Quickly load .gitignore templates for nearly any project"
 edition = "2021"
 keywords = ["git", "ignore"]
 license = "MIT"
