@@ -59,9 +59,9 @@ pub fn pull_template() -> anyhow::Result<()> {
 
     #[cfg(not(feature = "cache"))]
     let contents = {
-        let url = parse_url!(template_path);
+        let url = crate::parse_url!(template_path);
 
-        remote::get_url(&url)?.text()?.as_bytes().to_vec()
+        crate::remote::get_url(&url)?.text()?.as_bytes().to_vec()
     };
 
     let mut file = File::create(path).with_context(|| "Failed to create file")?;

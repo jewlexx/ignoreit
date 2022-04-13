@@ -1,5 +1,5 @@
 #[cfg(not(feature = "cache"))]
-pub use remote::get_templates;
+pub use crate::remote::get_templates;
 
 #[cfg(feature = "cache")]
 pub use crate::cache::get_templates;
