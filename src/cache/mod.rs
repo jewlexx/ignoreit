@@ -1,5 +1,6 @@
 use anyhow::Context;
 use directories::BaseDirs;
+use git2::Repository;
 use std::path::PathBuf;
 
 lazy_static! {
@@ -16,17 +17,23 @@ lazy_static! {
         .map(|dirs| dirs.cache_dir().join("gitignore"));
 }
 
-pub fn init_cache() -> anyhow::Result<()> {
-    if !CACHE_ENABLED.to_owned() {
-        return Ok(());
-    }
+const IGNORE_URL: &str = "https://github.com/github/gitignore.git";
 
+pub fn init_cache() -> anyhow::Result<PathBuf> {
     if let Some(cache_dir) = CACHE_DIR.to_owned() {
         if !cache_dir.exists() {
-            std::fs::create_dir_all(&cache_dir).with_context(|| "Failed to create cache directory")
-        } else {
-            Ok(())
+            std::fs::create_dir_all(&cache_dir)
+                .with_context(|| "Failed to create cache directory")?;
         }
+
+        Repository::clone(IGNORE_URL, &cache_dir)
+            .with_context(|| "Failed to clone gitignore repository")?;
+
+        let fetch_head = cache_dir.join(".git/FETCH_HEAD");
+        let meta = fetch_head.metadata()?;
+        let last_modified = meta.modified()?;
+
+        Ok(cache_dir)
     } else {
         Err(anyhow::anyhow!("Cache directory not found"))
     }
