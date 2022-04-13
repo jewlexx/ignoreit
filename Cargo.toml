@@ -1,24 +1,31 @@
 [package]
-name = "ignoreit"
-version = "1.0.0"
-edition = "2021"
-description = "Quickly download .gitignore templates for nearly any project"
-license = "MIT"
-repository = "https://github.com/jewlexx/ignoreit"
-readme = "README.md"
-keywords = ["git", "ignore"]
 categories = ["command-line-utilities"]
-
+description = "Quickly download .gitignore templates for nearly any project"
+edition = "2021"
+keywords = ["git", "ignore"]
+license = "MIT"
+name = "ignoreit"
+readme = "README.md"
+repository = "https://github.com/jewlexx/ignoreit"
+version = "1.0.0"
 [dependencies]
-reqwest = { version = "0.11.10", features = ["blocking", "json"] }
-clap = { version = "3.1.6", features = ["derive"] }
-serde_json = "1.0.79"
-spinners = "3.1.0"
 anyhow = "1.0.56"
 directories = "4.0.1"
+git2 = "*"
 lazy_static = "1.4.0"
+serde_json = "1.0.79"
+spinners = "3.1.0"
 
+[dependencies.clap]
+features = ["derive"]
+version = "3.1.6"
+
+[dependencies.reqwest]
+features = ["blocking", "json"]
+version = "0.11.10"
+
+[profile]
 [profile.release]
+lto = true
 opt-level = "s"
 strip = true
-lto = true
