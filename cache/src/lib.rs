@@ -28,13 +28,11 @@ lazy_static! {
         .map(|dirs| dirs.cache_dir().join("gitignore"));
 }
 
-const IGNORE_URL: &str = "https://github.com/github/gitignore.git";
-
 fn clone_cache(dir: &Path) -> anyhow::Result<Repository> {
     let sp = Spinner::new(Spinners::Dots12, "Initializing Cache...".into());
 
     fs::remove_dir_all(&dir).with_context(|| "Failed to remove cache directory")?;
-    let repo = Repository::clone(IGNORE_URL, &dir)
+    let repo = Repository::clone("https://github.com/github/gitignore.git", &dir)
         .with_context(|| "Failed to clone gitignore repository")?;
 
     sp.stop_with_newline();
