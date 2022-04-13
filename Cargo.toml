@@ -14,27 +14,13 @@ members = ["cache", "remote", "macros"]
 
 [dependencies]
 anyhow = "1.0.56"
-serde_json = "1.0.79"
-spinners = "3.1.0"
 colored = "2.0.0"
+clap = { version = "3.1.8", features = ["derive"] }
+reqwest = { version = "0.11.10", features = ["blocking","json"] }
 
-[dependencies.clap]
-features = ["derive"]
-version = "3.1.8"
-
-[dependencies.reqwest]
-features = ["blocking", "json"]
-version = "0.11.10"
-
-[dependencies.macros]
-path = "./macros"
-
-[dependencies.cache]
-path = "./cache"
-optional = true
-
-[dependencies.remote]
-path = "./remote"
+macros = { path = "./macros" }
+cache = { path = "./cache", optional = true }
+remote = { path = "./remote"}
 
 [profile.release]
 lto = true

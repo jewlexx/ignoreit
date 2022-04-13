@@ -408,8 +408,6 @@ dependencies = [
  "macros",
  "remote",
  "reqwest",
- "serde_json",
- "spinners",
 ]
 
 [[package]]
