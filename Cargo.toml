@@ -7,7 +7,7 @@ repository = "https://github.com/jewlexx/ignoreit"
 license = "MIT"
 edition = "2021"
 keywords = ["git", "ignore", "developer", "tools"]
-categories = ["Command line  utilities", "Development tools"]
+categories = ["Command line utilities", "Development tools"]
 
 [workspace]
 members = ["cache", "remote", "macros"]
