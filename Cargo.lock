@@ -52,6 +52,13 @@ checksum = "c4872d67bab6358e59559027aa3b9157c53d9358c51423c17554809a8858e0f8"
 [[package]]
 name = "cache"
 version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "directories",
+ "git2",
+ "lazy_static",
+ "spinners",
+]
 
 [[package]]
 name = "cc"
@@ -398,9 +405,6 @@ dependencies = [
  "cache",
  "clap",
  "colored",
- "directories",
- "git2",
- "lazy_static",
  "macros",
  "remote",
  "reqwest",

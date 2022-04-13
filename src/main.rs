@@ -1,14 +1,14 @@
-mod cache;
 mod commands;
 mod lib;
 
 #[macro_use]
-extern crate lazy_static;
-
-#[macro_use]
 extern crate macros;
 
+#[cfg(feature = "cache")]
+extern crate cache;
+#[cfg(feature = "cache")]
 use cache::{init_cache, CACHE_ENABLED};
+
 use colored::Colorize;
 use commands::{
     args::{parse, Commands},
