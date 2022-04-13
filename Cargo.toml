@@ -10,18 +10,20 @@ keywords = ["git", "ignore", "developer", "tools"]
 categories = ["Command line  utilities", "Development tools"]
 
 [workspace]
-members = ["cached", "remote", "macros"]
+members = ["cache", "remote", "macros"]
 
 [dependencies]
 anyhow = "1.0.56"
 directories = "4.0.1"
-git2 = "0.14.2"
 lazy_static = "1.4.0"
 serde_json = "1.0.79"
 spinners = "3.1.0"
 colored = "2.0.0"
 
-macros = { path = "./macros" }
+
+[dependencies.git2]
+version = "0.14.2"
+optional = true
 
 [dependencies.clap]
 features = ["derive"]
@@ -30,8 +32,25 @@ version = "3.1.8"
 [dependencies.reqwest]
 features = ["blocking", "json"]
 version = "0.11.10"
+optional = true
+
+[dependencies.macros]
+path = "./macros"
+
+[dependencies.cache]
+path = "./cache"
+optional = true
+
+[dependencies.remote]
+path = "./remote"
+optional = true
 
 [profile.release]
 lto = true
 opt-level = "s"
 strip = true
+
+[features]
+default = ["cache", "remote"]
+cache = ["dep:git2", "dep:cache"]
+remote = ["dep:reqwest", "dep:remote"]
