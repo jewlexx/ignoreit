@@ -4,7 +4,6 @@ mod lib;
 #[macro_use]
 extern crate macros;
 
-use colored::Colorize;
 use commands::{
     args::{parse, Commands},
     list::list_templates,
@@ -12,8 +11,8 @@ use commands::{
 };
 
 fn main() -> anyhow::Result<()> {
-    #[cfg(feature = "cache")]
-    {
+    if cfg!(feature = "cache") {
+        use colored::Colorize;
         if cache::CACHE_ENABLED.to_owned() {
             cache::init_cache()?;
         } else {
