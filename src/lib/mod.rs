@@ -1,10 +1,14 @@
-use anyhow::Context;
+#[cfg(not(feature = "cache"))]
+pub use remote::get_templates;
+
+#[cfg(feature = "cache")]
 use std::{collections::HashMap, fs};
 
-use cache::CACHE_DIR;
-
+#[cfg(feature = "cache")]
 pub fn get_templates() -> anyhow::Result<HashMap<String, String>> {
-    if let Some(cache_dir) = CACHE_DIR.to_owned() {
+    use anyhow::Context;
+
+    if let Some(cache_dir) = cache::CACHE_DIR.to_owned() {
         let dir = fs::read_dir(cache_dir).with_context(|| "Failed to read cache directory")?;
 
         let ignores_tuple = dir

@@ -1,7 +1,7 @@
 use anyhow::Context;
 use std::{
     env,
-    fs::{self, File},
+    fs::File,
     io::{self, Write},
 };
 
@@ -43,23 +43,25 @@ pub fn pull_template() -> anyhow::Result<()> {
         }
     }
 
+    #[cfg(feature = "cache")]
     let contents = {
-        if cfg!(feature = "cache") {
-            use cache::{CACHE_DIR, CACHE_ENABLED};
+        use cache::{CACHE_DIR, CACHE_ENABLED};
 
-            if CACHE_ENABLED.to_owned() {
-                let cache_dir = CACHE_DIR.to_owned().context("Failed to parse cache dir")?;
-                let file_path = cache_dir.join(format!("{}.gitignore", template_path));
+        if CACHE_ENABLED.to_owned() {
+            let cache_dir = CACHE_DIR.to_owned().context("Failed to parse cache dir")?;
+            let file_path = cache_dir.join(format!("{}.gitignore", template_path));
 
-                fs::read(file_path)?
-            } else {
-                Vec::new()
-            }
+            std::fs::read(file_path)?
         } else {
-            let url = parse_url!(template_path);
-
-            remote::get_url(&url)?.text()?.as_bytes().to_vec()
+            Vec::new()
         }
+    };
+
+    #[cfg(not(feature = "cache"))]
+    let contents = {
+        let url = parse_url!(template_path);
+
+        remote::get_url(&url)?.text()?.as_bytes().to_vec()
     };
 
     let mut file = File::create(path).with_context(|| "Failed to create file")?;
