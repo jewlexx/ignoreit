@@ -1,13 +1,13 @@
 [package]
-categories = ["command-line-utilities"]
-description = "Quickly load .gitignore templates for nearly any project"
-edition = "2021"
-keywords = ["git", "ignore"]
-license = "MIT"
 name = "ignoreit"
+description = "Quickly load .gitignore templates for nearly any project"
+version = "1.0.0"
 readme = "README.md"
 repository = "https://github.com/jewlexx/ignoreit"
-version = "1.0.0"
+license = "MIT"
+edition = "2021"
+keywords = ["git", "ignore", "developer", "tools"]
+categories = ["Command line  utilities", "Development tools"]
 
 [dependencies]
 anyhow = "1.0.56"
