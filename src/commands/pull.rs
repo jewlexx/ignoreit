@@ -5,7 +5,7 @@ use std::{
     io::{self, Write},
 };
 
-use crate::lib::get_templates;
+use crate::{flush_stdout, lib::get_templates};
 
 pub fn pull_template() -> anyhow::Result<()> {
     let template = env::args()
@@ -45,7 +45,7 @@ pub fn pull_template() -> anyhow::Result<()> {
 
     #[cfg(feature = "cache")]
     let contents = {
-        use cache::{CACHE_DIR, CACHE_ENABLED};
+        use crate::cache::{CACHE_DIR, CACHE_ENABLED};
 
         if CACHE_ENABLED.to_owned() {
             let cache_dir = CACHE_DIR.to_owned().context("Failed to parse cache dir")?;

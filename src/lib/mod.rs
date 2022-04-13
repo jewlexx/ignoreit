@@ -2,4 +2,4 @@
 pub use remote::get_templates;
 
 #[cfg(feature = "cache")]
-pub use cache::get_templates;
+pub use crate::cache::get_templates;

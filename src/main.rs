@@ -1,8 +1,12 @@
 mod commands;
 mod lib;
+mod remote;
 
 #[macro_use]
-extern crate macros;
+mod macros;
+
+#[cfg(feature = "cache")]
+mod cache;
 
 use commands::{
     args::{parse, Commands},

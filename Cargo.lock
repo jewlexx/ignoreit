@@ -50,18 +50,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c4872d67bab6358e59559027aa3b9157c53d9358c51423c17554809a8858e0f8"
 
 [[package]]
-name = "cache"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "directories",
- "git2",
- "lazy_static",
- "remote",
- "spinners",
-]
-
-[[package]]
 name = "cc"
 version = "1.0.73"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -403,11 +391,14 @@ name = "ignoreit"
 version = "1.1.0"
 dependencies = [
  "anyhow",
- "cache",
  "clap",
  "colored",
- "macros",
- "remote",
+ "directories",
+ "git2",
+ "lazy_static",
+ "reqwest",
+ "serde_json",
+ "spinners",
 ]
 
 [[package]]
@@ -519,10 +510,6 @@ checksum = "6389c490849ff5bc16be905ae24bc913a9c8892e19b2341dbc175e14c341c2b8"
 dependencies = [
  "cfg-if",
 ]
-
-[[package]]
-name = "macros"
-version = "0.1.0"
 
 [[package]]
 name = "maplit"
@@ -740,17 +727,6 @@ dependencies = [
  "getrandom",
  "redox_syscall",
  "thiserror",
-]
-
-[[package]]
-name = "remote"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "macros",
- "reqwest",
- "serde_json",
- "spinners",
 ]
 
 [[package]]

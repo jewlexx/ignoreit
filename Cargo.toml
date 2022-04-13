@@ -9,17 +9,16 @@ edition = "2021"
 keywords = ["git", "ignore", "developer", "tools"]
 categories = ["Command line utilities", "Development tools"]
 
-[workspace]
-members = ["cache", "remote", "macros"]
-
 [dependencies]
 anyhow = "1.0.56"
 clap = { version = "3.1.8", features = ["derive"] }
+reqwest = { version = "0.11.10", features = ["blocking", "json"] }
+serde_json = "1.0.79"
+spinners = "3.1.0"
+directories = { version = "4.0.1", optional = true }
+git2 = { version = "0.14.2", optional = true }
+lazy_static = { version = "1.4.0", optional = true }
 colored = { version = "2.0.0", optional = true }
-
-macros = { path = "./macros" }
-remote = { path = "./remote" }
-cache = { path = "./cache", optional = true }
 
 [profile.release]
 lto = true
@@ -28,4 +27,4 @@ strip = true
 
 [features]
 default = ["cache"]
-cache = ["dep:cache", "dep:colored"]
+cache = ["dep:colored", "dep:lazy_static", "dep:git2", "dep:directories"]

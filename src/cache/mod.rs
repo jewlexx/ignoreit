@@ -85,6 +85,6 @@ pub fn get_templates() -> anyhow::Result<HashMap<String, String>> {
 
         Ok(ignores)
     } else {
-        remote::get_templates()
+        crate::remote::get_templates()
     }
 }
