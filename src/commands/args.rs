@@ -16,6 +16,7 @@ pub enum Commands {
         Arg::new("output").takes_value(true).required(false),
     ])]
     Pull,
+    #[cfg(feature = "cache")]
     #[clap(about = "Purge gitignore cache")]
     Purge,
 }

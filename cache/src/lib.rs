@@ -8,6 +8,9 @@ use std::{
     time::SystemTime,
 };
 
+mod purge;
+pub use purge::purge;
+
 #[macro_use]
 extern crate lazy_static;
 

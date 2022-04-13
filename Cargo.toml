@@ -25,7 +25,6 @@ version = "3.1.8"
 [dependencies.reqwest]
 features = ["blocking", "json"]
 version = "0.11.10"
-optional = true
 
 [dependencies.macros]
 path = "./macros"
@@ -36,7 +35,6 @@ optional = true
 
 [dependencies.remote]
 path = "./remote"
-optional = true
 
 [profile.release]
 lto = true
@@ -44,6 +42,5 @@ opt-level = "s"
 strip = true
 
 [features]
-default = ["cache", "remote"]
+default = ["cache"]
 cache = ["dep:cache"]
-remote = ["dep:reqwest", "dep:remote"]

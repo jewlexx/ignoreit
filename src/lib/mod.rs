@@ -1,7 +1,7 @@
 use anyhow::Context;
 use std::{collections::HashMap, fs};
 
-use crate::cache::CACHE_DIR;
+use cache::CACHE_DIR;
 
 pub fn get_templates() -> anyhow::Result<HashMap<String, String>> {
     if let Some(cache_dir) = CACHE_DIR.to_owned() {
