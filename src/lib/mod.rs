@@ -37,20 +37,20 @@ pub fn get_templates() -> anyhow::Result<HashMap<String, String>> {
                     false
                 }
             })
-            .map(|e| {
-                let entry = e.unwrap();
+            .map(|e| -> anyhow::Result<(String, String)> {
+                let entry = e?;
                 let file_name = entry.file_name();
                 let name = file_name
                     .to_str()
-                    .unwrap()
+                    .context("Failed to parse file name")?
                     .split('.')
                     .next()
-                    .unwrap()
+                    .context("Failed to parse file name")?
                     .to_owned();
 
-                (name.to_lowercase(), name)
+                Ok((name.to_lowercase(), name))
             })
-            .collect::<Vec<(String, String)>>();
+            .collect::<anyhow::Result<Vec<_>>>()?;
 
         let mut ignores = HashMap::<String, String>::new();
 
@@ -73,10 +73,7 @@ pub fn get_templates() -> anyhow::Result<HashMap<String, String>> {
         .with_context(|| "Failed to parse tree")?;
 
     let tree = tree.iter().filter(|el| {
-        let name = el["path"]
-            .as_str()
-            .with_context(|| "Failed to parse path")
-            .unwrap();
+        let name = el["path"].as_str().context("Failed to parse path").unwrap();
 
         name.ends_with(".gitignore")
     });
@@ -84,15 +81,12 @@ pub fn get_templates() -> anyhow::Result<HashMap<String, String>> {
     let mut hashmap: HashMap<String, String> = HashMap::new();
 
     for item in tree {
-        let base_path = item["path"]
-            .as_str()
-            .with_context(|| "Failed to parse path")
-            .unwrap();
+        let base_path = item["path"].as_str().context("Failed to parse path")?;
 
         let path = base_path
             .split('.')
             .next()
-            .with_context(|| "Failed to parse path")?;
+            .context("Failed to parse path")?;
 
         let lowercase = &path.to_lowercase();
 
