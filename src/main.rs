@@ -13,11 +13,11 @@ use commands::{
 fn main() -> anyhow::Result<()> {
     #[cfg(feature = "cache")]
     {
-        use colored::Colorize;
-
         if cache::CACHE_ENABLED.to_owned() {
             cache::init_cache()?;
         } else {
+            use colored::Colorize;
+
             println!(
                 "{}",
                 "warning: cache is disabled. performance will not be optimal".yellow()
