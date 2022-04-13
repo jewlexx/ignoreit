@@ -17,8 +17,11 @@ fn main() -> anyhow::Result<()> {
     if CACHE_ENABLED.to_owned() {
         init_cache()?;
     } else {
-        println!("{}", "warning: cache is disabled".yellow());
-        sleep_for!(1000);
+        println!(
+            "{}",
+            "warning: cache is disabled. performance will not be optimal".yellow()
+        );
+        sleep_for!(3000);
     }
 
     let args = parse();
