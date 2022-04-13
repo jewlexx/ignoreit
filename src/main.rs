@@ -29,14 +29,15 @@ fn main() -> anyhow::Result<()> {
     let args = parse();
 
     if args.command == Commands::List {
-        return list_templates();
+        list_templates()?;
     }
     if args.command == Commands::Pull {
-        return pull_template();
+        pull_template()?;
     }
     #[cfg(feature = "cache")]
     if args.command == Commands::Purge {
-        return cache::purge();
+        cache::purge()?;
+        print!("Purged Cache!");
     }
 
     Ok(())

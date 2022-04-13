@@ -17,7 +17,7 @@ pub use consts::*;
 fn clone_cache(dir: &Path) -> anyhow::Result<Repository> {
     let sp = Spinner::new(Spinners::Dots12, "Initializing Cache...".into());
 
-    fs::remove_dir_all(&dir).with_context(|| "Failed to remove cache directory")?;
+    purge()?;
     let repo = Repository::clone("https://github.com/github/gitignore.git", &dir)
         .with_context(|| "Failed to clone gitignore repository")?;
 

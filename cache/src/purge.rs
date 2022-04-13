@@ -7,7 +7,5 @@ pub fn purge() -> anyhow::Result<()> {
 
     fs::remove_dir_all(cache_dir).with_context(|| "Failed to purge cache")?;
 
-    print!("Purged Cache!");
-
     Ok(())
 }
