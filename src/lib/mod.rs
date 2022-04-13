@@ -43,6 +43,6 @@ pub fn get_templates() -> anyhow::Result<HashMap<String, String>> {
 
         Ok(ignores)
     } else {
-        Err(anyhow::anyhow!("Failed to parse cache dir"))
+        remote::get_templates()
     }
 }
