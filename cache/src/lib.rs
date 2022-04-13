@@ -1,5 +1,4 @@
 use anyhow::Context;
-use directories::BaseDirs;
 use git2::Repository;
 use spinners::{Spinner, Spinners};
 use std::{
@@ -12,22 +11,8 @@ use std::{
 mod purge;
 pub use purge::purge;
 
-#[macro_use]
-extern crate lazy_static;
-
-lazy_static! {
-    static ref DIRS: Option<BaseDirs> = BaseDirs::new();
-    pub static ref CACHE_ENABLED: bool = {
-        if let Some(dirs) = DIRS.to_owned() {
-            dirs.cache_dir().exists()
-        } else {
-            false
-        }
-    };
-    pub static ref CACHE_DIR: Option<PathBuf> = DIRS
-        .to_owned()
-        .map(|dirs| dirs.cache_dir().join("gitignore"));
-}
+mod consts;
+pub use consts::*;
 
 fn clone_cache(dir: &Path) -> anyhow::Result<Repository> {
     let sp = Spinner::new(Spinners::Dots12, "Initializing Cache...".into());
