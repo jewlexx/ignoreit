@@ -58,6 +58,9 @@ pub fn get_templates() -> anyhow::Result<HashMap<String, String>> {
         return Ok(ignores);
     }
 
+    use spinners::{Spinner, Spinners};
+
+    let sp = Spinner::new(Spinners::Dots12, "Fetching templates...".into());
     let body: Value = get_url("https://api.github.com/repos/github/gitignore/git/trees/main")?
         .json()
         .with_context(|| "Failed to read JSON from response")?;
@@ -92,6 +95,8 @@ pub fn get_templates() -> anyhow::Result<HashMap<String, String>> {
 
         hashmap.insert(lowercase.to_string(), path.to_string());
     }
+
+    sp.stop();
 
     Ok(hashmap)
 }
