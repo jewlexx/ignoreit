@@ -1,6 +1,6 @@
 [package]
 name = "ignoreit"
-description = "Quickly load .gitignore templates for nearly any project"
+description = "Quickly load .gitignore templates"
 version = "1.0.0"
 readme = "README.md"
 repository = "https://github.com/jewlexx/ignoreit"
