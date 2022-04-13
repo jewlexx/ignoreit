@@ -5,10 +5,7 @@ use std::{
     io::{self, Write},
 };
 
-use crate::{
-    cache::{CACHE_DIR, CACHE_ENABLED},
-    lib::get_templates,
-};
+use crate::lib::get_templates;
 
 pub fn pull_template() -> anyhow::Result<()> {
     let template = env::args()
@@ -47,15 +44,21 @@ pub fn pull_template() -> anyhow::Result<()> {
     }
 
     let contents = {
-        if CACHE_ENABLED.to_owned() {
-            let cache_dir = CACHE_DIR.to_owned().context("Failed to parse cache dir")?;
-            let file_path = cache_dir.join(format!("{}.gitignore", template_path));
+        if cfg!(feature = "cache") {
+            use cache::{CACHE_DIR, CACHE_ENABLED};
 
-            fs::read(file_path)?
+            if CACHE_ENABLED.to_owned() {
+                let cache_dir = CACHE_DIR.to_owned().context("Failed to parse cache dir")?;
+                let file_path = cache_dir.join(format!("{}.gitignore", template_path));
+
+                fs::read(file_path)?
+            } else {
+                Vec::new()
+            }
         } else {
             let url = parse_url!(template_path);
 
-            get_url(&url)?.text()?.as_bytes().to_vec()
+            remote::get_url(&url)?.text()?.as_bytes().to_vec()
         }
     };
 
