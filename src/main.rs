@@ -11,8 +11,10 @@ use commands::{
 };
 
 fn main() -> anyhow::Result<()> {
-    if cfg!(feature = "cache") {
+    #[cfg(feature = "cache")]
+    {
         use colored::Colorize;
+
         if cache::CACHE_ENABLED.to_owned() {
             cache::init_cache()?;
         } else {
