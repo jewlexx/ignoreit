@@ -41,11 +41,11 @@ pub fn get_templates() -> anyhow::Result<HashMap<String, String>> {
                 let entry = e.unwrap();
                 let file_name = entry.file_name();
                 let name = file_name.to_str().unwrap();
-                let path = entry.path();
 
-                let contents = String::from_utf8(fs::read(path).unwrap()).unwrap();
-
-                (name.to_owned(), contents)
+                (
+                    name.to_owned().to_lowercase(),
+                    name.to_owned().split('.').next().unwrap().to_owned(),
+                )
             })
             .collect::<Vec<(String, String)>>();
 
