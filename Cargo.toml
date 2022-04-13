@@ -17,9 +17,9 @@ anyhow = "1.0.56"
 clap = { version = "3.1.8", features = ["derive"] }
 colored = { version = "2.0.0", optional = true }
 
-macros = { path = "./macros" }
-remote = { path = "./remote"}
-cache = { path = "./cache", optional = true }
+macros = { path = "./macros", version = "*" }
+remote = { path = "./remote", version = "*" }
+cache = { path = "./cache", optional = true, version = "*" }
 
 [profile.release]
 lto = true
