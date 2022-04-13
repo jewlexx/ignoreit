@@ -57,6 +57,7 @@ dependencies = [
  "directories",
  "git2",
  "lazy_static",
+ "remote",
  "spinners",
 ]
 
