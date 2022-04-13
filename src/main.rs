@@ -1,5 +1,9 @@
 mod commands;
 mod lib;
+mod user;
+
+#[macro_use]
+extern crate lazy_static;
 
 use commands::{
     args::{parse, Commands},
