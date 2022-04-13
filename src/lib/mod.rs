@@ -1,4 +1,4 @@
-use anyhow::Context as _;
+use anyhow::Context;
 use reqwest::{blocking::Response, header::USER_AGENT};
 use serde_json::Value;
 use std::{collections::HashMap, fs};

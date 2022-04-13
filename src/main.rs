@@ -11,6 +11,7 @@ use commands::{
     args::{parse, Commands},
     list::list_templates,
     pull::pull_template,
+    purge::purge,
 };
 
 fn main() -> anyhow::Result<()> {
@@ -26,10 +27,12 @@ fn main() -> anyhow::Result<()> {
 
     let args = parse();
 
-    if args.command == Commands::List {
-        list_templates()?
+    if args.command == Commands::Purge {
+        purge()?;
+    } else if args.command == Commands::List {
+        list_templates()?;
     } else if args.command == Commands::Pull {
-        pull_template()?
+        pull_template()?;
     }
 
     Ok(())

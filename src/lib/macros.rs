@@ -22,3 +22,13 @@ macro_rules! sleep_for {
         std::thread::sleep(std::time::Duration::from_millis($time));
     };
 }
+
+#[macro_export]
+macro_rules! parse_url {
+    ($url:tt) => {{
+        format!(
+            "https://raw.githubusercontent.com/github/gitignore/main/{}.gitignore",
+            $url
+        )
+    }};
+}

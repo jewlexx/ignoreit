@@ -1,4 +1,4 @@
-use anyhow::Context as _;
+use anyhow::Context;
 use std::{
     env,
     fs::{self, File},
@@ -9,16 +9,8 @@ use crate::{
     cache::{CACHE_DIR, CACHE_ENABLED},
     flush_stdout,
     lib::{get_templates, get_url},
+    parse_url,
 };
-
-macro_rules! parse_url {
-    ($url:tt) => {{
-        format!(
-            "https://raw.githubusercontent.com/github/gitignore/main/{}.gitignore",
-            $url
-        )
-    }};
-}
 
 pub fn pull_template() -> anyhow::Result<()> {
     let template = env::args()
