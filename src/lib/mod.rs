@@ -2,11 +2,9 @@
 pub use remote::get_templates;
 
 #[cfg(feature = "cache")]
-use std::{collections::HashMap, fs};
-
-#[cfg(feature = "cache")]
-pub fn get_templates() -> anyhow::Result<HashMap<String, String>> {
+pub fn get_templates() -> anyhow::Result<std::collections::HashMap<String, String>> {
     use anyhow::Context;
+    use std::{collections::HashMap, fs};
 
     if let Some(cache_dir) = cache::CACHE_DIR.to_owned() {
         let dir = fs::read_dir(cache_dir).with_context(|| "Failed to read cache directory")?;
