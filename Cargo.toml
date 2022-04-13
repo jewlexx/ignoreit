@@ -8,10 +8,11 @@ name = "ignoreit"
 readme = "README.md"
 repository = "https://github.com/jewlexx/ignoreit"
 version = "1.0.0"
+
 [dependencies]
 anyhow = "1.0.56"
 directories = "4.0.1"
-git2 = "*"
+git2 = "0.14.2"
 lazy_static = "1.4.0"
 serde_json = "1.0.79"
 spinners = "3.1.0"
