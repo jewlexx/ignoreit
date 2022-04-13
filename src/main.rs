@@ -6,6 +6,7 @@ mod lib;
 extern crate lazy_static;
 
 use cache::{init_cache, CACHE_ENABLED};
+use colored::Colorize;
 use commands::{
     args::{parse, Commands},
     list::list_templates,
@@ -16,7 +17,7 @@ fn main() -> anyhow::Result<()> {
     if CACHE_ENABLED.to_owned() {
         init_cache()?;
     } else {
-        println!("Cache is disabled");
+        println!("{}", "warning: cache is disabled".yellow());
         sleep_for!(1000);
     }
 
