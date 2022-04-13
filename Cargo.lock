@@ -407,7 +407,6 @@ dependencies = [
  "colored",
  "macros",
  "remote",
- "reqwest",
 ]
 
 [[package]]
