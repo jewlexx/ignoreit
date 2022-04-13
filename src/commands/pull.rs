@@ -1,11 +1,12 @@
 use anyhow::Context as _;
 use std::{
     env,
-    fs::File,
+    fs::{self, File},
     io::{self, Write},
 };
 
 use crate::{
+    cache::{CACHE_DIR, CACHE_ENABLED},
     flush_stdout,
     lib::{get_templates, get_url},
 };
@@ -32,8 +33,6 @@ pub fn pull_template() -> anyhow::Result<()> {
         .get(&template.to_lowercase())
         .with_context(|| "Template not found")?;
 
-    let url = parse_url!(template_path);
-
     let path = env::current_dir()
         .with_context(|| "Failed to get current directory")?
         .join(output);
@@ -57,10 +56,21 @@ pub fn pull_template() -> anyhow::Result<()> {
         }
     }
 
-    let body = get_url(&url)?.text()?;
+    let contents = {
+        if CACHE_ENABLED.to_owned() {
+            let cache_dir = CACHE_DIR.to_owned().context("Failed to parse cache dir")?;
+            let file_path = cache_dir.join(format!("{}.gitignore", template_path));
+
+            fs::read(file_path)?
+        } else {
+            let url = parse_url!(template_path);
+
+            get_url(&url)?.text()?.as_bytes().to_vec()
+        }
+    };
 
     let mut file = File::create(path).with_context(|| "Failed to create file")?;
-    file.write_all(body.as_bytes())
+    file.write_all(&contents)
         .with_context(|| "Failed to write to file")?;
 
     Ok(())
