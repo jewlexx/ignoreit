@@ -25,4 +25,4 @@ lto = true
 
 [features]
 default = ["cache"]
-cache = ["dep:directories"]
+cache = ["dep:git2"]
