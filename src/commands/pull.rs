@@ -5,12 +5,30 @@ use std::{
     io::{self, Write},
 };
 
-use crate::{flush_stdout, lib::get_templates};
+use crate::{
+    flush_stdout,
+    lib::{get_templates, CACHE_DIR},
+};
 
 fn get_contents_remote(template_path: &str) -> anyhow::Result<Vec<u8>> {
     let url = crate::parse_url!(template_path);
+    let contents = crate::remote::get_url(&url)?.text()?.as_bytes().to_vec();
 
-    Ok(crate::remote::get_url(&url)?.text()?.as_bytes().to_vec())
+    println!("Getting template {}", template_path);
+
+    #[cfg(feature = "cache")]
+    {
+        let cache_file = CACHE_DIR
+            .to_owned()
+            .context("Failed to find cache dir")?
+            .join(format!("{}.gitignore", template_path));
+
+        let mut file = File::create(cache_file)?;
+
+        file.write_all(&contents)?;
+    }
+
+    Ok(contents)
 }
 
 pub fn pull_template() -> anyhow::Result<()> {
@@ -51,7 +69,7 @@ pub fn pull_template() -> anyhow::Result<()> {
 
     #[cfg(feature = "cache")]
     let contents = {
-        use crate::lib::{CACHE_DIR, CACHE_ENABLED};
+        use crate::lib::CACHE_ENABLED;
 
         if CACHE_ENABLED.to_owned() {
             let cache_dir = CACHE_DIR.to_owned().context("Failed to parse cache dir")?;
@@ -67,7 +85,7 @@ pub fn pull_template() -> anyhow::Result<()> {
     };
 
     #[cfg(not(feature = "cache"))]
-    let contents = get_contents_remote(template_path);
+    let contents = get_contents_remote(template_path)?;
 
     let mut file = File::create(path).with_context(|| "Failed to create file")?;
     file.write_all(&contents)
