@@ -1,7 +1,7 @@
 [package]
 name = "ignoreit"
 description = "Quickly load .gitignore templates"
-version = "1.1.1"
+version = "1.2.0-rc.1"
 readme = "README.md"
 repository = "https://github.com/jewlexx/ignoreit"
 license = "MIT"
@@ -16,7 +16,6 @@ reqwest = { version = "0.11.10", features = ["blocking", "json"] }
 serde_json = "1.0.79"
 spinners = "3.1.0"
 directories = "4.0.1"
-git2 = { version = "0.14.2", optional = true }
 colored = "2.0.0"
 lazy_static = "1.4.0"
 
@@ -25,4 +24,4 @@ lto = true
 
 [features]
 default = ["cache"]
-cache = ["dep:git2"]
+cache = []
