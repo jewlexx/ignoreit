@@ -1,5 +1,7 @@
 # Ignore It
 
+[![Rust](https://github.com/jewlexx/ignoreit/actions/workflows/rust.yml/badge.svg?branch=trunk)](https://github.com/jewlexx/ignoreit/actions/workflows/rust.yml)
+
 ## Help
 
 ```shell
