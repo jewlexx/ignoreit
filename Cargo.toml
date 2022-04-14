@@ -17,7 +17,7 @@ serde_json = "1.0.79"
 spinners = "3.1.0"
 directories = { version = "4.0.1", optional = true }
 git2 = { version = "0.14.2", optional = true }
-colored = { version = "2.0.0", optional = true }
+colored = "2.0.0"
 lazy_static = "1.4.0"
 
 [profile.release]
@@ -25,4 +25,4 @@ lto = true
 
 [features]
 default = ["cache"]
-cache = ["dep:colored", "dep:git2", "dep:directories"]
+cache = ["dep:git2", "dep:directories"]
