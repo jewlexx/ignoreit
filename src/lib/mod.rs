@@ -1,3 +1,6 @@
+mod consts;
+pub use consts::*;
+
 #[cfg(not(feature = "cache"))]
 pub use crate::remote::get_templates;
 

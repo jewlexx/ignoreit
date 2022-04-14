@@ -17,11 +17,11 @@ use commands::{
 fn main() -> anyhow::Result<()> {
     #[cfg(feature = "cache")]
     {
-        if cache::CACHE_ENABLED.to_owned() {
+        if lib::CACHE_ENABLED.to_owned() {
             cache::init_cache()?;
         } else {
             use colored::Colorize;
-            if !remote::IS_ONLINE.to_owned() {
+            if !lib::IS_ONLINE.to_owned() {
                 println!(
                     "{}",
                     "error: you are offline and cache is disabled. we cannot continue".red()

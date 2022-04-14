@@ -45,7 +45,7 @@ pub fn pull_template() -> anyhow::Result<()> {
 
     #[cfg(feature = "cache")]
     let contents = {
-        use crate::cache::{CACHE_DIR, CACHE_ENABLED};
+        use crate::lib::{CACHE_DIR, CACHE_ENABLED};
 
         if CACHE_ENABLED.to_owned() {
             let cache_dir = CACHE_DIR.to_owned().context("Failed to parse cache dir")?;

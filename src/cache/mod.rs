@@ -9,10 +9,8 @@ use std::{
 };
 
 mod purge;
+use crate::lib::CACHE_DIR;
 pub use purge::purge;
-
-mod consts;
-pub use consts::*;
 
 fn clone_cache(dir: &Path) -> anyhow::Result<Repository> {
     let sp = Spinner::new(Spinners::Dots12, "Initializing Cache...".into());
