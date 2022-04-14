@@ -9,7 +9,7 @@ use std::{
 };
 
 mod purge;
-use crate::lib::CACHE_DIR;
+use crate::lib::{CACHE_DIR, IS_ONLINE};
 pub use purge::purge;
 
 fn clone_cache(dir: &Path) -> anyhow::Result<Repository> {
@@ -36,8 +36,8 @@ pub fn init_cache() -> anyhow::Result<PathBuf> {
         let last_modified = meta.modified()?;
         let since_modified = SystemTime::now().duration_since(last_modified)?;
 
-        // If the cache is older than a day, fetch the latest version
-        if since_modified.as_secs() > 60 * 60 * 24 {
+        // If the cache is older than a day, fetch the latest version, but not if the user is offline, for obvious reasons
+        if since_modified.as_secs() > 60 * 60 * 24 && IS_ONLINE.to_owned() {
             clone_cache(&cache_dir)?;
         }
 
