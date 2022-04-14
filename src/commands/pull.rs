@@ -3,11 +3,12 @@ use std::{
     env,
     fs::File,
     io::{self, Write},
+    time::SystemTime,
 };
 
 use crate::{
     flush_stdout,
-    lib::{get_templates, CACHE_DIR},
+    lib::{get_templates, CACHE_DIR, IS_ONLINE},
 };
 
 fn get_contents_remote(template_path: &str) -> anyhow::Result<Vec<u8>> {
@@ -74,10 +75,17 @@ pub fn pull_template() -> anyhow::Result<()> {
         if CACHE_ENABLED.to_owned() {
             let cache_dir = CACHE_DIR.to_owned().context("Failed to parse cache dir")?;
             let file_path = cache_dir.join(format!("{}.gitignore", template_path));
+            let last_modified = file_path.metadata()?.modified()?;
 
-            match std::fs::read(file_path) {
-                Ok(v) => v,
-                Err(_) => get_contents_remote(template_path)?,
+            if SystemTime::now().duration_since(last_modified)?.as_secs() * 60 * 60 > 24
+                && IS_ONLINE.to_owned()
+            {
+                get_contents_remote(template_path)?
+            } else {
+                match std::fs::read(file_path) {
+                    Ok(v) => v,
+                    Err(_) => get_contents_remote(template_path)?,
+                }
             }
         } else {
             Vec::new()
