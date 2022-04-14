@@ -21,7 +21,6 @@ fn main() -> anyhow::Result<()> {
             cache::init_cache()?;
         } else {
             use colored::Colorize;
-
             println!(
                 "{}",
                 "warning: cache is disabled. performance will not be optimal".yellow()
