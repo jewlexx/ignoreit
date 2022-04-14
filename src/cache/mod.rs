@@ -32,8 +32,7 @@ pub fn init_cache() -> anyhow::Result<PathBuf> {
         }
 
         let fetch_head = cache_dir.join(".git/FETCH_HEAD");
-        let meta = fetch_head.metadata()?;
-        let last_modified = meta.modified()?;
+        let last_modified = fetch_head.metadata()?.modified()?;
         let since_modified = SystemTime::now().duration_since(last_modified)?;
 
         // If the cache is older than a day, fetch the latest version, but not if the user is offline, for obvious reasons
