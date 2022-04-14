@@ -1,4 +1,4 @@
-use crate::cache::CACHE_DIR;
+use crate::lib::CACHE_DIR;
 use anyhow::Context;
 use std::fs;
 
