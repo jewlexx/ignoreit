@@ -21,7 +21,7 @@ fn main() -> anyhow::Result<()> {
             cache::init_cache()?;
         } else {
             use colored::Colorize;
-            if !cache::IS_ONLINE.to_owned() {
+            if !remote::IS_ONLINE.to_owned() {
                 println!(
                     "{}",
                     "error: you are offline and cache is disabled. we cannot continue".red()

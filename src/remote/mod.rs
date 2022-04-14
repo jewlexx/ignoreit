@@ -4,6 +4,9 @@ use reqwest::{blocking::Response, header::USER_AGENT};
 use serde_json::Value;
 use std::collections::HashMap;
 
+mod consts;
+pub use consts::*;
+
 pub fn get_url(str: &str) -> anyhow::Result<Response> {
     let client = create_client!();
 
