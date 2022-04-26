@@ -1,6 +1,8 @@
-use crate::lib::CACHE_DIR;
-use anyhow::Context;
 use std::fs;
+
+use anyhow::Context;
+
+use crate::lib::CACHE_DIR;
 
 pub fn purge() -> anyhow::Result<()> {
     let cache_dir = CACHE_DIR.to_owned().context("Failed to parse cache dir")?;

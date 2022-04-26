@@ -1,10 +1,11 @@
-use anyhow::Context;
 use std::{
     env,
     fs::File,
     io::{self, Write},
     time::SystemTime,
 };
+
+use anyhow::Context;
 
 use crate::{
     flush_stdout,

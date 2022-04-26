@@ -1,8 +1,10 @@
-use crate::create_client;
+use std::collections::HashMap;
+
 use anyhow::Context;
 use reqwest::{blocking::Response, header::USER_AGENT};
 use serde_json::Value;
-use std::collections::HashMap;
+
+use crate::create_client;
 
 pub fn get_url(str: &str) -> anyhow::Result<Response> {
     let client = create_client!();
@@ -23,7 +25,7 @@ pub fn get_url(str: &str) -> anyhow::Result<Response> {
 pub fn get_templates() -> anyhow::Result<HashMap<String, String>> {
     use spinners::{Spinner, Spinners};
 
-    let sp = Spinner::new(Spinners::Dots12, "Fetching templates...".into());
+    let mut sp = Spinner::new(Spinners::Dots12, "Fetching templates...".into());
     let body: Value = get_url("https://api.github.com/repos/github/gitignore/git/trees/main")?
         .json()
         .with_context(|| "Failed to read JSON from response")?;

@@ -1,5 +1,6 @@
-use anyhow::Context;
 use std::{collections::HashMap, fs, path::PathBuf};
+
+use anyhow::Context;
 
 mod purge;
 use crate::lib::CACHE_DIR;

@@ -1,6 +1,7 @@
+use std::path::PathBuf;
+
 use directories::BaseDirs;
 use lazy_static::lazy_static;
-use std::path::PathBuf;
 
 use crate::sleep_for;
 
