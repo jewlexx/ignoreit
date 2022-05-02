@@ -37,18 +37,15 @@ fn main() -> anyhow::Result<()> {
         }
     }
 
-    let args = parse();
+    let args = parse()?;
 
-    if args.command == Commands::List {
-        list_templates()?;
-    }
-    if args.command == Commands::Pull {
-        pull_template()?;
-    }
-    #[cfg(feature = "cache")]
-    if args.command == Commands::Purge {
-        cache::purge()?;
-        print!("Purged Cache!");
+    println!("{:?}", args.command);
+
+    match args.command {
+        Commands::List => list_templates()?,
+        Commands::Pull => pull_template()?,
+        #[cfg(feature = "cache")]
+        Commands::Purge => cache::purge()?,
     }
 
     Ok(())

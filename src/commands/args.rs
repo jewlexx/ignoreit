@@ -1,4 +1,4 @@
-use clap::{Arg, Parser, Subcommand};
+use clap::{Arg, Error, Parser, Subcommand};
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
@@ -23,6 +23,6 @@ pub enum Commands {
     Purge,
 }
 
-pub fn parse() -> Args {
-    Args::parse()
+pub fn parse() -> Result<Args, Error> {
+    Args::try_parse()
 }
