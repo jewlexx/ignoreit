@@ -1,7 +1,7 @@
-use clap::{Arg, Error, Parser, Subcommand};
+use clap::{Arg, Parser, Subcommand};
 
 #[derive(Parser, Debug)]
-#[clap(author, version, about, long_about = None)]
+#[clap(author, version, about)]
 pub struct Args {
     #[clap(subcommand)]
     pub command: Commands,
@@ -21,8 +21,4 @@ pub enum Commands {
     #[cfg(feature = "cache")]
     #[clap(about = "Purge gitignore cache")]
     Purge,
-}
-
-pub fn parse() -> Result<Args, Error> {
-    Args::try_parse()
 }

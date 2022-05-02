@@ -8,11 +8,10 @@ mod macros;
 #[cfg(feature = "cache")]
 mod cache;
 
-use commands::{
-    args::{parse, Commands},
-    list::list_templates,
-    pull::pull_template,
-};
+use clap::StructOpt;
+use commands::{args::Commands, list::list_templates, pull::pull_template};
+
+use crate::commands::args::Args;
 
 fn main() -> anyhow::Result<()> {
     #[cfg(feature = "cache")]
@@ -37,9 +36,7 @@ fn main() -> anyhow::Result<()> {
         }
     }
 
-    let args = parse()?;
-
-    println!("{:?}", args.command);
+    let args = Args::parse();
 
     match args.command {
         Commands::List => list_templates()?,
