@@ -16,8 +16,6 @@ pub fn get_contents_remote(template_path: &str) -> anyhow::Result<Vec<u8>> {
     let url = crate::parse_url!(template_path);
     let contents = crate::remote::get_url(&url)?.text()?.as_bytes().to_vec();
 
-    println!("Getting template {}", template_path);
-
     #[cfg(feature = "cache")]
     {
         let cache_file = CACHE_DIR
@@ -81,6 +79,7 @@ pub fn pull_template() -> anyhow::Result<()> {
             if SystemTime::now().duration_since(last_modified)?.as_secs() * 60 * 60 > 24
                 && IS_ONLINE.to_owned()
             {
+                println!("Getting template {}", template_path);
                 get_contents_remote(template_path)?
             } else {
                 match std::fs::read(file_path) {

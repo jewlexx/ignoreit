@@ -13,7 +13,7 @@ pub fn init_cache() -> anyhow::Result<PathBuf> {
             fs::create_dir_all(&cache_dir).with_context(|| "Failed to create cache directory")?;
         }
 
-        let sp = Spinner::new(Spinners::Dots12, "Initializing Cache...".into());
+        let mut sp = Spinner::new(Spinners::Dots12, "Initializing Cache...".into());
 
         let map = crate::remote::get_templates()?;
         let values: Vec<String> = map.values().cloned().collect();
