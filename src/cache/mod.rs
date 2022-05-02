@@ -1,11 +1,30 @@
-use std::{collections::HashMap, fs, path::PathBuf};
+use std::{
+    collections::HashMap,
+    fs,
+    path::PathBuf,
+    time::{Duration, SystemTime},
+};
 
 use anyhow::Context;
+use git2::Repository;
 use spinners::{Spinner, Spinners};
 
 mod purge;
 use crate::lib::CACHE_DIR;
 pub use purge::purge;
+
+const TO_UPDATE: u64 = 360 * 24;
+
+fn clone_repo(url: &str, cache_dir: &str) -> anyhow::Result<Repository> {
+    let mut sp = Spinner::new(Spinners::Dots12, "Initializing Cache...".into());
+
+    let r = Repository::clone(url, cache_dir)
+        .with_context(|| "Failed to clone gitignore repository")?;
+
+    sp.stop_with_message("Cache Initialized!".into());
+
+    Ok(r)
+}
 
 pub fn init_cache() -> anyhow::Result<PathBuf> {
     if let Some(cache_dir) = CACHE_DIR.to_owned() {
@@ -13,20 +32,27 @@ pub fn init_cache() -> anyhow::Result<PathBuf> {
             fs::create_dir_all(&cache_dir).with_context(|| "Failed to create cache directory")?;
         }
 
-        let mut sp = Spinner::new(Spinners::Dots12, "Initializing Cache...".into());
+        let url = "https://github.com/github/gitignore.git";
+        let fetch_path = cache_dir.join(".git").join("FETCH_HEAD");
 
-        let map = crate::remote::get_templates()?;
-        let values: Vec<String> = map.values().cloned().collect();
+        if !fetch_path.exists() {
+            clone_repo(url, cache_dir.to_str().unwrap())?;
 
-        for value in values {
-            let template_path = map
-                .get(&value.to_lowercase())
-                .with_context(|| "Template not found")?;
-
-            crate::commands::pull::get_contents_remote(template_path)?;
+            return Ok(cache_dir);
         }
 
-        sp.stop_with_message("Cache Initialized!".into());
+        let fetch_meta = fetch_path.metadata()?;
+        let last_modified = fetch_meta.modified()?;
+        let now = SystemTime::now();
+
+        let since = now
+            .duration_since(last_modified)
+            .unwrap_or(Duration::from_secs(TO_UPDATE))
+            .as_secs();
+
+        if since > TO_UPDATE {
+            clone_repo(url, cache_dir.to_str().unwrap())?;
+        }
 
         Ok(cache_dir)
     } else {
