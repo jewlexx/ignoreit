@@ -1,6 +1,7 @@
 use std::{collections::HashMap, fs, path::PathBuf};
 
 use anyhow::Context;
+use spinners::{Spinner, Spinners};
 
 mod purge;
 use crate::lib::CACHE_DIR;
@@ -11,6 +12,21 @@ pub fn init_cache() -> anyhow::Result<PathBuf> {
         if !cache_dir.exists() {
             fs::create_dir_all(&cache_dir).with_context(|| "Failed to create cache directory")?;
         }
+
+        let sp = Spinner::new(Spinners::Dots12, "Initializing Cache...".into());
+
+        let map = crate::remote::get_templates()?;
+        let values: Vec<String> = map.values().cloned().collect();
+
+        for value in values {
+            let template_path = map
+                .get(&value.to_lowercase())
+                .with_context(|| "Template not found")?;
+
+            crate::commands::pull::get_contents_remote(template_path)?;
+        }
+
+        sp.stop_with_message("Cache Initialized!".into());
 
         Ok(cache_dir)
     } else {

@@ -12,7 +12,7 @@ use crate::{
     lib::{get_templates, CACHE_DIR, IS_ONLINE},
 };
 
-fn get_contents_remote(template_path: &str) -> anyhow::Result<Vec<u8>> {
+pub fn get_contents_remote(template_path: &str) -> anyhow::Result<Vec<u8>> {
     let url = crate::parse_url!(template_path);
     let contents = crate::remote::get_url(&url)?.text()?.as_bytes().to_vec();
 
