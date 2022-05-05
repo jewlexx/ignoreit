@@ -32,9 +32,10 @@ pub fn parse_args() -> anyhow::Result<()> {
 
     if let Some(sub) = sub {
         match sub.as_ref() {
-            "list" => list_templates()?,
-            "pull" => pull_template()?,
+            "list" | "l" => list_templates()?,
+            "pull" | "p" => pull_template()?,
             "purge" => cache::purge()?,
+            "help" => todo!(),
             _ => unreachable!(),
         }
     } else {
