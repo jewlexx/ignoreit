@@ -63,7 +63,7 @@ pub fn pull_template() -> anyhow::Result<()> {
     };
 
     let mut file = File::create(path).with_context(|| "Failed to create file")?;
-    file.write_all(&contents)
+    file.write_all(contents.as_bytes())
         .with_context(|| "Failed to write to file")?;
 
     Ok(())
