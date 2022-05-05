@@ -1,5 +1,5 @@
 extern "C" {
-    fn IsOnline() -> cty::c_int;
+    fn IsOnline() -> u8;
 }
 
 pub fn is_online() -> bool {
