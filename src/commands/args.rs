@@ -1,6 +1,6 @@
 use clap::{Arg, Parser, Subcommand};
 
-use crate::cache;
+use crate::{cache, lib::VERSION};
 
 use super::{list::list_templates, pull::pull_template};
 
@@ -28,18 +28,25 @@ pub enum Commands {
 
 pub fn parse_args() -> anyhow::Result<()> {
     let mut args = pico_args::Arguments::from_env();
+
+    if args.contains("V") || args.contains("v") {
+        println!("{}", VERSION);
+        return Ok(());
+    }
+
     let sub = args.subcommand()?;
+    let mut help = args.contains("help");
 
     if let Some(sub) = sub {
         match sub.as_ref() {
             "list" | "l" => list_templates()?,
             "pull" | "p" => pull_template()?,
             "purge" => cache::purge()?,
-            "help" | "h" => todo!(),
+            "help" | "h" => help = true,
             _ => unreachable!(),
         }
     } else {
-        todo!();
+        help = true;
     }
 
     Ok(())
