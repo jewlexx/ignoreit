@@ -18,7 +18,6 @@ pub enum Commands {
     ])]
     Pull,
 
-    #[cfg(feature = "cache")]
     #[clap(about = "Purge gitignore cache")]
     Purge,
 }

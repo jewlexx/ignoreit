@@ -5,7 +5,6 @@ mod remote;
 #[macro_use]
 mod macros;
 
-#[cfg(feature = "cache")]
 mod cache;
 
 use clap::StructOpt;
@@ -14,8 +13,6 @@ use commands::{args::Commands, list::list_templates, pull::pull_template};
 use crate::commands::args::Args;
 
 fn main() -> anyhow::Result<()> {
-    #[cfg(feature = "cache")]
-    {
         if lib::CACHE_ENABLED.to_owned() {
             cache::init_cache()?;
         } else {
@@ -34,14 +31,12 @@ fn main() -> anyhow::Result<()> {
             );
             sleep_for!(3000);
         }
-    }
 
     let args = Args::parse();
 
     match args.command {
         Commands::List => list_templates()?,
         Commands::Pull => pull_template()?,
-        #[cfg(feature = "cache")]
         Commands::Purge => cache::purge()?,
     }
 

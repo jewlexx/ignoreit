@@ -6,21 +6,12 @@ use lazy_static::lazy_static;
 use crate::sleep_for;
 
 lazy_static! {
-    pub static ref CACHE_DIR: Option<PathBuf> = {
-        if cfg!(feature = "cache") {
-            BaseDirs::new().map(|dirs| dirs.cache_dir().to_owned().join("gitignore"))
-        } else {
-            None
-        }
-    };
+    pub static ref CACHE_DIR: Option<PathBuf> =
+        BaseDirs::new().map(|dirs| dirs.cache_dir().to_owned().join("gitignore"));
     pub static ref CACHE_ENABLED: bool = {
-        if cfg!(feature = "cache") {
-            if let Some(mut dir) = CACHE_DIR.to_owned() {
-                dir.pop();
-                dir.exists()
-            } else {
-                false
-            }
+        if let Some(mut dir) = CACHE_DIR.to_owned() {
+            dir.pop();
+            dir.exists()
         } else {
             false
         }

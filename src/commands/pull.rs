@@ -51,7 +51,6 @@ pub fn pull_template() -> anyhow::Result<()> {
         }
     }
 
-    #[cfg(feature = "cache")]
     let contents = {
         use crate::lib::CACHE_ENABLED;
 
@@ -62,9 +61,6 @@ pub fn pull_template() -> anyhow::Result<()> {
             Vec::new()
         }
     };
-
-    #[cfg(not(feature = "cache"))]
-    let contents = get_contents_remote(template_path)?;
 
     let mut file = File::create(path).with_context(|| "Failed to create file")?;
     file.write_all(&contents)
