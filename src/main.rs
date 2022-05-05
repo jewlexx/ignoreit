@@ -7,10 +7,7 @@ mod macros;
 
 mod cache;
 
-use clap::StructOpt;
-use commands::{args::Commands, list::list_templates, pull::pull_template};
-
-use crate::commands::args::Args;
+use commands::args::parse_args;
 
 fn main() -> anyhow::Result<()> {
     if lib::CACHE_ENABLED.to_owned() {
@@ -32,13 +29,7 @@ fn main() -> anyhow::Result<()> {
         sleep_for!(3000);
     }
 
-    let args = Args::parse();
-
-    match args.command {
-        Commands::List => list_templates()?,
-        Commands::Pull => pull_template()?,
-        Commands::Purge => cache::purge()?,
-    }
+    parse_args()?;
 
     Ok(())
 }

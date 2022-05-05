@@ -1,5 +1,9 @@
 use clap::{Arg, Parser, Subcommand};
 
+use crate::cache;
+
+use super::{list::list_templates, pull::pull_template};
+
 #[derive(Parser, Debug)]
 #[clap(author, version, about)]
 pub struct Args {
@@ -20,4 +24,22 @@ pub enum Commands {
 
     #[clap(about = "Purge gitignore cache")]
     Purge,
+}
+
+pub fn parse_args() -> anyhow::Result<()> {
+    let mut args = pico_args::Arguments::from_env();
+    let sub = args.subcommand()?;
+
+    if let Some(sub) = sub {
+        match sub.as_ref() {
+            "list" => list_templates()?,
+            "pull" => pull_template()?,
+            "purge" => cache::purge()?,
+            _ => unreachable!(),
+        }
+    } else {
+        todo!();
+    }
+
+    Ok(())
 }
