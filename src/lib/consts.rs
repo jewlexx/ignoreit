@@ -6,6 +6,7 @@ use lazy_static::lazy_static;
 use crate::{sleep_for, sys::is_online};
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
+const DESC: &str = env!("CARGO_PKG_DESCRIPTION");
 
 lazy_static! {
     pub static ref CACHE_DIR: Option<PathBuf> =
