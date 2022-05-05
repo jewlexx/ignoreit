@@ -1,3 +1,7 @@
 extern "C" {
-    pub fn IsOnline() -> cty::c_int;
+    fn IsOnline() -> cty::c_int;
+}
+
+pub fn is_online() -> bool {
+    unsafe { IsOnline() != 1 }
 }

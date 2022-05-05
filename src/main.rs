@@ -10,17 +10,10 @@ mod cache;
 
 use clap::StructOpt;
 use commands::{args::Commands, list::list_templates, pull::pull_template};
-use sys::IsOnline;
 
 use crate::commands::args::Args;
 
 fn main() -> anyhow::Result<()> {
-    let is_online = unsafe { IsOnline() };
-
-    println!("{}", is_online);
-
-    return Ok(());
-
     if lib::CACHE_ENABLED.to_owned() {
         cache::init_cache()?;
     } else {
