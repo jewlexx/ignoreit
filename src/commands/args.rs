@@ -1,28 +1,19 @@
-use clap::{Arg, Parser, Subcommand};
-
 use crate::{cache, lib::VERSION};
 
 use super::{list::list_templates, pull::pull_template};
 
-#[derive(Parser, Debug)]
-#[clap(author, version, about)]
 pub struct Args {
-    #[clap(subcommand)]
     pub command: Commands,
 }
 
-#[derive(Subcommand, Debug, PartialEq)]
 pub enum Commands {
-    #[clap(about = "List all available templates")]
+    /// List all available templates
     List,
 
-    #[clap(about = "Pull a template from the repository", args = [
-        Arg::new("template").takes_value(true).required(true),
-        Arg::new("output").takes_value(true).required(false),
-    ])]
+    /// Pull a template from the repository <template> <output?>
     Pull,
 
-    #[clap(about = "Purge gitignore cache")]
+    /// Purge gitignore cache
     Purge,
 }
 
