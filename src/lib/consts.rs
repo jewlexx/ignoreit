@@ -22,9 +22,9 @@ lazy_static! {
             println!("{}","warning: you are offline. you will only be able to use cached templates which may be out of date".yellow());
             sleep_for!(3000);
 
-            return true;
+            true
         } else {
-            return false;
+            false
         }
     };
 }
