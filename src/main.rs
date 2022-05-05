@@ -1,6 +1,5 @@
 mod commands;
 mod lib;
-mod remote;
 mod sys;
 
 #[macro_use]

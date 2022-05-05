@@ -8,13 +8,6 @@ use anyhow::Context;
 
 use crate::{cache::get_template, flush_stdout, lib::get_templates};
 
-pub fn get_contents_remote(template_path: &str) -> anyhow::Result<Vec<u8>> {
-    let url = crate::parse_url!(template_path);
-    let contents = crate::remote::get_url(&url)?.text()?.as_bytes().to_vec();
-
-    Ok(contents)
-}
-
 pub fn pull_template() -> anyhow::Result<()> {
     let template = env::args()
         .nth(2)
