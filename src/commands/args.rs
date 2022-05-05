@@ -29,13 +29,13 @@ pub enum Commands {
 pub fn parse_args() -> anyhow::Result<()> {
     let mut args = pico_args::Arguments::from_env();
 
-    if args.contains("V") || args.contains("v") {
+    if args.contains("-V") || args.contains("-v") || args.contains("--version") {
         println!("{}", VERSION);
         return Ok(());
     }
 
     let sub = args.subcommand()?;
-    let mut help = args.contains("help");
+    let mut help = args.contains("--help") || args.contains("-h");
 
     if let Some(sub) = sub {
         match sub.as_ref() {
