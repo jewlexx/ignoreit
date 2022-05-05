@@ -1,6 +1,7 @@
 use std::{
     collections::HashMap,
     fs,
+    io::Read,
     path::PathBuf,
     time::{Duration, SystemTime},
 };
@@ -92,4 +93,21 @@ pub fn get_templates() -> anyhow::Result<HashMap<String, String>> {
     }
 
     Ok(ignores)
+}
+
+pub fn get_template(name: &str) -> anyhow::Result<String> {
+    let cache_dir = CACHE_DIR.to_owned().context("Cache directory not found")?;
+    let filename = name.to_owned() + ".gitignore";
+
+    let path = cache_dir.join(filename);
+
+    if !path.exists() {
+        return Err(anyhow::anyhow!("Template not found"));
+    } else {
+        let file = fs::File::open(path).with_context(|| "Failed to open template file")?;
+        let mut str = String::new();
+        file.read_to_string(&mut str);
+
+        Ok(str)
+    }
 }
