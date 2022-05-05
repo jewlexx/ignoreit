@@ -2,6 +2,7 @@
 #include <netfw.h>
 #else
 #include <netdb.h>
+#include <stddef.h>
 #endif
 
 int IsOnline() {
