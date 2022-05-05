@@ -35,7 +35,7 @@ pub fn parse_args() -> anyhow::Result<()> {
             "list" | "l" => list_templates()?,
             "pull" | "p" => pull_template()?,
             "purge" => cache::purge()?,
-            "help" => todo!(),
+            "help" | "h" => todo!(),
             _ => unreachable!(),
         }
     } else {
