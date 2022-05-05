@@ -6,7 +6,7 @@ use std::{
 
 use anyhow::Context;
 
-use crate::{flush_stdout, lib::get_templates};
+use crate::{cache::get_template, flush_stdout, lib::get_templates};
 
 pub fn get_contents_remote(template_path: &str) -> anyhow::Result<Vec<u8>> {
     let url = crate::parse_url!(template_path);
@@ -56,9 +56,9 @@ pub fn pull_template() -> anyhow::Result<()> {
 
         if CACHE_ENABLED.to_owned() {
             println!("Getting template {}", template_path);
-            get_contents_remote(template_path)?
+            get_template(template_path)?
         } else {
-            Vec::new()
+            String::new()
         }
     };
 
