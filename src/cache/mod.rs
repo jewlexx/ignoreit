@@ -104,9 +104,9 @@ pub fn get_template(name: &str) -> anyhow::Result<String> {
     if !path.exists() {
         return Err(anyhow::anyhow!("Template not found"));
     } else {
-        let file = fs::File::open(path).with_context(|| "Failed to open template file")?;
+        let mut file = fs::File::open(path).with_context(|| "Failed to open template file")?;
         let mut str = String::new();
-        file.read_to_string(&mut str);
+        file.read_to_string(&mut str)?;
 
         Ok(str)
     }
