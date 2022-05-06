@@ -22,7 +22,7 @@ fn clone_repo(url: &str, cache_dir: &str) -> anyhow::Result<Repository> {
     let r = Repository::clone(url, cache_dir)
         .with_context(|| "Failed to clone gitignore repository")?;
 
-    sp.stop_with_message("Cache Initialized!".into());
+    sp.stop_with_message("Cache Initialized!\n".into());
 
     Ok(r)
 }
@@ -49,6 +49,7 @@ pub fn init_cache() -> anyhow::Result<PathBuf> {
             .as_secs();
 
         if since > TO_UPDATE {
+            fs::remove_dir_all(&cache_dir)?;
             clone_repo(url, cache_dir.to_str().unwrap())?;
         }
 
