@@ -86,22 +86,22 @@ pub fn parse_args() -> anyhow::Result<()> {
         println!("");
         println!("Usage:");
         println!(
-            "  {0:<10} {1}",
+            "  {0:<25} {1}",
             Commands::Help.get_usage(),
             Commands::Help.get_help()
         );
         println!(
-            "  {0:<10} {1}",
+            "  {0:<25} {1}",
             Commands::List.get_usage(),
             Commands::List.get_help()
         );
         println!(
-            "  {0:<10} {1}",
+            "  {0:<25} {1}",
             Commands::Pull.get_usage(),
             Commands::Pull.get_help()
         );
         println!(
-            "  {0:<10} {1}",
+            "  {0:<25} {1}",
             Commands::Purge.get_usage(),
             Commands::Purge.get_help()
         );
