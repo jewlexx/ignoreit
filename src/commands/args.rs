@@ -39,17 +39,15 @@ impl Commands {
         }
     }
 
-    fn run(self) -> anyhow::Result<bool> {
-        let mut r = false;
-
+    fn run(self) -> anyhow::Result<()> {
         match self {
             Commands::List => list_templates()?,
             Commands::Pull => pull_template()?,
             Commands::Purge => cache::purge()?,
-            Commands::Help => r = true,
+            _ => (),
         };
 
-        Ok(false)
+        Ok(())
     }
 }
 
