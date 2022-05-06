@@ -1,6 +1,9 @@
 use std::fmt::Display;
 
-use crate::{cache, lib::VERSION};
+use crate::{
+    cache,
+    lib::{DESC, VERSION},
+};
 
 use super::{list::list_templates, pull::pull_template};
 
@@ -87,6 +90,8 @@ pub fn parse_args() -> anyhow::Result<()> {
 
     if help {
         println!("ignoreit {}", VERSION);
+        println!();
+        println!("{}", DESC);
         println!();
         println!("Usage:");
         println!("{}", Commands::Help.get_info());
