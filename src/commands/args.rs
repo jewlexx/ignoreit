@@ -74,12 +74,7 @@ pub fn parse_args() -> anyhow::Result<()> {
         let command = Commands::from_str(&sub);
 
         if let Some(command) = command {
-            match command {
-                Commands::List => list_templates()?,
-                Commands::Pull => pull_template()?,
-                Commands::Purge => cache::purge()?,
-                Commands::Help => help = true,
-            }
+            help = command.run()?;
         } else {
             help = true;
         }
