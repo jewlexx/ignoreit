@@ -74,7 +74,7 @@ impl Display for Commands {
 pub fn parse_args() -> anyhow::Result<()> {
     let mut args = pico_args::Arguments::from_env();
 
-    if args.contains("-V") || args.contains("-v") || args.contains("--version") {
+    if args.contains("-V") || args.contains("--version") {
         println!("{}", VERSION);
         return Ok(());
     }
@@ -93,7 +93,13 @@ pub fn parse_args() -> anyhow::Result<()> {
         println!();
         println!("{}", DESC);
         println!();
-        println!("Usage:");
+        println!("Usage: ignoreit [FLAGS] <COMMAND> [ARGUMENTS]");
+        println!();
+        println!("Flags:");
+        println!("  -h, --help     Show this help message");
+        println!("  -V, --version  Show version");
+        println!();
+        println!("Subcommands:");
         println!("{}", Commands::Help.get_info());
         println!("{}", Commands::List.get_info());
         println!("{}", Commands::Pull.get_info(),);
