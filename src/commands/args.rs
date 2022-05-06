@@ -83,7 +83,7 @@ pub fn parse_args() -> anyhow::Result<()> {
 
     if help {
         println!("ignoreit {}", VERSION);
-        println!("");
+        println!();
         println!("Usage:");
         println!(
             "  {0:<25} {1}",
@@ -105,6 +105,8 @@ pub fn parse_args() -> anyhow::Result<()> {
             Commands::Purge.get_usage(),
             Commands::Purge.get_help()
         );
+        println!();
+        println!("Thank you for using ignoreit by Juliette Cordor")
     }
 
     if let Some(command) = command {
