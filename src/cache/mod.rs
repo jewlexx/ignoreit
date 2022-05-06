@@ -11,7 +11,10 @@ use git2::Repository;
 use spinners::{Spinner, Spinners};
 
 mod purge;
-use crate::lib::CACHE_DIR;
+use crate::{
+    lib::{CACHE_DIR, IS_ONLINE},
+    sys::is_online,
+};
 pub use purge::purge;
 
 /// One Day in seconds
@@ -49,7 +52,7 @@ pub fn init_cache() -> anyhow::Result<PathBuf> {
             .unwrap_or(Duration::from_secs(TO_UPDATE))
             .as_secs();
 
-        if since > TO_UPDATE {
+        if since > TO_UPDATE && *IS_ONLINE {
             fs::remove_dir_all(&cache_dir)?;
             clone_repo(url, cache_dir.to_str().unwrap())?;
         }
