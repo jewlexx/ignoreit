@@ -99,7 +99,7 @@ pub fn parse_args() -> anyhow::Result<()> {
         println!("  -h, --help     Show this help message");
         println!("  -V, --version  Show version");
         println!();
-        println!("Subcommands:");
+        println!("Commands:");
         println!("{}", Commands::Help.get_info());
         println!("{}", Commands::List.get_info());
         println!("{}", Commands::Pull.get_info(),);
