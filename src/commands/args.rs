@@ -106,7 +106,7 @@ pub fn parse_args() -> anyhow::Result<()> {
             Commands::Purge.get_help()
         );
         println!();
-        println!("Thank you for using ignoreit by Juliette Cordor")
+        println!("Thank you for using ignoreit by Juliette Cordor");
     }
 
     if let Some(command) = command {
