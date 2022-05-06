@@ -85,15 +85,26 @@ pub fn parse_args() -> anyhow::Result<()> {
         println!("ignoreit {}", VERSION);
         println!("");
         println!("Usage:");
-        println!("  {}", Commands::Help.get_usage());
-        println!("  {}", Commands::List.get_usage());
-        println!("  {}", Commands::Pull.get_usage());
-        println!("  {}", Commands::Purge.get_usage());
-        println!("");
-        println!("  {}", Commands::Help.get_help());
-        println!("{}", Commands::List.get_help());
-        println!("{}", Commands::Pull.get_help());
-        println!("{}", Commands::Purge.get_help());
+        println!(
+            "  {0:<10} {}",
+            Commands::Help.get_usage(),
+            Commands::Help.get_help()
+        );
+        println!(
+            "  {0:<10} {}",
+            Commands::List.get_usage(),
+            Commands::List.get_help()
+        );
+        println!(
+            "  {0:<10} {}",
+            Commands::Pull.get_usage(),
+            Commands::Pull.get_help()
+        );
+        println!(
+            "  {0:<10} {}",
+            Commands::Purge.get_usage(),
+            Commands::Purge.get_help()
+        );
     }
 
     if let Some(command) = command {
