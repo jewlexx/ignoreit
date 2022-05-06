@@ -11,10 +11,7 @@ use git2::Repository;
 use spinners::{Spinner, Spinners};
 
 mod purge;
-use crate::{
-    lib::{CACHE_DIR, IS_ONLINE},
-    sys::is_online,
-};
+use crate::lib::{CACHE_DIR, IS_ONLINE};
 pub use purge::purge;
 
 /// One Day in seconds
