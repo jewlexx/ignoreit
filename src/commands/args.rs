@@ -2,7 +2,7 @@ use crate::{cache, lib::VERSION};
 
 use super::{list::list_templates, pull::pull_template};
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Debug, Clone, Copy)]
 pub enum Commands {
     List,
     Pull,
@@ -69,7 +69,7 @@ pub fn parse_args() -> anyhow::Result<()> {
     }
 
     let sub = args.subcommand()?;
-    let command = Commands::from_str(&sub.unwrap_or(String::from("help")));
+    let command = Commands::from_str(&sub.unwrap_or_else(|| String::from("help")));
     let help = args.contains("--help")
         || args.contains("-h")
         || match command {
