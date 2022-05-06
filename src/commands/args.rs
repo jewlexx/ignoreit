@@ -96,7 +96,7 @@ pub fn parse_args() -> anyhow::Result<()> {
         println!("Usage: ignoreit [FLAGS] <COMMAND> [ARGUMENTS]");
         println!();
         println!("Flags:");
-        println!("  -h, --help     Show this help message");
+        println!("  -h, --help     {}", Commands::Help.get_help());
         println!("  -V, --version  Show version");
         println!();
         println!("Commands:");
