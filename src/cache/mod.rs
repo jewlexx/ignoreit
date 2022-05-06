@@ -14,6 +14,7 @@ mod purge;
 use crate::lib::CACHE_DIR;
 pub use purge::purge;
 
+/// One Day in seconds
 const TO_UPDATE: u64 = 60 * 60 * 24;
 
 fn clone_repo(url: &str, cache_dir: &str) -> anyhow::Result<Repository> {
