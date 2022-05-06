@@ -3,16 +3,9 @@ use crate::{cache, lib::VERSION};
 use super::{list::list_templates, pull::pull_template};
 
 pub enum Commands {
-    /// List all available templates
     List,
-
-    /// Pull a template from the repository <template> <output?>
     Pull,
-
-    /// Purge gitignore cache
     Purge,
-
-    /// Help Command
     Help,
 }
 
