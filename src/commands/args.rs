@@ -39,6 +39,10 @@ impl Commands {
         }
     }
 
+    fn get_info(self) -> String {
+        format!("   {0: <25} {1}", self.get_usage(), self.get_help())
+    }
+
     fn run(self) -> anyhow::Result<()> {
         match self {
             Commands::List => list_templates()?,
@@ -85,26 +89,10 @@ pub fn parse_args() -> anyhow::Result<()> {
         println!("ignoreit {}", VERSION);
         println!();
         println!("Usage:");
-        println!(
-            "  {0:<25} {1}",
-            Commands::Help.get_usage(),
-            Commands::Help.get_help()
-        );
-        println!(
-            "  {0:<25} {1}",
-            Commands::List.get_usage(),
-            Commands::List.get_help()
-        );
-        println!(
-            "  {0:<25} {1}",
-            Commands::Pull.get_usage(),
-            Commands::Pull.get_help()
-        );
-        println!(
-            "  {0:<25} {1}",
-            Commands::Purge.get_usage(),
-            Commands::Purge.get_help()
-        );
+        println!("{}", Commands::Help.get_info());
+        println!("{}", Commands::List.get_info());
+        println!("{}", Commands::Pull.get_info(),);
+        println!("{}", Commands::Purge.get_info());
         println!();
         println!("Thank you for using ignoreit by Juliette Cordor");
     }
