@@ -88,24 +88,31 @@ pub fn parse_args() -> anyhow::Result<()> {
             None => true,
         };
 
+    use colored::Colorize;
     if help {
-        println!("ignoreit {}", VERSION);
+        println!("{} {}", "ignoreit".green(), VERSION.yellow());
         println!();
         println!("{}", DESC);
         println!();
-        println!("Usage: ignoreit [FLAGS] <COMMAND> [ARGUMENTS]");
+        println!(
+            "{}: ignoreit [FLAGS] <COMMAND> [ARGUMENTS]",
+            "Usage".green()
+        );
         println!();
-        println!("Flags:");
+        println!("{}:", "Flags".green());
         println!("  -h, --help     {}", Commands::Help.get_help());
         println!("  -V, --version  Show version");
         println!();
-        println!("Commands:");
+        println!("{}:", "Commands".green());
         println!("{}", Commands::Help.get_info());
         println!("{}", Commands::List.get_info());
         println!("{}", Commands::Pull.get_info(),);
         println!("{}", Commands::Purge.get_info());
         println!();
-        println!("Thank you for using ignoreit by Juliette Cordor");
+        println!(
+            "Thank you for using {} by Juliette Cordor",
+            "ignoreit".green()
+        );
     }
 
     if let Some(command) = command {
