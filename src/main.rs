@@ -1,11 +1,10 @@
+mod cache;
 mod commands;
 mod lib;
 mod sys;
 
 #[macro_use]
 mod macros;
-
-mod cache;
 
 use commands::args::parse_args;
 
