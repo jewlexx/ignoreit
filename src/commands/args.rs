@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use crate::{cache, lib::VERSION};
 
 use super::{list::list_templates, pull::pull_template};
@@ -18,15 +20,6 @@ impl Commands {
             "purge" => Some(Commands::Purge),
             "help" | "h" => Some(Commands::Help),
             _ => None,
-        }
-    }
-
-    fn to_string(&self) -> String {
-        match self {
-            Commands::List => String::from("list"),
-            Commands::Pull => String::from("pull"),
-            Commands::Purge => String::from("purge"),
-            Commands::Help => String::from("help"),
         }
     }
 
@@ -57,6 +50,19 @@ impl Commands {
         };
 
         Ok(false)
+    }
+}
+
+impl Display for Commands {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
+            Commands::List => String::from("list"),
+            Commands::Pull => String::from("pull"),
+            Commands::Purge => String::from("purge"),
+            Commands::Help => String::from("help"),
+        };
+
+        write!(f, "{}", s)
     }
 }
 
