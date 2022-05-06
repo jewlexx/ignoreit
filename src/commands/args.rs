@@ -68,16 +68,12 @@ pub fn parse_args() -> anyhow::Result<()> {
     }
 
     let sub = args.subcommand()?;
-    let mut help = args.contains("--help") || args.contains("-h");
+    let mut help = args.contains("--help") || args.contains("-h") || sub.is_none();
 
-    if let Some(sub) = sub {
-        let command = Commands::from_str(&sub);
+    let command = Commands::from_str(&sub.unwrap());
 
-        if let Some(command) = command {
-            help = command.run()?;
-        } else {
-            help = true;
-        }
+    if let Some(command) = command {
+        help = command.run()?;
     } else {
         help = true;
     }
