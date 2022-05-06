@@ -2,6 +2,7 @@ use crate::{cache, lib::VERSION};
 
 use super::{list::list_templates, pull::pull_template};
 
+#[derive(PartialEq)]
 pub enum Commands {
     List,
     Pull,
@@ -68,18 +69,20 @@ pub fn parse_args() -> anyhow::Result<()> {
     }
 
     let sub = args.subcommand()?;
-    let mut help = args.contains("--help") || args.contains("-h") || sub.is_none();
-
-    let command = Commands::from_str(&sub.unwrap());
-
-    if let Some(command) = command {
-        help = command.run()?;
-    } else {
-        help = true;
-    }
+    let command = Commands::from_str(&sub.unwrap_or(String::from("help")));
+    let help = args.contains("--help")
+        || args.contains("-h")
+        || match command {
+            Some(v) => v == Commands::Help,
+            None => true,
+        };
 
     if help {
-        println!("{}", include_str!("help.txt"));
+        println!("Help Here");
+    }
+
+    if let Some(command) = command {
+        command.run()?;
     }
 
     Ok(())
