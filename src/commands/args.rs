@@ -52,6 +52,7 @@ pub fn parse_args() -> anyhow::Result<()> {
                 Commands::Pull => pull_template()?,
                 Commands::Purge => cache::purge()?,
                 Commands::Help => help = true,
+            }
         } else {
             help = true;
         }
