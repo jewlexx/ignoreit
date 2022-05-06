@@ -14,7 +14,7 @@ mod purge;
 use crate::lib::CACHE_DIR;
 pub use purge::purge;
 
-const TO_UPDATE: u64 = 360 * 24;
+const TO_UPDATE: u64 = 60 * 60 * 24;
 
 fn clone_repo(url: &str, cache_dir: &str) -> anyhow::Result<Repository> {
     let mut sp = Spinner::new(Spinners::Dots12, "Initializing Cache...".into());
