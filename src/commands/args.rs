@@ -2,10 +2,6 @@ use crate::{cache, lib::VERSION};
 
 use super::{list::list_templates, pull::pull_template};
 
-pub struct Args {
-    pub command: Commands,
-}
-
 pub enum Commands {
     /// List all available templates
     List,
@@ -21,13 +17,38 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub fn from_str(command: &str) -> Option<Self> {
+    fn from_str(command: &str) -> Option<Self> {
         match command {
             "list" | "l" => Some(Commands::List),
             "pull" | "p" => Some(Commands::Pull),
             "purge" => Some(Commands::Purge),
             "help" | "h" => Some(Commands::Help),
             _ => None,
+        }
+    }
+
+    fn to_string(&self) -> String {
+        match self {
+            Commands::List => String::from("list"),
+            Commands::Pull => String::from("pull"),
+            Commands::Purge => String::from("purge"),
+            Commands::Help => Strinf::from("help"),
+        }
+    }
+
+    fn get_help(self) -> String {
+        match self {
+            Commands::List => String::from("List all available templates"),
+            Commands::Pull => String::from("Pull a template from the repository"),
+            Commands::Purge => String::from("Purge gitignore cache"),
+            Commands::Help => String::from("Shows the help message"),
+        }
+    }
+
+    fn get_usage(self) -> String {
+        match self {
+            Commands::Pull => String::from("pull <template> [output]"),
+            _ => self.to_string(),
         }
     }
 }
