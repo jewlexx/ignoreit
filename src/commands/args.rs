@@ -15,6 +15,21 @@ pub enum Commands {
 
     /// Purge gitignore cache
     Purge,
+
+    /// Help Command
+    Help,
+}
+
+impl Commands {
+    pub fn from_str(command: &str) -> Option<Self> {
+        match command {
+            "list" | "l" => Some(Commands::List),
+            "pull" | "p" => Some(Commands::Pull),
+            "purge" => Some(Commands::Purge),
+            "help" | "h" => Some(Commands::Help),
+            _ => None,
+        }
+    }
 }
 
 pub fn parse_args() -> anyhow::Result<()> {
@@ -29,15 +44,23 @@ pub fn parse_args() -> anyhow::Result<()> {
     let mut help = args.contains("--help") || args.contains("-h");
 
     if let Some(sub) = sub {
-        match sub.as_ref() {
-            "list" | "l" => list_templates()?,
-            "pull" | "p" => pull_template()?,
-            "purge" => cache::purge()?,
-            "help" | "h" => help = true,
-            _ => unreachable!(),
+        let command = Commands::from_str(&sub);
+
+        if let Some(command) = command {
+            match command {
+                Commands::List => list_templates()?,
+                Commands::Pull => pull_template()?,
+                Commands::Purge => cache::purge()?,
+                Commands::Help => help = true,
+        } else {
+            help = true;
         }
     } else {
         help = true;
+    }
+
+    if help {
+        println!("{}", include_str!("help.txt"));
     }
 
     Ok(())
