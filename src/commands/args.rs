@@ -32,7 +32,7 @@ impl Commands {
             Commands::List => String::from("list"),
             Commands::Pull => String::from("pull"),
             Commands::Purge => String::from("purge"),
-            Commands::Help => Strinf::from("help"),
+            Commands::Help => String::from("help"),
         }
     }
 
