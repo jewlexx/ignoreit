@@ -44,6 +44,19 @@ impl Commands {
             _ => self.to_string(),
         }
     }
+
+    fn run(self) -> anyhow::Result<bool> {
+        let mut r = false;
+
+        match self {
+            Commands::List => list_templates()?,
+            Commands::Pull => pull_template()?,
+            Commands::Purge => cache::purge()?,
+            Commands::Help => r = true,
+        };
+
+        Ok(false)
+    }
 }
 
 pub fn parse_args() -> anyhow::Result<()> {
