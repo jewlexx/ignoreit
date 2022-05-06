@@ -49,7 +49,7 @@ pub fn init_cache() -> anyhow::Result<PathBuf> {
             .unwrap_or(Duration::from_secs(TO_UPDATE))
             .as_secs();
 
-        if since > TO_UPDATE && *IS_ONLINE {
+        if since >= TO_UPDATE && *IS_ONLINE {
             fs::remove_dir_all(&cache_dir)?;
             clone_repo(url, cache_dir.to_str().unwrap())?;
         }
