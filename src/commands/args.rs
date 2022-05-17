@@ -48,7 +48,7 @@ impl Commands {
     }
 
     fn get_info(self) -> String {
-        format!("   {0:<10} {1}", self.get_usage().green(), self.get_help())
+        format!("{0:<10} {1}", self.get_usage().green(), self.get_help())
     }
 
     pub fn run(self) -> anyhow::Result<()> {
@@ -101,24 +101,29 @@ impl Args {
             };
 
         if help {
+            // TODO: Format into a single String? Preferably constant but idk if that will work
             println!("{} {}", "ignoreit".green(), VERSION.yellow());
             println!();
             println!("{}", DESC);
             println!();
             println!(
-                "{}: ignoreit [FLAGS] <COMMAND> [ARGUMENTS]",
+                "{}:\n   ignoreit [FLAGS] <COMMAND> [ARGUMENTS]",
                 "USAGE".yellow()
             );
             println!();
-            println!("{}:", "Flags".green());
-            println!("  -h, --help     {}", Commands::Help.get_help());
-            println!("  -V, --version  Show version");
+            println!("{}:", "FLAGS".yellow());
+            println!(
+                "   {}     {}",
+                "-h, --help".green(),
+                Commands::Help.get_help()
+            );
+            println!("   {}  Show version", "-V, --version".green());
             println!();
-            println!("{}:", "Commands".green());
-            println!("{}", Commands::Help.get_info());
-            println!("{}", Commands::List.get_info());
-            println!("{}", Commands::Pull.get_info(),);
-            println!("{}", Commands::Purge.get_info());
+            println!("{}:", "COMMANDS".yellow());
+            println!("   {}", Commands::Help.get_info());
+            println!("   {}", Commands::List.get_info());
+            println!("   {}", Commands::Pull.get_info(),);
+            println!("   {}", Commands::Purge.get_info());
             println!();
             println!(
                 "Thank you for using {} by Juliette Cordor",
