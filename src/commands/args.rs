@@ -45,7 +45,7 @@ impl Commands {
     }
 
     fn get_info(self) -> String {
-        format!("   {0: <25} {1}", self.get_usage(), self.get_help())
+        format!("   {0: <35} {1}", self.get_usage(), self.get_help())
     }
 
     pub fn run(self) -> anyhow::Result<()> {
