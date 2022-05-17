@@ -39,7 +39,7 @@ impl Commands {
 
     fn get_usage(self) -> String {
         match self {
-            Commands::Pull => String::from("pull <template> [output]"),
+            Commands::Pull => String::from("pull <template> [--output <output>]"),
             _ => self.to_string(),
         }
     }
