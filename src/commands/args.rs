@@ -101,7 +101,6 @@ impl Args {
             };
 
         if help {
-            // TODO: Format into a single String? Preferably constant but idk if that will work
             println!("{} {}", "ignoreit".green(), VERSION.yellow());
             println!();
             println!("{}", DESC);
