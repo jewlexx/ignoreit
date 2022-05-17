@@ -5,22 +5,24 @@
 ## Help
 
 ```shell
-ignoreit --help
+ignoreit 2.2.0
 
-    ignoreit 1.0.0
-    Quickly download .gitignore templates for nearly any project
+Quickly load .gitignore templates
 
-    USAGE:
-        ignoreit <SUBCOMMAND>
+USAGE:
+   ignoreit [FLAGS] <COMMAND> [ARGUMENTS]
 
-    OPTIONS:
-        -h, --help       Print help information
-        -V, --version    Print version information
+FLAGS:
+   -h, --help     Shows the help message
+   -V, --version  Show version
 
-    SUBCOMMANDS:
-        help    Print this message or the help of the given subcommand(s)
-        list    List all available templates
-        pull    Pull a template from the repository
+COMMANDS:
+   help       Shows the help message
+   list       List all available templates
+   pull       Pull a template from the repository
+   purge      Purge gitignore cache
+
+Thank you for using ignoreit by Juliette Cordor
 ```
 
 ## Usage
