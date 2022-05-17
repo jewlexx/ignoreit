@@ -8,6 +8,14 @@ use anyhow::Context;
 
 use crate::{cache::get_template, flush_stdout, lib::get_templates};
 
+const EOL: &str = {
+    if cfg!(windows) {
+        r"\r\n"
+    } else {
+        r"\n"
+    }
+};
+
 pub fn pull_template() -> anyhow::Result<()> {
     if let Some(template) = env::args().nth(2) {
         let output = env::args().nth(3).unwrap_or_else(|| ".gitignore".into());
@@ -66,6 +74,20 @@ pub fn pull_template() -> anyhow::Result<()> {
         };
 
         enable_raw_mode()?;
+
+        let text = {
+            let template_string = String::new();
+            let map = get_templates()?;
+
+            println!("Available templates:");
+
+            let mut values = map.values().collect::<Vec<&String>>();
+            values.sort();
+
+            for item in values {
+                println!("  {}", item);
+            }
+        };
 
         execute!(stdout(), Clear(ClearType::All))?;
 
