@@ -107,7 +107,7 @@ impl Args {
             println!();
             println!(
                 "{}: ignoreit [FLAGS] <COMMAND> [ARGUMENTS]",
-                "Usage".green()
+                "USAGE".yellow()
             );
             println!();
             println!("{}:", "Flags".green());
