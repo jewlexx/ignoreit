@@ -1,7 +1,7 @@
 use std::{
     env,
     fs::File,
-    io::{self, Write},
+    io::{self, stdout, Write},
 };
 
 use anyhow::Context;
@@ -58,6 +58,19 @@ pub fn pull_template() -> anyhow::Result<()> {
 
         Ok(())
     } else {
+        use crossterm::{
+            event, execute,
+            style::{Color, Print, ResetColor, SetBackgroundColor, SetForegroundColor},
+            terminal::{disable_raw_mode, enable_raw_mode, Clear, ClearType},
+            ExecutableCommand, Result,
+        };
+
+        enable_raw_mode()?;
+
+        execute!(stdout(), Clear(ClearType::All))?;
+
+        disable_raw_mode()?;
+
         Ok(())
     }
 }
