@@ -15,7 +15,7 @@ spinners = "4.0.0"
 directories = "4.0.1"
 colored = "2.0.0"
 lazy_static = "1.4.0"
-git2 = { version = "0.14.3", default-features = false, features = ["https"] }
+git2 = { version = "0.14.4", default-features = false, features = ["https"] }
 pico-args = "0.4.2"
 dialoguer = "0.10.1"
 

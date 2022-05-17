@@ -1,5 +1,6 @@
 use std::fmt::Display;
 
+use colored::Colorize;
 use lazy_static::lazy_static;
 
 use crate::{
@@ -41,13 +42,13 @@ impl Commands {
 
     fn get_usage(self) -> String {
         match self {
-            Commands::Pull => String::from("pull <template> [--output <output>]"),
+            Commands::Pull => String::from("pull"),
             _ => self.to_string(),
         }
     }
 
     fn get_info(self) -> String {
-        format!("   {0: <35} {1}", self.get_usage(), self.get_help())
+        format!("   {0:<5} {1}", self.get_usage().green(), self.get_help())
     }
 
     pub fn run(self) -> anyhow::Result<()> {
@@ -99,7 +100,6 @@ impl Args {
                 None => true,
             };
 
-        use colored::Colorize;
         if help {
             println!("{} {}", "ignoreit".green(), VERSION.yellow());
             println!();
