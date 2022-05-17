@@ -127,7 +127,7 @@ impl Args {
         }
 
         let output = args
-            .opt_value_from_str::<[&str; 2], String>(["--output", "-o"])
+            .opt_value_from_str::<[&str; 2], String>(["-o", "--output"])
             .unwrap();
 
         Args { command, output }
