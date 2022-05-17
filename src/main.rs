@@ -6,7 +6,7 @@ mod sys;
 #[macro_use]
 mod macros;
 
-use commands::args::parse_args;
+use commands::args::ARGS;
 
 fn main() -> anyhow::Result<()> {
     if lib::CACHE_ENABLED.to_owned() {
@@ -28,7 +28,7 @@ fn main() -> anyhow::Result<()> {
         sleep_for!(3000);
     }
 
-    if let Some(cmd) = parse_args()? {
+    if let Some(cmd) = ARGS.command {
         cmd.run()?;
     }
 
