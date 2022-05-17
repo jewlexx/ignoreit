@@ -17,6 +17,8 @@ pub enum Commands {
     Help,
 }
 
+// TODO: Fix the help message and add help to subcommands
+
 impl Commands {
     fn from_str(command: &str) -> Option<Self> {
         match command {
