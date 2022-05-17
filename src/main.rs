@@ -28,7 +28,9 @@ fn main() -> anyhow::Result<()> {
         sleep_for!(3000);
     }
 
-    parse_args()?;
+    if let Some(cmd) = parse_args()? {
+        cmd.run()?;
+    }
 
     Ok(())
 }

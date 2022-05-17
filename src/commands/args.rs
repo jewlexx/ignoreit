@@ -1,5 +1,7 @@
 use std::fmt::Display;
 
+use lazy_static::lazy_static;
+
 use crate::{
     cache,
     lib::{DESC, VERSION},
@@ -46,7 +48,7 @@ impl Commands {
         format!("   {0: <25} {1}", self.get_usage(), self.get_help())
     }
 
-    fn run(self) -> anyhow::Result<()> {
+    pub fn run(self) -> anyhow::Result<()> {
         match self {
             Commands::List => list_templates()?,
             Commands::Pull => pull_template()?,
@@ -71,12 +73,12 @@ impl Display for Commands {
     }
 }
 
-pub fn parse_args() -> anyhow::Result<()> {
+pub fn parse_args() -> anyhow::Result<Option<Commands>> {
     let mut args = pico_args::Arguments::from_env();
 
     if args.contains("-V") || args.contains("--version") {
         println!("{}", VERSION);
-        return Ok(());
+        return Ok(None);
     }
 
     let sub = args.subcommand()?;
@@ -115,9 +117,5 @@ pub fn parse_args() -> anyhow::Result<()> {
         );
     }
 
-    if let Some(command) = command {
-        command.run()?;
-    }
-
-    Ok(())
+    Ok(command)
 }
