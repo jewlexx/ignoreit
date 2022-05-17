@@ -1,7 +1,7 @@
 [package]
 name = "ignoreit"
 description = "Quickly load .gitignore templates"
-version = "2.1.1"
+version = "2.2.0"
 readme = "README.md"
 repository = "https://github.com/jewlexx/ignoreit"
 license = "MIT"
@@ -17,6 +17,7 @@ colored = "2.0.0"
 lazy_static = "1.4.0"
 git2 = { version = "0.14.3", default-features = false, features = ["https"] }
 pico-args = "0.4.2"
+dialoguer = "0.10.1"
 
 [build-dependencies]
 cc = "1.0.73"

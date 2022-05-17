@@ -11,7 +11,33 @@ use crate::{cache::get_template, flush_stdout, lib::get_templates};
 pub fn pull_template() -> anyhow::Result<()> {
     let template = env::args()
         .nth(2)
-        .with_context(|| "Please provide a template name")?;
+        .or_else(|| -> Option<String> {
+            use dialoguer::{theme::ColorfulTheme, Select};
+
+            let values = {
+                let map = match get_templates() {
+                    Ok(v) => v,
+                    Err(_) => return None,
+                };
+
+                let mut values = map.values().cloned().collect::<Vec<String>>();
+                values.sort();
+
+                values
+            };
+
+            let selection = Select::with_theme(&ColorfulTheme::default())
+                .with_prompt("Choose one of the following templates:")
+                .items(values.as_slice())
+                .default(0)
+                .interact();
+
+            match selection {
+                Ok(v) => values.get(v).cloned(),
+                Err(_) => None,
+            }
+        })
+        .context("Failed to get template. Please double check your input")?;
 
     let output = env::args().nth(3).unwrap_or_else(|| ".gitignore".into());
 

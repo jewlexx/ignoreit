@@ -1,5 +1,7 @@
 use std::fmt::Display;
 
+use lazy_static::lazy_static;
+
 use crate::{
     cache,
     lib::{DESC, VERSION},
@@ -14,6 +16,8 @@ pub enum Commands {
     Purge,
     Help,
 }
+
+// TODO: Fix the help message and add help to subcommands
 
 impl Commands {
     fn from_str(command: &str) -> Option<Self> {
@@ -37,16 +41,16 @@ impl Commands {
 
     fn get_usage(self) -> String {
         match self {
-            Commands::Pull => String::from("pull <template> [output]"),
+            Commands::Pull => String::from("pull <template> [--output <output>]"),
             _ => self.to_string(),
         }
     }
 
     fn get_info(self) -> String {
-        format!("   {0: <25} {1}", self.get_usage(), self.get_help())
+        format!("   {0: <35} {1}", self.get_usage(), self.get_help())
     }
 
-    fn run(self) -> anyhow::Result<()> {
+    pub fn run(self) -> anyhow::Result<()> {
         match self {
             Commands::List => list_templates()?,
             Commands::Pull => pull_template()?,
@@ -71,53 +75,65 @@ impl Display for Commands {
     }
 }
 
-pub fn parse_args() -> anyhow::Result<()> {
-    let mut args = pico_args::Arguments::from_env();
+#[derive(Default, Clone, Debug)]
+pub struct Args {
+    pub command: Option<Commands>,
+    pub output: Option<String>,
+}
 
-    if args.contains("-V") || args.contains("--version") {
-        println!("{}", VERSION);
-        return Ok(());
+impl Args {
+    pub fn parse() -> Self {
+        let mut args = pico_args::Arguments::from_env();
+
+        if args.contains("-V") || args.contains("--version") {
+            println!("{}", VERSION);
+            return Default::default();
+        }
+
+        let sub = args.subcommand().unwrap();
+        let command = Commands::from_str(&sub.unwrap_or_else(|| String::from("help")));
+        let help = args.contains("--help")
+            || args.contains("-h")
+            || match command {
+                Some(v) => v == Commands::Help,
+                None => true,
+            };
+
+        use colored::Colorize;
+        if help {
+            println!("{} {}", "ignoreit".green(), VERSION.yellow());
+            println!();
+            println!("{}", DESC);
+            println!();
+            println!(
+                "{}: ignoreit [FLAGS] <COMMAND> [ARGUMENTS]",
+                "Usage".green()
+            );
+            println!();
+            println!("{}:", "Flags".green());
+            println!("  -h, --help     {}", Commands::Help.get_help());
+            println!("  -V, --version  Show version");
+            println!();
+            println!("{}:", "Commands".green());
+            println!("{}", Commands::Help.get_info());
+            println!("{}", Commands::List.get_info());
+            println!("{}", Commands::Pull.get_info(),);
+            println!("{}", Commands::Purge.get_info());
+            println!();
+            println!(
+                "Thank you for using {} by Juliette Cordor",
+                "ignoreit".green()
+            );
+        }
+
+        let output = args
+            .opt_value_from_str::<[&str; 2], String>(["-o", "--output"])
+            .unwrap();
+
+        Args { command, output }
     }
+}
 
-    let sub = args.subcommand()?;
-    let command = Commands::from_str(&sub.unwrap_or_else(|| String::from("help")));
-    let help = args.contains("--help")
-        || args.contains("-h")
-        || match command {
-            Some(v) => v == Commands::Help,
-            None => true,
-        };
-
-    use colored::Colorize;
-    if help {
-        println!("{} {}", "ignoreit".green(), VERSION.yellow());
-        println!();
-        println!("{}", DESC);
-        println!();
-        println!(
-            "{}: ignoreit [FLAGS] <COMMAND> [ARGUMENTS]",
-            "Usage".green()
-        );
-        println!();
-        println!("{}:", "Flags".green());
-        println!("  -h, --help     {}", Commands::Help.get_help());
-        println!("  -V, --version  Show version");
-        println!();
-        println!("{}:", "Commands".green());
-        println!("{}", Commands::Help.get_info());
-        println!("{}", Commands::List.get_info());
-        println!("{}", Commands::Pull.get_info(),);
-        println!("{}", Commands::Purge.get_info());
-        println!();
-        println!(
-            "Thank you for using {} by Juliette Cordor",
-            "ignoreit".green()
-        );
-    }
-
-    if let Some(command) = command {
-        command.run()?;
-    }
-
-    Ok(())
+lazy_static! {
+    pub static ref ARGS: Args = Args::parse();
 }
