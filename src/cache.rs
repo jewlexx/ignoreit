@@ -10,9 +10,15 @@ use anyhow::Context;
 use git2::Repository;
 use spinners::{Spinner, Spinners};
 
-mod purge;
-use crate::lib::{CACHE_DIR, IS_ONLINE};
-pub use purge::purge;
+use crate::utils::{CACHE_DIR, IS_ONLINE};
+
+pub fn purge() -> anyhow::Result<()> {
+    let cache_dir = CACHE_DIR.to_owned().context("Failed to parse cache dir")?;
+
+    fs::remove_dir_all(cache_dir).with_context(|| "Failed to purge cache")?;
+
+    Ok(())
+}
 
 // One Day in seconds
 const TO_UPDATE: u64 = 60 * 60 * 24;

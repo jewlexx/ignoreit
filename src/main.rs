@@ -1,19 +1,17 @@
-mod cache;
-mod commands;
-mod lib;
-mod sys;
-
-#[macro_use]
-mod macros;
+pub mod cache;
+pub mod commands;
+pub mod macros;
+pub mod sys;
+pub mod utils;
 
 use commands::args::ARGS;
 
 fn main() -> anyhow::Result<()> {
-    if lib::CACHE_ENABLED.to_owned() {
+    if utils::CACHE_ENABLED.to_owned() {
         cache::init_cache()?;
     } else {
         use colored::Colorize;
-        if !lib::IS_ONLINE.to_owned() {
+        if !utils::IS_ONLINE.to_owned() {
             println!(
                 "{}",
                 "error: you are offline and cache is disabled. we cannot continue".red()

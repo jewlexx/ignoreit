@@ -1,4 +1,4 @@
-use crate::lib::get_templates;
+use crate::cache::get_templates;
 
 pub fn list_templates() -> anyhow::Result<()> {
     let map = get_templates()?;

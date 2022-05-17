@@ -6,7 +6,10 @@ use std::{
 
 use anyhow::Context;
 
-use crate::{cache::get_template, flush_stdout, lib::get_templates};
+use crate::{
+    cache::{get_template, get_templates},
+    flush_stdout,
+};
 
 pub fn pull_template() -> anyhow::Result<()> {
     let template = env::args()
@@ -71,7 +74,7 @@ pub fn pull_template() -> anyhow::Result<()> {
     }
 
     let contents = {
-        use crate::lib::CACHE_ENABLED;
+        use crate::utils::CACHE_ENABLED;
 
         if CACHE_ENABLED.to_owned() {
             println!("Getting template {}", template_path);

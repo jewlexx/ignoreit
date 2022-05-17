@@ -5,7 +5,7 @@ use lazy_static::lazy_static;
 
 use crate::{
     cache,
-    lib::{DESC, VERSION},
+    utils::{DESC, VERSION},
 };
 
 use super::{list::list_templates, pull::pull_template};
