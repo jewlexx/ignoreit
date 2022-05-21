@@ -97,6 +97,7 @@ pub fn pull_template() -> anyhow::Result<()> {
         if CACHE_ENABLED.to_owned() {
             println!("Getting template {}", template_path);
             let template = get_template(template_path)?;
+            contents.push('\n');
             contents.push_str(template.as_str());
         }
 
