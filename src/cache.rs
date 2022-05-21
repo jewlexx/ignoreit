@@ -36,6 +36,10 @@ fn clone_repo(url: &str, cache_dir: &str) -> anyhow::Result<Repository> {
 
 pub fn init_cache() -> anyhow::Result<PathBuf> {
     if let Some(cache_dir) = CACHE_DIR.to_owned() {
+        if !cache_dir.exists() {
+            fs::create_dir_all(cache_dir.clone())?;
+        }
+
         let url = "https://github.com/github/gitignore.git";
         let fetch_path = cache_dir.join(".git").join("FETCH_HEAD");
 
