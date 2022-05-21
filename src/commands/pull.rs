@@ -13,7 +13,7 @@ use crate::{
 };
 
 pub fn pull_template() -> anyhow::Result<()> {
-    let template = env::args()
+    let template_name = env::args()
         .nth(2)
         .or_else(|| -> Option<String> {
             use dialoguer::{theme::ColorfulTheme, Select};
@@ -48,7 +48,7 @@ pub fn pull_template() -> anyhow::Result<()> {
     let template_map = get_templates()?;
 
     let template_path = template_map
-        .get(&template.to_lowercase())
+        .get(&template_name.to_lowercase())
         .with_context(|| "Template not found")?;
 
     let path = env::current_dir()
@@ -97,7 +97,8 @@ pub fn pull_template() -> anyhow::Result<()> {
         if CACHE_ENABLED.to_owned() {
             println!("Getting template {}", template_path);
             let template = get_template(template_path)?;
-            contents.push('\n');
+            let title = format!("\n# {}.gitignore\n", template_name);
+            contents.push_str(&title);
             contents.push_str(template.as_str());
         }
 
