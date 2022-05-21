@@ -1,10 +1,11 @@
 use std::{
     env,
     fs::File,
-    io::{self, Write},
+    io::{self, Read, Write},
 };
 
 use anyhow::Context;
+use colored::Colorize;
 
 use crate::{
     cache::{get_template, get_templates},
@@ -54,34 +55,52 @@ pub fn pull_template() -> anyhow::Result<()> {
         .with_context(|| "Failed to get current directory")?
         .join(output);
 
-    if path.exists() {
-        print!(
-            "{} already exists. Would you like to continue? (y/N)",
-            path.display()
-        );
-
-        flush_stdout!();
-
-        let mut input = String::new();
-
-        io::stdin()
-            .read_line(&mut input)
-            .with_context(|| "Failed to read input")?;
-
-        if input.trim().to_lowercase() != "y" {
-            return Ok(());
-        }
-    }
-
     let contents = {
         use crate::utils::CACHE_ENABLED;
 
+        let mut contents = String::new();
+
+        if path.exists() {
+            print!(
+                "{} already exists. What would you like to do? ({o}verwrite/{a}ppend/{e}xit)",
+                path.display(),
+                o = "O".underline(),
+                a = "A".underline(),
+                e = "E".underline()
+            );
+
+            flush_stdout!();
+
+            let mut input = String::new();
+
+            io::stdin()
+                .read_line(&mut input)
+                .with_context(|| "Failed to read input")?;
+
+            let answer = input
+                .trim()
+                .chars()
+                .next()
+                .context("invalid input")?
+                .to_lowercase()
+                .to_string();
+
+            if answer == "e" {
+                return Ok(());
+            } else if answer == "a" {
+                File::open(path.clone())
+                    .with_context(|| "Failed to open file")?
+                    .read_to_string(&mut contents)?;
+            }
+        }
+
         if CACHE_ENABLED.to_owned() {
             println!("Getting template {}", template_path);
-            get_template(template_path)?
-        } else {
-            String::new()
+            let template = get_template(template_path)?;
+            contents.push_str(template.as_str());
         }
+
+        contents
     };
 
     let mut file = File::create(path).with_context(|| "Failed to create file")?;
