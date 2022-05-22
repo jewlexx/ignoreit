@@ -39,9 +39,9 @@ impl Display for PullOpts {
 impl PullOpts {
     pub fn get_opts<'a>(&self) -> [&'a str; 2] {
         match *self {
-            PullOpts::Append => ["-a", "--append"],
-            PullOpts::Overwrite => ["", "--overwrite"],
-            PullOpts::NoOverwrite => ["", "--no-overwrite"],
+            PullOpts::Append => ["-A", "--append"],
+            PullOpts::Overwrite => ["-O", "--overwrite"],
+            PullOpts::NoOverwrite => ["-N", "--no-overwrite"],
         }
     }
 
@@ -128,15 +128,14 @@ impl Args {
     pub fn parse() -> Self {
         let mut args = pico_args::Arguments::from_env();
 
-        if args.contains("-V") || args.contains("--version") {
+        if args.contains(["-V", "--version"]) {
             println!("{}", VERSION);
             return Default::default();
         }
 
         let sub = args.subcommand().unwrap();
         let command = Commands::from_str(&sub.unwrap_or_else(|| String::from("help")));
-        let help = args.contains("--help")
-            || args.contains("-h")
+        let help = args.contains(["-h", "--help"])
             || match command {
                 Some(v) => v == Commands::Help,
                 None => true,

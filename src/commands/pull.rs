@@ -12,6 +12,8 @@ use crate::{
     flush_stdout,
 };
 
+use super::args::ARGS;
+
 pub fn pull_template() -> anyhow::Result<()> {
     let template_name = env::args()
         .nth(2)
@@ -43,7 +45,7 @@ pub fn pull_template() -> anyhow::Result<()> {
         })
         .context("Failed to get template. Please double check your input")?;
 
-    let output = env::args().nth(3).unwrap_or_else(|| ".gitignore".into());
+    let output = ARGS.output.clone().unwrap_or_else(|| ".gitignore".into());
 
     let template_map = get_templates()?;
 
