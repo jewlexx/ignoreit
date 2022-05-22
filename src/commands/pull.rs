@@ -112,7 +112,7 @@ pub fn pull_template() -> anyhow::Result<()> {
         if CACHE_ENABLED.to_owned() {
             println!("Getting template {}", template_path);
             let template = get_template(template_path)?;
-            let title = format!("\n# {}.gitignore\n", template_name);
+            let title = format!("# {}.gitignore\n", template_name);
             contents.push_str(&title);
             contents.push_str(template.as_str());
         }
