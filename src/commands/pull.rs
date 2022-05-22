@@ -1,18 +1,22 @@
 use std::{
     env,
     fs::File,
-    io::{self, Write},
+    io::{self, Read, Write},
 };
 
 use anyhow::Context;
+use colored::Colorize;
 
 use crate::{
     cache::{get_template, get_templates},
+    commands::args::PullOpts,
     flush_stdout,
 };
 
+use super::args::ARGS;
+
 pub fn pull_template() -> anyhow::Result<()> {
-    let template = env::args()
+    let template_name = env::args()
         .nth(2)
         .or_else(|| -> Option<String> {
             use dialoguer::{theme::ColorfulTheme, Select};
@@ -42,46 +46,78 @@ pub fn pull_template() -> anyhow::Result<()> {
         })
         .context("Failed to get template. Please double check your input")?;
 
-    let output = env::args().nth(3).unwrap_or_else(|| ".gitignore".into());
+    let output = ARGS.output.clone().unwrap_or_else(|| ".gitignore".into());
 
     let template_map = get_templates()?;
 
     let template_path = template_map
-        .get(&template.to_lowercase())
+        .get(&template_name.to_lowercase())
         .with_context(|| "Template not found")?;
 
     let path = env::current_dir()
         .with_context(|| "Failed to get current directory")?
         .join(output);
 
-    if path.exists() {
-        print!(
-            "{} already exists. Would you like to continue? (y/N)",
-            path.display()
-        );
-
-        flush_stdout!();
-
-        let mut input = String::new();
-
-        io::stdin()
-            .read_line(&mut input)
-            .with_context(|| "Failed to read input")?;
-
-        if input.trim().to_lowercase() != "y" {
-            return Ok(());
-        }
-    }
-
     let contents = {
         use crate::utils::CACHE_ENABLED;
 
+        let mut contents = String::new();
+
+        if path.exists() {
+            let opt = ARGS.pull_opt.unwrap_or_else(|| {
+                print!(
+                    "{} already exists. What would you like to do? ({o}verwrite/{a}ppend/{e}xit)",
+                    path.display(),
+                    o = "O".underline(),
+                    a = "A".underline(),
+                    e = "E".underline()
+                );
+
+                flush_stdout!().unwrap();
+
+                let mut input = String::new();
+
+                io::stdin()
+                    .read_line(&mut input)
+                    .with_context(|| "Failed to read input")
+                    .unwrap();
+
+                let answer = input
+                    .trim()
+                    .chars()
+                    .next()
+                    .context("invalid input")
+                    .unwrap()
+                    .to_lowercase()
+                    .to_string();
+
+                match answer.as_str() {
+                    "o" => PullOpts::Overwrite,
+                    "a" => PullOpts::Append,
+                    "e" => PullOpts::NoOverwrite,
+                    _ => PullOpts::NoOverwrite,
+                }
+            });
+
+            if opt == PullOpts::NoOverwrite {
+                return Ok(());
+            } else if opt == PullOpts::Append {
+                let mut file = File::open(&path).with_context(|| "Failed to open file")?;
+
+                file.read_to_string(&mut contents)
+                    .with_context(|| "Failed to read file")?;
+            }
+        }
+
         if CACHE_ENABLED.to_owned() {
             println!("Getting template {}", template_path);
-            get_template(template_path)?
-        } else {
-            String::new()
+            let template = get_template(template_path)?;
+            let title = format!("# {}.gitignore\n", template_name);
+            contents.push_str(&title);
+            contents.push_str(template.as_str());
         }
+
+        contents
     };
 
     let mut file = File::create(path).with_context(|| "Failed to create file")?;

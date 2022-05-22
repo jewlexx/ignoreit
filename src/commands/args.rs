@@ -2,6 +2,7 @@ use std::fmt::Display;
 
 use colored::Colorize;
 use lazy_static::lazy_static;
+use pico_args::Arguments;
 
 use crate::{
     cache,
@@ -16,6 +17,46 @@ pub enum Commands {
     Pull,
     Purge,
     Help,
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum PullOpts {
+    Append,
+    Overwrite,
+    NoOverwrite,
+}
+
+impl Display for PullOpts {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            PullOpts::Append => write!(f, "{}ppend", "A".underline()),
+            PullOpts::Overwrite => write!(f, "{}verwrite", "O".underline()),
+            PullOpts::NoOverwrite => write!(f, "{}o-verwrite", "N".underline()),
+        }
+    }
+}
+
+impl PullOpts {
+    pub fn get_opts<'a>(&self) -> [&'a str; 2] {
+        match *self {
+            PullOpts::Append => ["-A", "--append"],
+            PullOpts::Overwrite => ["-O", "--overwrite"],
+            PullOpts::NoOverwrite => ["-N", "--no-overwrite"],
+        }
+    }
+
+    pub fn get_args(args: &mut Arguments) -> Vec<Self> {
+        let opts = [PullOpts::Append, PullOpts::Overwrite, PullOpts::NoOverwrite];
+
+        opts.iter()
+            .filter(|x| {
+                let opts = x.get_opts();
+
+                args.contains(opts)
+            })
+            .copied()
+            .collect()
+    }
 }
 
 // TODO: Fix the help message and add help to subcommands
@@ -80,21 +121,21 @@ impl Display for Commands {
 pub struct Args {
     pub command: Option<Commands>,
     pub output: Option<String>,
+    pub pull_opt: Option<PullOpts>,
 }
 
 impl Args {
     pub fn parse() -> Self {
         let mut args = pico_args::Arguments::from_env();
 
-        if args.contains("-V") || args.contains("--version") {
+        if args.contains(["-V", "--version"]) {
             println!("{}", VERSION);
             return Default::default();
         }
 
         let sub = args.subcommand().unwrap();
         let command = Commands::from_str(&sub.unwrap_or_else(|| String::from("help")));
-        let help = args.contains("--help")
-            || args.contains("-h")
+        let help = args.contains(["-h", "--help"])
             || match command {
                 Some(v) => v == Commands::Help,
                 None => true,
@@ -134,7 +175,22 @@ impl Args {
             .opt_value_from_str::<[&str; 2], String>(["-o", "--output"])
             .unwrap();
 
-        Args { command, output }
+        let pull_opt = {
+            let opts = PullOpts::get_args(&mut args);
+
+            if opts.len() > 1 {
+                println!("{}", "Only one pull option can be used at a time".red());
+                None
+            } else {
+                opts.first().copied()
+            }
+        };
+
+        Args {
+            command,
+            output,
+            pull_opt,
+        }
     }
 }
 
