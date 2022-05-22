@@ -2,6 +2,7 @@ use std::fmt::Display;
 
 use colored::Colorize;
 use lazy_static::lazy_static;
+use pico_args::Arguments;
 
 use crate::{
     cache,
@@ -16,6 +17,46 @@ pub enum Commands {
     Pull,
     Purge,
     Help,
+}
+
+#[derive(Debug, Copy, Clone)]
+pub enum PullOpts {
+    Append,
+    Overwrite,
+    NoOverwrite,
+}
+
+impl Display for PullOpts {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            PullOpts::Append => write!(f, "{}ppend", "A".underline()),
+            PullOpts::Overwrite => write!(f, "{}verwrite", "O".underline()),
+            PullOpts::NoOverwrite => write!(f, "{}o-verwrite", "N".underline()),
+        }
+    }
+}
+
+impl PullOpts {
+    pub fn get_opts<'a>(&self) -> [&'a str; 2] {
+        match *self {
+            PullOpts::Append => ["-a", "--append"],
+            PullOpts::Overwrite => ["", "--overwrite"],
+            PullOpts::NoOverwrite => ["", "--no-overwrite"],
+        }
+    }
+
+    pub fn get_args(args: &mut Arguments) -> Vec<Self> {
+        let opts = [PullOpts::Append, PullOpts::Overwrite, PullOpts::NoOverwrite];
+
+        opts.iter()
+            .filter(|x| {
+                let opts = x.get_opts();
+
+                args.contains(opts)
+            })
+            .copied()
+            .collect()
+    }
 }
 
 // TODO: Fix the help message and add help to subcommands
@@ -80,6 +121,7 @@ impl Display for Commands {
 pub struct Args {
     pub command: Option<Commands>,
     pub output: Option<String>,
+    pub pull_opt: Option<PullOpts>,
 }
 
 impl Args {
@@ -134,7 +176,22 @@ impl Args {
             .opt_value_from_str::<[&str; 2], String>(["-o", "--output"])
             .unwrap();
 
-        Args { command, output }
+        let pull_opt = {
+            let opts = PullOpts::get_args(&mut args);
+
+            if opts.len() > 1 {
+                println!("{}", "Only one pull option can be used at a time".red());
+                None
+            } else {
+                opts.first().copied()
+            }
+        };
+
+        Args {
+            command,
+            output,
+            pull_opt,
+        }
     }
 }
 
