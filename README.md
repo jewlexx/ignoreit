@@ -5,7 +5,7 @@
 ## Help
 
 ```shell
-ignoreit 2.2.0
+ignoreit
 
 Quickly load .gitignore templates
 
