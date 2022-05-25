@@ -1,7 +1,7 @@
 [package]
 name = "ignoreit"
 description = "Quickly load .gitignore templates"
-version = "2.4.0"
+version = "2.4.1"
 readme = "README.md"
 repository = "https://github.com/jewlexx/ignoreit"
 license = "MIT"
