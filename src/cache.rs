@@ -8,7 +8,7 @@ use std::{
 
 use anyhow::Context;
 use git2::Repository;
-use spinners::{Spinner, Spinners};
+use spinners_rs::{Spinner, Spinners};
 
 use crate::utils::{CACHE_DIR, IS_ONLINE};
 
@@ -24,12 +24,12 @@ pub fn purge() -> anyhow::Result<()> {
 const TO_UPDATE: u64 = 60 * 60 * 24;
 
 fn clone_repo(url: &str, cache_dir: &str) -> anyhow::Result<Repository> {
-    let mut sp = Spinner::new(Spinners::Dots12, "Initializing Cache...".into());
+    let mut sp = Spinner::new(Spinners::Dots, "Initializing Cache...");
 
     let r = Repository::clone(url, cache_dir)
         .with_context(|| "Failed to clone gitignore repository")?;
 
-    sp.stop_with_message("Cache Initialized!\n".into());
+    sp.stop_with_message("Cache Initialized!\n");
 
     Ok(r)
 }
