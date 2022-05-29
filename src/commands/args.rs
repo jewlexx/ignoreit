@@ -7,22 +7,32 @@ use crate::{
 
 #[derive(Debug, Subcommand, Clone)]
 pub enum Commands {
+    /// Pull the template from the cache
     Pull {
+        /// The name fo the template to pull
         template: Option<String>,
 
+        /// The path to output the template to
         #[clap(short, long, default_value = ".gitignore")]
         output: String,
 
+        /// Whether to append the template to the end an existing gitignore
         #[clap(long)]
         append: bool,
 
+        /// Whether to overwrite the template if it already exists
         #[clap(long)]
         overwrite: bool,
 
+        /// Whether to exit if the template already exists
         #[clap(long)]
         no_overwrite: bool,
     },
+
+    /// List all available templates
     List,
+
+    /// Purge the cache
     Purge,
 }
 
@@ -47,6 +57,7 @@ impl Commands {
 #[derive(Parser, Clone, Debug)]
 #[clap(author, version, about)]
 pub struct Args {
+    /// The command to execute
     #[clap(subcommand)]
     pub command: Option<Commands>,
 }
