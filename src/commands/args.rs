@@ -1,16 +1,12 @@
-use std::fmt::Display;
-
 use clap::{Parser, Subcommand};
-use const_strum::ConstStr;
 
 use crate::{
     cache,
     commands::{list::list_templates, pull::pull_template},
 };
 
-#[derive(Debug, Subcommand, Clone, PartialEq, ConstStr)]
+#[derive(Debug, Subcommand, Clone)]
 pub enum Commands {
-    List,
     Pull {
         template: Option<String>,
 
@@ -26,14 +22,8 @@ pub enum Commands {
         #[clap(long)]
         no_overwrite: bool,
     },
+    List,
     Purge,
-    Help,
-}
-
-impl Display for Commands {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.const_to_string())
-    }
 }
 
 // TODO: Fix the help message and add help to subcommands
@@ -49,7 +39,6 @@ impl Commands {
                 no_overwrite,
             } => pull_template(output, template.clone(), append, overwrite, no_overwrite)?,
             Commands::Purge => cache::purge()?,
-            _ => (),
         };
 
         Ok(())

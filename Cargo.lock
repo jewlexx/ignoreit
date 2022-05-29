@@ -112,17 +112,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "const_strum"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f5fd184e5acb2a351f4fd20f6eb3e53e2e83877d6659d6062bb50e50f5057625"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
 name = "dialoguer"
 version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -243,7 +232,6 @@ dependencies = [
  "anyhow",
  "clap",
  "colored",
- "const_strum",
  "dialoguer",
  "directories",
  "git2",
