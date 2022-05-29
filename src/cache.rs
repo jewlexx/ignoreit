@@ -13,7 +13,7 @@ use spinners_rs::{Spinner, Spinners};
 use crate::utils::{CACHE_DIR, IS_ONLINE};
 
 pub fn purge() -> anyhow::Result<()> {
-    let cache_dir = CACHE_DIR.to_owned().context("Failed to parse cache dir")?;
+    let cache_dir = CACHE_DIR.clone().context("Failed to parse cache dir")?;
 
     fs::remove_dir_all(cache_dir).with_context(|| "Failed to purge cache")?;
 
@@ -35,7 +35,7 @@ fn clone_repo(url: &str, cache_dir: &str) -> anyhow::Result<Repository> {
 }
 
 pub fn init_cache() -> anyhow::Result<PathBuf> {
-    if let Some(cache_dir) = CACHE_DIR.to_owned() {
+    if let Some(cache_dir) = CACHE_DIR.clone() {
         if !cache_dir.exists() {
             fs::create_dir_all(cache_dir.clone())?;
         }
@@ -71,7 +71,7 @@ pub fn init_cache() -> anyhow::Result<PathBuf> {
 }
 
 pub fn get_templates() -> anyhow::Result<HashMap<String, String>> {
-    let cache_dir = CACHE_DIR.to_owned().context("Cache directory not found")?;
+    let cache_dir = CACHE_DIR.clone().context("Cache directory not found")?;
     let dir = fs::read_dir(cache_dir).with_context(|| "Failed to read cache directory")?;
 
     let ignores_tuple = dir
@@ -108,7 +108,7 @@ pub fn get_templates() -> anyhow::Result<HashMap<String, String>> {
 }
 
 pub fn get_template(name: &str) -> anyhow::Result<String> {
-    let cache_dir = CACHE_DIR.to_owned().context("Cache directory not found")?;
+    let cache_dir = CACHE_DIR.clone().context("Cache directory not found")?;
     let filename = name.to_owned() + ".gitignore";
 
     let path = cache_dir.join(filename);

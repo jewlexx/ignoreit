@@ -9,11 +9,11 @@ pub mod utils;
 use commands::args::ARGS;
 
 fn main() -> anyhow::Result<()> {
-    if utils::CACHE_ENABLED.to_owned() {
+    if *utils::CACHE_ENABLED {
         cache::init_cache()?;
     } else {
         use colored::Colorize;
-        if !utils::IS_ONLINE.to_owned() {
+        if !(*utils::IS_ONLINE) {
             println!(
                 "{}",
                 "error: you are offline and cache is disabled. we cannot continue".red()

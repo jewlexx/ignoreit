@@ -16,6 +16,8 @@ use crate::{
 use super::args::ARGS;
 
 pub fn pull_template() -> anyhow::Result<()> {
+    let args = &*ARGS;
+
     let template_name = env::args()
         .nth(2)
         .or_else(|| -> Option<String> {
@@ -46,8 +48,6 @@ pub fn pull_template() -> anyhow::Result<()> {
         })
         .context("Failed to get template. Please double check your input")?;
 
-    let output = ARGS.output.clone().unwrap_or_else(|| ".gitignore".into());
-
     let template_map = get_templates()?;
 
     let template_path = template_map
@@ -56,7 +56,7 @@ pub fn pull_template() -> anyhow::Result<()> {
 
     let path = env::current_dir()
         .with_context(|| "Failed to get current directory")?
-        .join(output);
+        .join(args.output.clone());
 
     let contents = {
         use crate::utils::CACHE_ENABLED;
@@ -64,7 +64,8 @@ pub fn pull_template() -> anyhow::Result<()> {
         let mut contents = String::new();
 
         if path.exists() {
-            let opt = ARGS.pull_opt.unwrap_or_else(|| {
+            let pull_opt = PullOpts::get_opt(args);
+            let opt = pull_opt.unwrap_or_else(|| {
                 print!(
                     "{} already exists. What would you like to do? ({o}verwrite/{a}ppend/{e}xit)",
                     path.display(),
@@ -109,7 +110,7 @@ pub fn pull_template() -> anyhow::Result<()> {
             }
         }
 
-        if CACHE_ENABLED.to_owned() {
+        if *CACHE_ENABLED {
             println!("Getting template {}", template_path);
             let template = get_template(template_path)?;
             let title = format!("# {}.gitignore\n", template_name);
