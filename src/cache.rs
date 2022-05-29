@@ -15,7 +15,7 @@ use crate::utils::{CACHE_DIR, IS_ONLINE};
 pub fn purge() -> anyhow::Result<()> {
     let cache_dir = CACHE_DIR.clone().context("Failed to parse cache dir")?;
 
-    fs::remove_dir_all(cache_dir).with_context(|| "Failed to purge cache")?;
+    fs::remove_dir_all(cache_dir).context("Failed to purge cache")?;
 
     Ok(())
 }
@@ -26,8 +26,7 @@ const TO_UPDATE: u64 = 60 * 60 * 24;
 fn clone_repo(url: &str, cache_dir: &str) -> anyhow::Result<Repository> {
     let mut sp = Spinner::new(Spinners::Dots, "Initializing Cache...");
 
-    let r = Repository::clone(url, cache_dir)
-        .with_context(|| "Failed to clone gitignore repository")?;
+    let r = Repository::clone(url, cache_dir).context("Failed to clone gitignore repository")?;
 
     sp.stop_with_message("Cache Initialized!\n");
 

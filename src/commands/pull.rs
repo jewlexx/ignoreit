@@ -66,8 +66,10 @@ pub fn pull_template(
 
         if path.exists() {
             let pull_opt = PullOpts::get_opt(append, overwrite, no_overwrite);
-            let opt = pull_opt.unwrap_or_else(|| {
-                print!(
+            let opt = pull_opt
+                .map(anyhow::Ok)
+                .unwrap_or_else(|| -> anyhow::Result<PullOpts> {
+                    print!(
                     "{} already exists. What would you like to do? ({o}verwrite/{a}ppend/{e}xit)",
                     path.display(),
                     o = "O".underline(),
@@ -75,31 +77,31 @@ pub fn pull_template(
                     e = "E".underline()
                 );
 
-                flush_stdout!().unwrap();
+                    flush_stdout!()?;
 
-                let mut input = String::new();
+                    let mut input = String::new();
 
-                io::stdin()
-                    .read_line(&mut input)
-                    .with_context(|| "Failed to read input")
-                    .unwrap();
+                    io::stdin()
+                        .read_line(&mut input)
+                        .with_context(|| "Failed to read input")?;
 
-                let answer = input
-                    .trim()
-                    .chars()
-                    .next()
-                    .context("invalid input")
-                    .unwrap()
-                    .to_lowercase()
-                    .to_string();
+                    let answer = input
+                        .trim()
+                        .chars()
+                        .next()
+                        .context("invalid input")?
+                        .to_lowercase()
+                        .to_string();
 
-                match answer.as_str() {
-                    "o" => PullOpts::Overwrite,
-                    "a" => PullOpts::Append,
-                    "e" => PullOpts::NoOverwrite,
-                    _ => PullOpts::NoOverwrite,
-                }
-            });
+                    let a = match answer.as_str() {
+                        "o" => PullOpts::Overwrite,
+                        "a" => PullOpts::Append,
+                        "e" => PullOpts::NoOverwrite,
+                        _ => PullOpts::NoOverwrite,
+                    };
+
+                    Ok(a)
+                })?;
 
             if opt == PullOpts::NoOverwrite {
                 return Ok(());
