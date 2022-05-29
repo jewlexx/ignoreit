@@ -8,10 +8,14 @@ use crate::cache;
 
 use super::{list::list_templates, pull::pull_template};
 
-#[derive(Debug, Subcommand, Clone, Copy, PartialEq, ConstStr)]
+#[derive(Debug, Subcommand, Clone, PartialEq, ConstStr)]
 pub enum Commands {
     List,
-    Pull,
+    Pull {
+        #[clap(short, long, default_value = ".gitignore")]
+        output: String,
+        template: Option<String>,
+    },
     Purge,
     Help,
 }
@@ -24,10 +28,10 @@ impl Display for Commands {
 
 // TODO: Fix the help message and add help to subcommands
 impl Commands {
-    pub fn run(self) -> anyhow::Result<()> {
+    pub fn run(&self) -> anyhow::Result<()> {
         match self {
             Commands::List => list_templates()?,
-            Commands::Pull => pull_template()?,
+            Commands::Pull { output, template } => pull_template(output, template.clone())?,
             Commands::Purge => cache::purge()?,
             _ => (),
         };
@@ -41,9 +45,6 @@ impl Commands {
 pub struct Args {
     #[clap(subcommand)]
     pub command: Option<Commands>,
-
-    #[clap(default_value = ".gitignore")]
-    pub output: String,
 
     #[clap(short, long)]
     pub append: bool,

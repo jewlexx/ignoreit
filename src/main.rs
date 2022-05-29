@@ -28,7 +28,7 @@ fn main() -> anyhow::Result<()> {
         sleep_for!(3000);
     }
 
-    if let Some(cmd) = ARGS.command {
+    if let Some(cmd) = &ARGS.command {
         cmd.run()?;
     }
 

@@ -9,17 +9,14 @@ use colored::Colorize;
 
 use crate::{
     cache::{get_template, get_templates},
-    commands::args::PullOpts,
+    commands::args::{PullOpts, ARGS},
     flush_stdout,
 };
 
-use super::args::ARGS;
-
-pub fn pull_template() -> anyhow::Result<()> {
+pub fn pull_template(output: &str, template: Option<String>) -> anyhow::Result<()> {
     let args = &*ARGS;
 
-    let template_name = env::args()
-        .nth(2)
+    let template_name = template
         .or_else(|| -> Option<String> {
             use dialoguer::{theme::ColorfulTheme, Select};
 
@@ -56,7 +53,7 @@ pub fn pull_template() -> anyhow::Result<()> {
 
     let path = env::current_dir()
         .with_context(|| "Failed to get current directory")?
-        .join(args.output.clone());
+        .join(output);
 
     let contents = {
         use crate::utils::CACHE_ENABLED;
