@@ -26,7 +26,6 @@ pub enum Commands {
     Purge,
 }
 
-// TODO: Fix the help message and add help to subcommands
 impl Commands {
     pub fn run(&self) -> anyhow::Result<()> {
         match self {
