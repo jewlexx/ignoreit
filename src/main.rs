@@ -1,7 +1,9 @@
+#![forbid(unsafe_code)]
+
 pub mod cache;
 pub mod commands;
 pub mod macros;
-pub mod sys;
+pub mod net;
 pub mod utils;
 
 use commands::args::ARGS;

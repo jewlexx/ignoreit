@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use directories::BaseDirs;
 use lazy_static::lazy_static;
 
-use crate::{sleep_for, sys::is_online};
+use crate::{net::is_online, sleep_for};
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 pub const DESC: &str = env!("CARGO_PKG_DESCRIPTION");
