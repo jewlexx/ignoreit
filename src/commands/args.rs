@@ -37,6 +37,7 @@ pub enum Commands {
 }
 
 impl Commands {
+    // Runs the subcommand
     pub fn run(&self) -> anyhow::Result<()> {
         match self {
             Commands::List => list_templates()?,
@@ -62,6 +63,7 @@ pub struct Args {
     pub command: Option<Commands>,
 }
 
+// The list of options the user can give when the gitignore exists
 #[derive(PartialEq, Eq)]
 pub enum PullOpts {
     Append,
