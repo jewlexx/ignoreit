@@ -3,9 +3,10 @@ use std::fmt::Display;
 use clap::{Parser, Subcommand};
 use const_strum::ConstStr;
 
-use crate::cache;
-
-use super::{list::list_templates, pull::pull_template};
+use crate::{
+    cache,
+    commands::{list::list_templates, pull::pull_template},
+};
 
 #[derive(Debug, Subcommand, Clone, PartialEq, ConstStr)]
 pub enum Commands {
