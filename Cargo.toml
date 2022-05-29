@@ -10,14 +10,14 @@ keywords = ["git", "ignore", "developer", "tools"]
 categories = ["command-line-utilities", "development-tools"]
 
 [dependencies]
-anyhow = "1.0.57"
-spinners-rs = "2.3.0"
-directories = "4.0.1"
-colored = "2.0.0"
-lazy_static = "1.4.0"
-git2 = { version = "0.14.4", default-features = false, features = ["https"] }
-pico-args = "0.4.2"
-dialoguer = "0.10.1"
+anyhow = "1.0"
+spinners-rs = "2.3"
+directories = "4.0"
+colored = "2.0"
+lazy_static = "1.4"
+git2 = { version = "0.14", default-features = false, features = ["https"] }
+pico-args = "0.4"
+dialoguer = "0.10"
 
 
 [profile.release]
