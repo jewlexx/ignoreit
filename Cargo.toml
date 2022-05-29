@@ -18,6 +18,7 @@ lazy_static = "1.4"
 git2 = { version = "0.14", default-features = false, features = ["https"] }
 pico-args = "0.4"
 dialoguer = "0.10"
+clap = { version = "3.1.18", features = ["derive"] }
 
 
 [profile.release]
