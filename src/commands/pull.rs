@@ -9,13 +9,17 @@ use colored::Colorize;
 
 use crate::{
     cache::{get_template, get_templates},
-    commands::args::{PullOpts, ARGS},
+    commands::args::PullOpts,
     flush_stdout,
 };
 
-pub fn pull_template(output: &str, template: Option<String>) -> anyhow::Result<()> {
-    let args = &*ARGS;
-
+pub fn pull_template(
+    output: &str,
+    template: Option<String>,
+    append: &bool,
+    overwrite: &bool,
+    no_overwrite: &bool,
+) -> anyhow::Result<()> {
     let template_name = template
         .or_else(|| -> Option<String> {
             use dialoguer::{theme::ColorfulTheme, Select};
@@ -61,7 +65,7 @@ pub fn pull_template(output: &str, template: Option<String>) -> anyhow::Result<(
         let mut contents = String::new();
 
         if path.exists() {
-            let pull_opt = PullOpts::get_opt(args);
+            let pull_opt = PullOpts::get_opt(append, overwrite, no_overwrite);
             let opt = pull_opt.unwrap_or_else(|| {
                 print!(
                     "{} already exists. What would you like to do? ({o}verwrite/{a}ppend/{e}xit)",

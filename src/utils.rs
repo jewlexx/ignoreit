@@ -5,9 +5,6 @@ use lazy_static::lazy_static;
 
 use crate::{net::is_online, sleep_for};
 
-pub const VERSION: &str = env!("CARGO_PKG_VERSION");
-pub const DESC: &str = env!("CARGO_PKG_DESCRIPTION");
-
 lazy_static! {
     pub static ref CACHE_DIR: Option<PathBuf> =
         BaseDirs::new().map(|dirs| dirs.cache_dir().to_owned().join("gitignore"));

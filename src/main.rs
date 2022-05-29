@@ -1,12 +1,13 @@
 #![forbid(unsafe_code)]
+use clap::Parser;
 
-pub mod cache;
-pub mod commands;
-pub mod macros;
-pub mod net;
-pub mod utils;
+mod cache;
+mod commands;
+mod macros;
+mod net;
+mod utils;
 
-use commands::args::ARGS;
+use commands::args::Args;
 
 fn main() -> anyhow::Result<()> {
     if *utils::CACHE_ENABLED {
@@ -28,7 +29,9 @@ fn main() -> anyhow::Result<()> {
         sleep_for!(3000);
     }
 
-    if let Some(cmd) = &ARGS.command {
+    let args = Args::parse();
+
+    if let Some(cmd) = args.command {
         cmd.run()?;
     }
 

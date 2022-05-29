@@ -2,7 +2,6 @@ use std::fmt::Display;
 
 use clap::{Parser, Subcommand};
 use const_strum::ConstStr;
-use lazy_static::lazy_static;
 
 use crate::cache;
 
@@ -12,9 +11,19 @@ use super::{list::list_templates, pull::pull_template};
 pub enum Commands {
     List,
     Pull {
+        template: Option<String>,
+
         #[clap(short, long, default_value = ".gitignore")]
         output: String,
-        template: Option<String>,
+
+        #[clap(short, long)]
+        append: bool,
+
+        #[clap(short, long)]
+        overwrite: bool,
+
+        #[clap(short, long)]
+        no_overwrite: bool,
     },
     Purge,
     Help,
@@ -31,7 +40,13 @@ impl Commands {
     pub fn run(&self) -> anyhow::Result<()> {
         match self {
             Commands::List => list_templates()?,
-            Commands::Pull { output, template } => pull_template(output, template.clone())?,
+            Commands::Pull {
+                output,
+                template,
+                append,
+                overwrite,
+                no_overwrite,
+            } => pull_template(output, template.clone(), append, overwrite, no_overwrite)?,
             Commands::Purge => cache::purge()?,
             _ => (),
         };
@@ -45,15 +60,6 @@ impl Commands {
 pub struct Args {
     #[clap(subcommand)]
     pub command: Option<Commands>,
-
-    #[clap(short, long)]
-    pub append: bool,
-
-    #[clap(short, long)]
-    pub overwrite: bool,
-
-    #[clap(short, long)]
-    pub no_overwrite: bool,
 }
 
 #[derive(PartialEq, Eq)]
@@ -64,16 +70,16 @@ pub enum PullOpts {
 }
 
 impl PullOpts {
-    pub fn get_opt(args: &Args) -> Option<Self> {
+    pub fn get_opt(append: &bool, overwrite: &bool, no_overwrite: &bool) -> Option<Self> {
         let mut opts_vec = Vec::<Self>::new();
 
-        if args.append {
+        if *append {
             opts_vec.push(PullOpts::Append);
         }
-        if args.overwrite {
+        if *overwrite {
             opts_vec.push(PullOpts::Overwrite);
         }
-        if args.no_overwrite {
+        if *no_overwrite {
             opts_vec.push(PullOpts::NoOverwrite);
         }
 
@@ -83,8 +89,4 @@ impl PullOpts {
 
         opts_vec.pop()
     }
-}
-
-lazy_static! {
-    pub static ref ARGS: Args = Args::parse();
 }
