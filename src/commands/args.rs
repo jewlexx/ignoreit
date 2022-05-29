@@ -16,13 +16,13 @@ pub enum Commands {
         #[clap(short, long, default_value = ".gitignore")]
         output: String,
 
-        #[clap(short, long)]
+        #[clap(long)]
         append: bool,
 
-        #[clap(short, long)]
+        #[clap(long)]
         overwrite: bool,
 
-        #[clap(short, long)]
+        #[clap(long)]
         no_overwrite: bool,
     },
     Purge,
