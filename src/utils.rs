@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use directories::BaseDirs;
 use lazy_static::lazy_static;
 
-use crate::{net::is_online, sleep_for};
+use crate::net::is_online;
 
 lazy_static! {
     pub static ref CACHE_DIR: Option<PathBuf> =
@@ -16,15 +16,5 @@ lazy_static! {
             false
         }
     };
-    pub static ref IS_ONLINE: bool = {
-        if !is_online() {
-            use colored::Colorize;
-            println!("{}","warning: you are offline. you will only be able to use cached templates which may be out of date".yellow());
-            sleep_for!(3000);
-
-            true
-        } else {
-            false
-        }
-    };
+    pub static ref IS_ONLINE: bool = is_online();
 }
