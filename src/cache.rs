@@ -25,6 +25,7 @@ const TO_UPDATE: u64 = 60 * 60 * 24;
 
 fn clone_repo(url: &str, cache_dir: &str) -> anyhow::Result<Repository> {
     let mut sp = Spinner::new(Spinners::Dots, "Initializing Cache...");
+    sp.start();
 
     let r = Repository::clone(url, cache_dir).context("Failed to clone gitignore repository")?;
 
