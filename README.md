@@ -2,6 +2,16 @@
 
 [![Rust](https://github.com/jewlexx/ignoreit/actions/workflows/rust.yml/badge.svg?branch=trunk)](https://github.com/jewlexx/ignoreit/actions/workflows/rust.yml)
 
+## Installation
+
+[![Packaging status](https://repology.org/badge/vertical-allrepos/ignoreit.svg)](https://repology.org/project/ignoreit/versions)
+
+If you do not have access to these repositories you can install from crates.io:
+
+```shell
+cargo install ignoreit
+```
+
 ## Help
 
 ```shell
