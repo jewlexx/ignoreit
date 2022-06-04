@@ -3,8 +3,6 @@ use std::path::PathBuf;
 use directories::BaseDirs;
 use lazy_static::lazy_static;
 
-use crate::net::is_online;
-
 lazy_static! {
     pub static ref CACHE_DIR: Option<PathBuf> =
         BaseDirs::new().map(|dirs| dirs.cache_dir().to_owned().join("gitignore"));
@@ -16,5 +14,4 @@ lazy_static! {
             false
         }
     };
-    pub static ref IS_ONLINE: bool = is_online();
 }

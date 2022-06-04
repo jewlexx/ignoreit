@@ -10,7 +10,7 @@ use anyhow::Context;
 use git2::Repository;
 use spinners_rs::{Spinner, Spinners};
 
-use crate::utils::{CACHE_DIR, IS_ONLINE};
+use crate::utils::{CACHE_DIR};
 
 pub fn purge() -> anyhow::Result<()> {
     let cache_dir = CACHE_DIR.clone().context("Failed to parse cache dir")?;
@@ -59,7 +59,7 @@ pub fn init_cache() -> anyhow::Result<PathBuf> {
             .unwrap_or(Duration::from_secs(TO_UPDATE))
             .as_secs();
 
-        if since >= TO_UPDATE && *IS_ONLINE {
+        if since >= TO_UPDATE {
             fs::remove_dir_all(&cache_dir)?;
             clone_repo(url, cache_dir.to_str().unwrap())?;
         }
