@@ -15,7 +15,7 @@ spinners-rs = "2.3.0"
 directories = "4.0.1"
 colored = "2.0.0"
 lazy_static = "1.4.0"
-git2 = { version = "0.14.4", default-features = false, features = ["https"] }
+git2 = { version = "0.15.0", default-features = false, features = ["https"] }
 dialoguer = "0.10.1"
 clap = { version = "3.2.11", features = ["derive"] }
 
