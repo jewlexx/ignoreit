@@ -1,6 +1,6 @@
 use std::{
     collections::HashMap,
-    fs::{self, read_to_string},
+    fs::{self, read_to_string, DirEntry},
     io::{Read, Write},
     path::{Path, PathBuf},
 };
@@ -75,19 +75,16 @@ pub fn init_cache() -> anyhow::Result<PathBuf> {
 
 pub fn get_templates() -> anyhow::Result<HashMap<String, String>> {
     let cache_dir = CACHE_DIR.clone().context("Cache directory not found")?;
-    let dir = fs::read_dir(cache_dir).with_context(|| "Failed to read cache directory")?;
+    let dir = fs::read_dir(cache_dir)
+        .with_context(|| "Failed to read cache directory")?
+        .collect::<Result<Vec<DirEntry>, _>>()?;
 
     let ignores_tuple = dir
-        .filter(|e| {
-            if let Ok(entry) = e {
-                entry.file_type().unwrap().is_file()
-                    && entry.file_name().to_str().unwrap().ends_with(".gitignore")
-            } else {
-                false
-            }
+        .filter(|entry| {
+            entry.file_type().unwrap().is_file()
+                && entry.file_name().to_str().unwrap().ends_with(".gitignore")
         })
-        .map(|e| -> anyhow::Result<(String, String)> {
-            let entry = e?;
+        .map(|entry| -> anyhow::Result<(String, String)> {
             let file_name = entry.file_name();
             let name = file_name
                 .to_str()
@@ -110,7 +107,7 @@ pub fn get_templates() -> anyhow::Result<HashMap<String, String>> {
     Ok(ignores)
 }
 
-pub fn get_template(name: &str) -> anyhow::Result<String> {
+pub fn get_template(name: &str) -> anyhow::Result<Vec<u8>> {
     let cache_dir = CACHE_DIR.clone().context("Cache directory not found")?;
     let filename = name.to_owned() + ".gitignore";
 
@@ -120,10 +117,10 @@ pub fn get_template(name: &str) -> anyhow::Result<String> {
         return Err(anyhow::anyhow!("Template not found"));
     } else {
         let mut file = fs::File::open(path).with_context(|| "Failed to open template file")?;
-        let mut str = String::new();
-        file.read_to_string(&mut str)?;
+        let mut bytes = Vec::new();
+        file.read_to_end(&mut bytes)?;
 
-        Ok(str)
+        Ok(bytes)
     }
 }
 
