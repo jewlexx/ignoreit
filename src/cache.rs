@@ -2,7 +2,6 @@ use std::{
     collections::HashMap,
     fs::{self, read_to_string, DirEntry},
     io::{Read, Write},
-    path::{Path, PathBuf},
 };
 
 use anyhow::Context;
@@ -10,7 +9,7 @@ use anyhow::Context;
 use crate::utils::CACHE_DIR;
 
 pub fn purge() -> anyhow::Result<()> {
-    let cache_dir = CACHE_DIR.clone().context("Failed to parse cache dir")?;
+    let cache_dir = CACHE_DIR.clone();
 
     fs::remove_dir_all(cache_dir).context("Failed to purge cache")?;
 
@@ -22,11 +21,12 @@ pub fn purge() -> anyhow::Result<()> {
 /// 24 hours -> in minutes -> in seconds -> in milliseconds
 const TO_UPDATE: u128 = 24 * 60 * 60 * 1000;
 
-fn clone_templates(cache_dir: &Path) -> anyhow::Result<()> {
+fn clone_templates() -> anyhow::Result<()> {
     let templates = crate::templates::github::GithubApi::new()?;
+    let cache_dir = CACHE_DIR.clone();
 
     for gitignore in templates.response {
-        let path = gitignore.path(cache_dir);
+        let path = gitignore.path(&cache_dir);
 
         if !path.exists() {
             fs::create_dir_all(path.parent().context("Path was root for some reason")?)
@@ -40,41 +40,39 @@ fn clone_templates(cache_dir: &Path) -> anyhow::Result<()> {
     Ok(())
 }
 
-pub fn init_cache() -> anyhow::Result<PathBuf> {
-    if let Some(cache_dir) = CACHE_DIR.clone() {
-        let fetch_path = cache_dir.join(".timestamp");
+pub fn init_cache() -> anyhow::Result<()> {
+    let fetch_path = CACHE_DIR.join(".timestamp");
+    let cache_dir = CACHE_DIR.clone();
 
-        if !cache_dir.exists() {
-            println!("No cache dir found, creating");
-            fs::create_dir_all(cache_dir.clone())?;
-            fs::File::create(&fetch_path)?.write_all(crate::TIMESTAMP.to_string().as_bytes())?;
-            clone_templates(&cache_dir)?;
-        }
-
-        if !fetch_path.exists() {
-            fs::remove_dir_all(&cache_dir)?;
-            return init_cache();
-        }
-
-        let timestamp_string = read_to_string(fetch_path)?;
-        let timestamp = timestamp_string.parse::<u128>()?;
-        let now = *crate::TIMESTAMP;
-
-        let since = now - timestamp;
-
-        if since >= TO_UPDATE {
-            fs::remove_dir_all(&cache_dir)?;
-            clone_templates(&cache_dir)?;
-        }
-
-        Ok(cache_dir)
-    } else {
-        Err(anyhow::anyhow!("User's cache directory not found"))
+    if !CACHE_DIR.exists() {
+        println!("No cache dir found, creating");
+        fs::create_dir_all(&cache_dir)?;
+        fs::File::create(&fetch_path)?.write_all(crate::TIMESTAMP.to_string().as_bytes())?;
+        clone_templates()?;
     }
+
+    if !fetch_path.exists() {
+        fs::remove_dir_all(&cache_dir)?;
+        return init_cache();
+    }
+
+    let timestamp_string = read_to_string(fetch_path)?;
+    let timestamp = timestamp_string.parse::<u128>()?;
+    let now = *crate::TIMESTAMP;
+
+    let since = now - timestamp;
+
+    if since >= TO_UPDATE {
+        fs::remove_dir_all(cache_dir)?;
+        clone_templates()?;
+    }
+
+    Ok(())
 }
 
 pub fn get_templates() -> anyhow::Result<HashMap<String, String>> {
-    let cache_dir = CACHE_DIR.clone().context("Cache directory not found")?;
+    let cache_dir = CACHE_DIR.clone();
+
     let dir = fs::read_dir(cache_dir)
         .with_context(|| "Failed to read cache directory")?
         .collect::<Result<Vec<DirEntry>, _>>()?;
@@ -109,10 +107,9 @@ pub fn get_templates() -> anyhow::Result<HashMap<String, String>> {
 }
 
 pub fn get_template(name: &str) -> anyhow::Result<Vec<u8>> {
-    let cache_dir = CACHE_DIR.clone().context("Cache directory not found")?;
     let filename = name.to_owned() + ".gitignore";
 
-    let path = cache_dir.join(filename);
+    let path = CACHE_DIR.join(filename);
 
     if !path.exists() {
         return Err(anyhow::anyhow!("Template not found"));
