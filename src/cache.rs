@@ -10,7 +10,7 @@ use anyhow::Context;
 use git2::Repository;
 use spinners_rs::{Spinner, Spinners};
 
-use crate::utils::{CACHE_DIR};
+use crate::utils::CACHE_DIR;
 
 pub fn purge() -> anyhow::Result<()> {
     let cache_dir = CACHE_DIR.clone().context("Failed to parse cache dir")?;

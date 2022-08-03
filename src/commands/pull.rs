@@ -5,7 +5,6 @@ use std::{
 };
 
 use anyhow::Context;
-use colored::Colorize;
 
 use crate::{
     cache::{get_template, get_templates},
@@ -60,7 +59,7 @@ pub fn pull_template(
         .join(output);
 
     let contents = {
-        use crate::utils::CACHE_ENABLED;
+        use mincolor::Colorize;
 
         let mut contents = String::new();
 
@@ -113,7 +112,7 @@ pub fn pull_template(
             }
         }
 
-        if *CACHE_ENABLED {
+        if *crate::utils::CACHE_ENABLED {
             println!("Getting template {}", template_path);
             let template = get_template(template_path)?;
             let title = format!("# {}.gitignore\n", template_name);

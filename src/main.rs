@@ -12,7 +12,7 @@ fn main() -> anyhow::Result<()> {
     if *utils::CACHE_ENABLED {
         cache::init_cache()?;
     } else {
-        use colored::Colorize;
+        use mincolor::Colorize;
         println!(
             "{}",
             "warning: cache is disabled. performance will not be optimal".yellow()
