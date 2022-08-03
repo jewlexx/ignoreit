@@ -4,6 +4,7 @@ use clap::Parser;
 mod cache;
 mod commands;
 mod macros;
+mod templates;
 mod utils;
 
 use commands::args::Args;
