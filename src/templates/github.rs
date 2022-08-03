@@ -18,7 +18,7 @@ impl GithubApi {
 
         let response: Gitignores = reqwest::blocking::get(API_URL)?.json()?;
 
-        let mapped: Vec<(String, Vec<u8>)> = response
+        let files: Vec<(String, Vec<u8>)> = response
             .par_iter()
             .progress_count(response.len() as u64)
             .map(|template| {
@@ -27,12 +27,18 @@ impl GithubApi {
                     template
                 );
 
-                let file = reqwest::blocking::get(download_url)?;
+                let file = reqwest::blocking::get(download_url)?.bytes()?.to_vec();
 
-                Ok((template.to_string(), vec![9]))
+                Ok::<_, reqwest::Error>((template.clone(), file))
             })
             .collect::<Result<Vec<_>, _>>()?;
 
-        Ok(Self { response })
+        let mut mapped = HashMap::new();
+
+        for file in files {
+            mapped.insert(file.0, file.1);
+        }
+
+        Ok(Self { response: mapped })
     }
 }
