@@ -45,7 +45,6 @@ pub fn init_cache() -> anyhow::Result<()> {
     let cache_dir = CACHE_DIR.clone();
 
     if !CACHE_DIR.exists() {
-        println!("No cache dir found, creating");
         fs::create_dir_all(&cache_dir)?;
         fs::File::create(&fetch_path)?.write_all(crate::TIMESTAMP.to_string().as_bytes())?;
         clone_templates()?;
