@@ -80,7 +80,7 @@ pub fn get_templates() -> anyhow::Result<HashMap<String, String>> {
         .iter()
         .filter(|entry| {
             entry.file_type().unwrap().is_file()
-                && entry.file_name().to_str().unwrap().ends_with(".gitignore")
+                && entry.file_name().to_str().unwrap() != ".timestamp"
         })
         .map(|entry| -> anyhow::Result<(String, String)> {
             let file_name = entry.file_name();

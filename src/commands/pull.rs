@@ -35,7 +35,7 @@ pub fn pull_template(
             };
 
             let selection = Select::with_theme(&ColorfulTheme::default())
-                .with_prompt("Choose one of the following templates:")
+                .with_prompt("Choose one of the following templates")
                 .items(values.as_slice())
                 .default(0)
                 .interact();
@@ -68,8 +68,8 @@ pub fn pull_template(
                     use dialoguer::{theme::ColorfulTheme, Select};
 
                     let selection = Select::with_theme(&ColorfulTheme::default())
-                        .with_prompt("Choose one of the following templates:")
-                        .items(&["Append", "Overwrite", "No Overwrite"])
+                        .with_prompt("The gitignore file already exists in your current directory")
+                        .items(&["Append", "Overwrite", "Exit"])
                         .default(0)
                         .interact()?;
 
@@ -84,6 +84,7 @@ pub fn pull_template(
                 })?;
 
             if opt == PullOpts::NoOverwrite {
+                println!("Goodbye!");
                 return Ok(());
             } else if opt == PullOpts::Append {
                 let mut file = File::open(&path).with_context(|| "Failed to open file")?;
