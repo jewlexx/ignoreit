@@ -1,9 +1,14 @@
 use std::collections::HashMap;
 
+use indicatif::ParallelProgressIterator;
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
+
 pub type Gitignores = Vec<String>;
 
+pub type GitignoreResponse = HashMap<String, Vec<u8>>;
+
 pub struct GithubApi {
-    response: Gitignores,
+    response: GitignoreResponse,
 }
 
 impl GithubApi {
@@ -12,6 +17,12 @@ impl GithubApi {
         const API_URL: &str = "https://api.github.com/gitignore/templates";
 
         let response: Gitignores = reqwest::blocking::get(API_URL)?.json()?;
+
+        let mapped: GitignoreResponse = response
+            .par_iter()
+            .progress_count(response.len() as u64)
+            .map_init(HashMap::new, |m, v| {})
+            .collect();
 
         Ok(Self { response })
     }
