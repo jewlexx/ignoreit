@@ -1,4 +1,7 @@
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    path::{Path, PathBuf},
+};
 
 use indicatif::ParallelProgressIterator;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
@@ -7,8 +10,23 @@ pub type Gitignores = Vec<String>;
 
 pub type GitignoreResponse = HashMap<String, Vec<u8>>;
 
+pub struct GitignoreFile {
+    path: String,
+    bytes: Vec<u8>,
+}
+
+impl GitignoreFile {
+    pub fn path(&self, base: impl AsRef<Path>) -> PathBuf {
+        base.as_ref().join(&self.path)
+    }
+
+    pub fn bytes(&self) -> &[u8] {
+        &self.bytes
+    }
+}
+
 pub struct GithubApi {
-    response: GitignoreResponse,
+    pub response: GitignoreResponse,
 }
 
 impl GithubApi {
