@@ -19,7 +19,7 @@ pub fn pull_template(
     no_overwrite: &bool,
 ) -> anyhow::Result<()> {
     let template_name = template
-        .or_else(|| -> Option<String> {
+        .or_else(|| {
             use dialoguer::{theme::ColorfulTheme, Select};
 
             let values = {
