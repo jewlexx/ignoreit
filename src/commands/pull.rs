@@ -1,7 +1,7 @@
 use std::{
     env,
     fs::File,
-    io::{self, Read, Write},
+    io::{Read, Write},
 };
 
 use anyhow::Context;
@@ -9,7 +9,6 @@ use anyhow::Context;
 use crate::{
     cache::{get_template, get_templates},
     commands::args::PullOpts,
-    flush_stdout,
 };
 
 pub fn pull_template(
@@ -59,8 +58,6 @@ pub fn pull_template(
         .join(output);
 
     let contents = {
-        use mincolor::Colorize;
-
         let mut contents = String::new();
 
         if path.exists() {
@@ -68,34 +65,18 @@ pub fn pull_template(
             let opt = pull_opt
                 .map(anyhow::Ok)
                 .unwrap_or_else(|| -> anyhow::Result<PullOpts> {
-                    print!(
-                    "{} already exists. What would you like to do? ({o}verwrite/{a}ppend/{e}xit)",
-                    path.display(),
-                    o = "O".underline(),
-                    a = "A".underline(),
-                    e = "E".underline()
-                );
+                    use dialoguer::{theme::ColorfulTheme, Select};
 
-                    flush_stdout!()?;
+                    let selection = Select::with_theme(&ColorfulTheme::default())
+                        .with_prompt("Choose one of the following templates:")
+                        .items(&["Append", "Overwrite", "No Overwrite"])
+                        .default(0)
+                        .interact()?;
 
-                    let mut input = String::new();
-
-                    io::stdin()
-                        .read_line(&mut input)
-                        .with_context(|| "Failed to read input")?;
-
-                    let answer = input
-                        .trim()
-                        .chars()
-                        .next()
-                        .context("invalid input")?
-                        .to_lowercase()
-                        .to_string();
-
-                    let a = match answer.as_str() {
-                        "o" => PullOpts::Overwrite,
-                        "a" => PullOpts::Append,
-                        "e" => PullOpts::NoOverwrite,
+                    let a = match selection {
+                        0 => PullOpts::Overwrite,
+                        1 => PullOpts::Append,
+                        // 2 and anything else
                         _ => PullOpts::NoOverwrite,
                     };
 
