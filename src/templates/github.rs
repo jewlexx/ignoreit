@@ -3,7 +3,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use indicatif::ParallelProgressIterator;
+use indicatif::{ParallelProgressIterator, ProgressStyle};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
 pub type Gitignores = Vec<String>;
@@ -34,6 +34,10 @@ impl GithubApi {
     pub fn new() -> anyhow::Result<Self> {
         const API_URL: &str = "https://api.github.com/gitignore/templates";
 
+        let style = ProgressStyle::default_bar().template(
+            "{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] ({pos}/{len}, ETA {eta})",
+        )?;
+
         let response: Gitignores = reqwest::blocking::Client::builder()
             .user_agent("ignoreit")
             .build()?
@@ -43,7 +47,7 @@ impl GithubApi {
 
         let files = response
             .par_iter()
-            .progress_count(response.len() as u64)
+            .progress_with_style(style)
             .map(|template| {
                 let download_url = format!(
                     "https://raw.githubusercontent.com/github/gitignore/main/{}.gitignore",
