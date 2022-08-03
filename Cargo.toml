@@ -11,7 +11,6 @@ categories = ["command-line-utilities", "development-tools"]
 
 [dependencies]
 anyhow = "1.0.60"
-spinners-rs = "2.3.0"
 directories = "4.0.1"
 lazy_static = "1.4.0"
 git2 = { version = "0.15.0", default-features = false, features = ["https"] }
