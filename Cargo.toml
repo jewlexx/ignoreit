@@ -7,7 +7,7 @@ readme = "README.md"
 repository = "https://github.com/jewlexx/ignoreit"
 license = "MIT"
 edition = "2021"
-keywords = ["git", "ignore", "developer", "tools"]
+keywords = ["git", "ignore", "developer", "tools", "gitignore"]
 categories = ["command-line-utilities", "development-tools"]
 
 [dependencies]
@@ -31,6 +31,4 @@ lto = true
 
 [features]
 default = []
-# vendored = ["vendored-libgit2", "vendored-openssl"]
-# vendored-libgit2 = ["git2/vendored-libgit2"]
-# vendored-openssl = ["git2/vendored-openssl"]
+vendored = ["reqwest/native-tls-vendored"]
