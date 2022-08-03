@@ -14,7 +14,6 @@ categories = ["command-line-utilities", "development-tools"]
 anyhow = "1.0.60"
 directories = "4.0.1"
 lazy_static = "1.4.0"
-git2 = { version = "0.15.0", default-features = false, features = ["https"] }
 dialoguer = "0.10.2"
 clap = { version = "3.2.16", features = ["derive"] }
 mincolor = "2.0.1"
@@ -32,6 +31,6 @@ lto = true
 
 [features]
 default = []
-vendored = ["vendored-libgit2", "vendored-openssl"]
-vendored-libgit2 = ["git2/vendored-libgit2"]
-vendored-openssl = ["git2/vendored-openssl"]
+# vendored = ["vendored-libgit2", "vendored-openssl"]
+# vendored-libgit2 = ["git2/vendored-libgit2"]
+# vendored-openssl = ["git2/vendored-openssl"]

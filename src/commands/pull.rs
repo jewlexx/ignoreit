@@ -117,7 +117,7 @@ pub fn pull_template(
             let template = get_template(template_path)?;
             let title = format!("# {}.gitignore\n", template_name);
             contents.push_str(&title);
-            contents.push_str(template.as_str());
+            contents.push_str(std::str::from_utf8(&template)?);
         }
 
         contents

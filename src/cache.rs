@@ -80,6 +80,7 @@ pub fn get_templates() -> anyhow::Result<HashMap<String, String>> {
         .collect::<Result<Vec<DirEntry>, _>>()?;
 
     let ignores_tuple = dir
+        .iter()
         .filter(|entry| {
             entry.file_type().unwrap().is_file()
                 && entry.file_name().to_str().unwrap().ends_with(".gitignore")
