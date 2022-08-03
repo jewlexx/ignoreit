@@ -18,10 +18,10 @@ impl GithubApi {
 
         let response: Gitignores = reqwest::blocking::get(API_URL)?.json()?;
 
-        let mapped: GitignoreResponse = response
+        let mapped: Vec<(String, Vec<u8>)> = response
             .par_iter()
             .progress_count(response.len() as u64)
-            .map_init(HashMap::new, |m, v| {})
+            .map(|template| {})
             .collect();
 
         Ok(Self { response })
