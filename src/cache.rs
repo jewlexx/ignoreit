@@ -1,13 +1,12 @@
 use std::{
     collections::HashMap,
-    fs,
-    io::Read,
-    path::PathBuf,
+    fs::{self, read_to_string},
+    io::{Read, Write},
+    path::{Path, PathBuf},
     time::{Duration, SystemTime},
 };
 
 use anyhow::Context;
-use git2::Repository;
 
 use crate::utils::CACHE_DIR;
 
@@ -19,44 +18,54 @@ pub fn purge() -> anyhow::Result<()> {
     Ok(())
 }
 
-// One Day in seconds
-const TO_UPDATE: u64 = 60 * 60 * 24;
+/// One Day in seconds
+///
+/// 24 hours -> in minutes -> in seconds -> in milliseconds
+const TO_UPDATE: u128 = 24 * 60 * 60 * 1000;
 
-fn clone_repo(url: &str, cache_dir: &str) -> anyhow::Result<Repository> {
-    crate::templates::github::GithubApi::new()?;
-    let r = Repository::clone(url, cache_dir).context("Failed to clone gitignore repository")?;
+fn clone_templates(cache_dir: &Path) -> anyhow::Result<()> {
+    let templates = crate::templates::github::GithubApi::new()?;
 
-    Ok(r)
+    for gitignore in templates.response {
+        let path = gitignore.path(cache_dir);
+
+        if !path.exists() {
+            fs::create_dir_all(path.parent().context("Path was root for some reason")?)
+                .context("Failed to create dir")?;
+            let mut file = fs::File::create(path).context("Failed to create file")?;
+
+            file.write_all(gitignore.bytes())?;
+        }
+    }
+
+    Ok(())
 }
 
 pub fn init_cache() -> anyhow::Result<PathBuf> {
     if let Some(cache_dir) = CACHE_DIR.clone() {
-        if !cache_dir.exists() {
-            fs::create_dir_all(cache_dir.clone())?;
-        }
+        let fetch_path = cache_dir.join(".timestamp");
 
-        let url = "https://github.com/github/gitignore.git";
-        let fetch_path = cache_dir.join(".git").join("FETCH_HEAD");
+        if !cache_dir.exists() {
+            println!("No cache dir found, creating");
+            fs::create_dir_all(cache_dir.clone())?;
+            fs::File::create(&fetch_path)?.write_all(crate::TIMESTAMP.to_string().as_bytes())?;
+            clone_templates(&cache_dir)?;
+        }
 
         if !fetch_path.exists() {
             fs::remove_dir_all(&cache_dir)?;
-            clone_repo(url, cache_dir.to_str().unwrap())?;
-
-            return Ok(cache_dir);
+            return init_cache();
         }
 
-        let fetch_meta = fetch_path.metadata()?;
-        let last_modified = fetch_meta.modified()?;
-        let now = SystemTime::now();
+        let timestamp_string = read_to_string(fetch_path)?;
+        let timestamp = timestamp_string.parse::<u128>()?;
+        let now = *crate::TIMESTAMP;
 
-        let since = now
-            .duration_since(last_modified)
-            .unwrap_or(Duration::from_secs(TO_UPDATE))
-            .as_secs();
+        let since = now - timestamp;
 
         if since >= TO_UPDATE {
             fs::remove_dir_all(&cache_dir)?;
-            clone_repo(url, cache_dir.to_str().unwrap())?;
+            clone_templates(&cache_dir)?;
         }
 
         Ok(cache_dir)
@@ -116,5 +125,13 @@ pub fn get_template(name: &str) -> anyhow::Result<String> {
         file.read_to_string(&mut str)?;
 
         Ok(str)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_to_update() {
+        assert_eq!(86400000, super::TO_UPDATE);
     }
 }
