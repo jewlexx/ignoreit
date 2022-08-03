@@ -34,7 +34,12 @@ impl GithubApi {
     pub fn new() -> anyhow::Result<Self> {
         const API_URL: &str = "https://api.github.com/gitignore/templates";
 
-        let response: Gitignores = reqwest::blocking::get(API_URL)?.json()?;
+        let response: Gitignores = reqwest::blocking::Client::builder()
+            .user_agent("ignoreit")
+            .build()?
+            .get(API_URL)
+            .send()?
+            .json()?;
 
         let files = response
             .par_iter()

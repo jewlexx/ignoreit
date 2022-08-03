@@ -10,6 +10,9 @@ mod utils;
 use commands::args::Args;
 
 fn main() -> anyhow::Result<()> {
+    templates::github::GithubApi::new()?;
+
+    return Ok(());
     if *utils::CACHE_ENABLED {
         cache::init_cache()?;
     } else {
