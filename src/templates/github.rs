@@ -31,7 +31,7 @@ impl GithubApi {
 
                 Ok((template.to_string(), vec![9]))
             })
-            .collect::<Vec<Result<_, _>>>();
+            .collect::<Result<Vec<_>, _>>()?;
 
         Ok(Self { response })
     }
