@@ -8,7 +8,7 @@ use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
 pub type Gitignores = Vec<String>;
 
-pub type GitignoreResponse = HashMap<String, Vec<u8>>;
+pub type GitignoreResponse = Vec<GitignoreFile>;
 
 pub struct GitignoreFile {
     path: String,
@@ -36,7 +36,7 @@ impl GithubApi {
 
         let response: Gitignores = reqwest::blocking::get(API_URL)?.json()?;
 
-        let files: Vec<(String, Vec<u8>)> = response
+        let files = response
             .par_iter()
             .progress_count(response.len() as u64)
             .map(|template| {
@@ -47,16 +47,13 @@ impl GithubApi {
 
                 let file = reqwest::blocking::get(download_url)?.bytes()?.to_vec();
 
-                Ok::<_, reqwest::Error>((template.clone(), file))
+                Ok::<_, reqwest::Error>(GitignoreFile {
+                    path: template.clone(),
+                    bytes: file,
+                })
             })
             .collect::<Result<Vec<_>, _>>()?;
 
-        let mut mapped = HashMap::new();
-
-        for file in files {
-            mapped.insert(file.0, file.1);
-        }
-
-        Ok(Self { response: mapped })
+        Ok(Self { response: files })
     }
 }
