@@ -9,6 +9,8 @@ mod macros;
 mod templates;
 mod utils;
 
+// TODO: add custom errors with `thiserror`
+
 use commands::args::Args;
 
 lazy_static::lazy_static! {
