@@ -1,5 +1,4 @@
 use std::{
-    collections::HashMap,
     fs::{self, read_to_string, DirEntry},
     io::{Read, Write},
 };
@@ -69,12 +68,12 @@ pub fn init_cache() -> anyhow::Result<()> {
     Ok(())
 }
 
-pub fn get_templates() -> anyhow::Result<HashMap<String, String>> {
+pub fn get_template_paths() -> anyhow::Result<Vec<String>> {
     let dir: Vec<DirEntry> = fs::read_dir::<&std::path::Path>(CACHE_DIR.as_ref())
         .context("Failed to read cache directory")?
         .collect::<Result<_, _>>()?;
 
-    let ignores_tuple = dir
+    let ignores = dir
         .iter()
         .filter(|entry| {
             entry.file_type().unwrap().is_file()
@@ -82,17 +81,13 @@ pub fn get_templates() -> anyhow::Result<HashMap<String, String>> {
         })
         .map(|entry| {
             let file_name = entry.file_name();
-            let name = file_name.to_str().context("Invalid file name")?;
 
-            Ok((name.to_lowercase(), name.to_string()))
+            file_name
+                .to_str()
+                .expect("invalid utf-8 file name")
+                .to_string()
         })
-        .collect::<anyhow::Result<Vec<_>>>()?;
-
-    let mut ignores = HashMap::<String, String>::new();
-
-    for (lower, path) in ignores_tuple {
-        ignores.insert(lower, path);
-    }
+        .collect();
 
     Ok(ignores)
 }

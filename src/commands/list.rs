@@ -1,14 +1,11 @@
-use crate::cache::get_templates;
+use crate::cache::get_template_paths;
 
 pub fn list_templates() -> anyhow::Result<()> {
-    let map = get_templates()?;
+    let templates = get_template_paths()?;
 
     println!("Available templates:");
 
-    let mut values = map.values().collect::<Vec<&String>>();
-    values.sort();
-
-    for item in values {
+    for item in templates {
         println!("  {}", item);
     }
 

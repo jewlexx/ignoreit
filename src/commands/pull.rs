@@ -7,7 +7,7 @@ use std::{
 use anyhow::Context;
 
 use crate::{
-    cache::{get_template, get_templates},
+    cache::{get_template, get_template_paths},
     commands::args::PullOpts,
 };
 
@@ -18,17 +18,18 @@ pub fn pull_template(
     overwrite: &bool,
     no_overwrite: &bool,
 ) -> anyhow::Result<()> {
+    let template_paths = get_template_paths();
+
     let template_name = template
         .or_else(|| {
             use dialoguer::{theme::ColorfulTheme, Select};
 
             let values = {
-                let map = match get_templates() {
+                let mut values = match template_paths {
                     Ok(v) => v,
                     Err(_) => return None,
                 };
 
-                let mut values = map.values().cloned().collect::<Vec<String>>();
                 values.sort();
 
                 values
@@ -41,17 +42,17 @@ pub fn pull_template(
                 .interact();
 
             match selection {
-                Ok(v) => values.get(v).cloned(),
+                Ok(v) => values.get(v).map(|x| x.to_string()),
                 Err(_) => None,
             }
         })
         .context("Failed to get template. Please double check your input")?;
 
-    let template_map = get_templates()?;
+    let template_map = get_template_paths()?;
 
-    let template_path = template_map
-        .get(&template_name.to_lowercase())
-        .with_context(|| "Template not found")?;
+    if !template_map.contains(&template_name) {
+        return Err(anyhow::anyhow!("Template not found: {}", template_name));
+    }
 
     let path = env::current_dir()
         .with_context(|| "Failed to get current directory")?
@@ -95,8 +96,8 @@ pub fn pull_template(
         }
 
         if *crate::utils::CACHE_ENABLED {
-            println!("Getting template {}", template_path);
-            let template = get_template(template_path)?;
+            println!("Getting template {}", template_name);
+            let template = get_template(&template_name)?;
             let title = format!("# {}.gitignore\n", template_name);
             contents.push_str(&title);
             contents.push_str(std::str::from_utf8(&template)?);
