@@ -4,6 +4,7 @@ use std::{
 };
 
 use anyhow::Context;
+use parking_lot::{const_mutex, Mutex};
 
 use crate::utils::CACHE_DIR;
 
@@ -39,7 +40,17 @@ fn clone_templates() -> anyhow::Result<()> {
     Ok(())
 }
 
+static HAS_RECURSED: Mutex<usize> = const_mutex(0);
+
 pub fn init_cache() -> anyhow::Result<()> {
+    {
+        if *HAS_RECURSED.lock() > 2 {
+            panic!("Recursed too much during cache initialization");
+        }
+
+        *HAS_RECURSED.lock() += 1;
+    }
+
     let fetch_path = CACHE_DIR.join(".timestamp");
     let cache_dir = CACHE_DIR.clone();
 
