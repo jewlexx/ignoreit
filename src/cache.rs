@@ -46,7 +46,7 @@ pub fn init_cache() -> anyhow::Result<()> {
 
     if !CACHE_DIR.exists() {
         fs::create_dir_all(&cache_dir)?;
-        fs::File::create(&fetch_path)?.write_all(crate::TIMESTAMP.to_string().as_bytes())?;
+        fs::File::create(&fetch_path)?.write_all(crate::utils::TIMESTAMP.to_string().as_bytes())?;
         clone_templates()?;
     }
 
@@ -57,7 +57,7 @@ pub fn init_cache() -> anyhow::Result<()> {
 
     let timestamp_string = read_to_string(fetch_path)?;
     let timestamp = timestamp_string.parse::<u128>()?;
-    let now = *crate::TIMESTAMP;
+    let now = *crate::utils::TIMESTAMP;
 
     let since = now - timestamp;
 

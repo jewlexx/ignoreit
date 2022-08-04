@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{path::PathBuf, time::SystemTime};
 
 use directories::BaseDirs;
 use lazy_static::lazy_static;
@@ -12,4 +12,8 @@ lazy_static! {
         dir.pop();
         dir.exists()
     };
+    pub static ref TIMESTAMP: u128 = SystemTime::now()
+        .duration_since(SystemTime::UNIX_EPOCH)
+        .expect("time went backwards")
+        .as_millis();
 }

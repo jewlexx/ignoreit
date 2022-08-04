@@ -1,6 +1,4 @@
 #![forbid(unsafe_code)]
-use std::time::SystemTime;
-
 use clap::Parser;
 
 mod cache;
@@ -13,12 +11,8 @@ mod utils;
 
 use commands::args::Args;
 
-lazy_static::lazy_static! {
-    static ref TIMESTAMP: u128 = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).expect("time went backwards").as_millis();
-}
-
 fn main() -> anyhow::Result<()> {
-    lazy_static::initialize(&TIMESTAMP);
+    lazy_static::initialize(&utils::TIMESTAMP);
 
     if *utils::CACHE_ENABLED {
         cache::init_cache()?;
