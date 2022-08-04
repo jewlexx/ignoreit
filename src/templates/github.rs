@@ -3,6 +3,8 @@ use std::path::{Path, PathBuf};
 use indicatif::{ParallelProgressIterator, ProgressStyle};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
+use crate::parse_url;
+
 pub type Gitignores = Vec<String>;
 
 pub type GitignoreResponse = Vec<GitignoreFile>;
@@ -46,10 +48,7 @@ impl GithubApi {
             .par_iter()
             .progress_with_style(style)
             .map(|template| {
-                let download_url = format!(
-                    "https://raw.githubusercontent.com/github/gitignore/main/{}.gitignore",
-                    template
-                );
+                let download_url = parse_url!(template);
 
                 let file = reqwest::blocking::get(download_url)?.bytes()?.to_vec();
 
