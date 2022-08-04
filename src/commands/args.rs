@@ -60,7 +60,7 @@ impl Commands {
 pub struct Args {
     /// The command to execute
     #[clap(subcommand)]
-    pub command: Option<Commands>,
+    pub command: Commands,
 }
 
 // The list of options the user can give when the gitignore exists

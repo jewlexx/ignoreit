@@ -27,9 +27,7 @@ fn main() -> anyhow::Result<()> {
 
     let args = Args::parse();
 
-    if let Some(cmd) = args.command {
-        cmd.run()?;
-    }
+    args.command.run()?;
 
     Ok(())
 }
