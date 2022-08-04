@@ -127,8 +127,11 @@ fn clone_templates() -> anyhow::Result<()> {
 
 #[cfg(test)]
 mod tests {
+    /// One day in milliseconds
+    const DAY: u128 = 86400000;
+
     #[test]
     fn test_to_update() {
-        assert_eq!(86400000, super::TO_UPDATE);
+        assert_eq!(DAY, super::TO_UPDATE);
     }
 }
