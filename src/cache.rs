@@ -70,11 +70,9 @@ pub fn init_cache() -> anyhow::Result<()> {
 }
 
 pub fn get_templates() -> anyhow::Result<HashMap<String, String>> {
-    let cache_dir = CACHE_DIR.clone();
-
-    let dir = fs::read_dir(cache_dir)
-        .with_context(|| "Failed to read cache directory")?
-        .collect::<Result<Vec<DirEntry>, _>>()?;
+    let dir: Vec<DirEntry> = fs::read_dir::<&std::path::Path>(CACHE_DIR.as_ref())
+        .context("Failed to read cache directory")?
+        .collect::<Result<_, _>>()?;
 
     let ignores_tuple = dir
         .iter()
@@ -82,17 +80,11 @@ pub fn get_templates() -> anyhow::Result<HashMap<String, String>> {
             entry.file_type().unwrap().is_file()
                 && entry.file_name().to_str().unwrap() != ".timestamp"
         })
-        .map(|entry| -> anyhow::Result<(String, String)> {
+        .map(|entry| {
             let file_name = entry.file_name();
-            let name = file_name
-                .to_str()
-                .context("Failed to parse file name")?
-                .split('.')
-                .next()
-                .context("Failed to parse file name")?
-                .to_owned();
+            let name = file_name.to_str().context("Invalid file name")?;
 
-            Ok((name.to_lowercase(), name))
+            Ok((name.to_lowercase(), name.to_string()))
         })
         .collect::<anyhow::Result<Vec<_>>>()?;
 
