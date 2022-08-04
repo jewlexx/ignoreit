@@ -24,15 +24,9 @@ pub fn pull_template(
         .or_else(|| {
             use dialoguer::{theme::ColorfulTheme, Select};
 
-            let values = {
-                let mut values = match template_paths {
-                    Ok(v) => v,
-                    Err(_) => return None,
-                };
-
-                values.sort();
-
-                values
+            let values = match template_paths {
+                Ok(v) => v,
+                Err(_) => return None,
             };
 
             let selection = Select::with_theme(&ColorfulTheme::default())
