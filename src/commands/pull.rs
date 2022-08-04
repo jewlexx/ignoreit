@@ -11,7 +11,7 @@ use crate::{
     commands::args::PullOpts,
 };
 
-pub fn pull_template(
+pub fn run(
     output: &str,
     template: Option<String>,
     append: &bool,

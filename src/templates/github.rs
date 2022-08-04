@@ -1,3 +1,5 @@
+//! Interaction with Github
+
 use std::path::{Path, PathBuf};
 
 use indicatif::{ParallelProgressIterator, ProgressStyle};
@@ -5,31 +7,39 @@ use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
 use crate::parse_url;
 
+/// Alias for Gitignore response
 pub type Gitignores = Vec<String>;
 
+/// Alias for Gitignore response
 pub type GitignoreResponse = Vec<GitignoreFile>;
 
+/// Struct representation of gitignore files
 pub struct GitignoreFile {
     path: String,
     bytes: Vec<u8>,
 }
 
 impl GitignoreFile {
+    /// Return a reference to the path
     pub fn path(&self, base: impl AsRef<Path>) -> PathBuf {
         base.as_ref().join(&self.path)
     }
 
+    /// Return a reference to the bytes
     pub fn bytes(&self) -> &[u8] {
         &self.bytes
     }
 }
 
+/// Struct representation of the Github API
 pub struct GithubApi {
+    /// The given response
     pub response: GitignoreResponse,
 }
 
 impl GithubApi {
     // TODO: Implement a better error type
+    /// Get the response from Github
     pub fn new() -> anyhow::Result<Self> {
         const API_URL: &str = "https://api.github.com/gitignore/templates";
 

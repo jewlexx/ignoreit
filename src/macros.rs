@@ -1,3 +1,6 @@
+//! Global macros
+
+/// Pause execution for given amount of time in milliseconds
 #[macro_export]
 macro_rules! sleep_for {
     ($time:expr) => {
@@ -5,6 +8,7 @@ macro_rules! sleep_for {
     };
 }
 
+/// Parse gitignore download URL
 #[macro_export]
 macro_rules! parse_url {
     ($url:tt) => {

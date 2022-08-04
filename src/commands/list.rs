@@ -1,6 +1,6 @@
 use crate::cache::get_template_paths;
 
-pub fn list_templates() -> anyhow::Result<()> {
+pub fn run() -> anyhow::Result<()> {
     let templates = get_template_paths()?;
 
     println!("Available templates:");

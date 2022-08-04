@@ -1,10 +1,13 @@
+//! CLI Arguments
+
 use clap::{Parser, Subcommand};
 
 use crate::{
     cache,
-    commands::{list::list_templates, pull::pull_template},
+    commands::{list_templates, pull_template},
 };
 
+/// All possible CLI commands
 #[derive(Debug, Subcommand, Clone)]
 pub enum Commands {
     /// Pull the template from the cache
@@ -37,7 +40,7 @@ pub enum Commands {
 }
 
 impl Commands {
-    // Runs the subcommand
+    /// Runs the subcommand
     pub fn run(&self) -> anyhow::Result<()> {
         match self {
             Commands::List => list_templates()?,
@@ -55,6 +58,7 @@ impl Commands {
     }
 }
 
+/// CLI Args
 #[derive(Parser, Clone, Debug)]
 #[clap(author, version, about)]
 pub struct Args {
@@ -63,15 +67,19 @@ pub struct Args {
     pub command: Commands,
 }
 
-// The list of options the user can give when the gitignore exists
+/// The list of options the user can give when the gitignore exists
 #[derive(PartialEq, Eq)]
 pub enum PullOpts {
+    /// Append to the current gitignore
     Append,
+    /// Overwrite the current gitignore
     Overwrite,
+    /// Exit if there is an existing gitignore
     NoOverwrite,
 }
 
 impl PullOpts {
+    /// Get the option based on a boolean representation
     pub fn get_opt(append: &bool, overwrite: &bool, no_overwrite: &bool) -> Option<Self> {
         let mut opts_vec = Vec::<Self>::new();
 

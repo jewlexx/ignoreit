@@ -1,11 +1,14 @@
+//! CLI application to pull gitignore templates with ease
+
 #![forbid(unsafe_code)]
+#![warn(missing_docs)]
 use clap::Parser;
 
-mod cache;
-mod commands;
-mod macros;
-mod templates;
-mod utils;
+pub mod cache;
+pub mod commands;
+pub mod macros;
+pub mod templates;
+pub mod utils;
 
 // TODO: add custom errors with `thiserror`
 

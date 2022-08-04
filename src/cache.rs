@@ -1,3 +1,5 @@
+//! Handle gitignore cache
+
 use std::{
     fs::{self, read_to_string, DirEntry},
     io::{Read, Write},
@@ -8,6 +10,7 @@ use parking_lot::{const_mutex, Mutex};
 
 use crate::utils::CACHE_DIR;
 
+/// Purge the current cache
 pub fn purge() -> anyhow::Result<()> {
     let cache_dir = CACHE_DIR.clone();
 
@@ -21,27 +24,9 @@ pub fn purge() -> anyhow::Result<()> {
 /// 24 hours -> in minutes -> in seconds -> in milliseconds
 const TO_UPDATE: u128 = 24 * 60 * 60 * 1000;
 
-fn clone_templates() -> anyhow::Result<()> {
-    let templates = crate::templates::github::GithubApi::new()?;
-    let cache_dir = CACHE_DIR.clone();
-
-    for gitignore in templates.response {
-        let path = gitignore.path(&cache_dir);
-
-        if !path.exists() {
-            fs::create_dir_all(path.parent().context("Path was root for some reason")?)
-                .context("Failed to create dir")?;
-            let mut file = fs::File::create(path).context("Failed to create file")?;
-
-            file.write_all(gitignore.bytes())?;
-        }
-    }
-
-    Ok(())
-}
-
 static HAS_RECURSED: Mutex<usize> = const_mutex(0);
 
+/// Initialize cache
 pub fn init_cache() -> anyhow::Result<()> {
     {
         if *HAS_RECURSED.lock() > 2 {
@@ -79,6 +64,24 @@ pub fn init_cache() -> anyhow::Result<()> {
     Ok(())
 }
 
+/// Get a given template by name and return it's byte representation
+pub fn get_template(name: &str) -> anyhow::Result<Vec<u8>> {
+    let filename = name.to_owned() + ".gitignore";
+
+    let path = CACHE_DIR.join(filename);
+
+    if !path.exists() {
+        return Err(anyhow::anyhow!("Template not found"));
+    } else {
+        let mut file = fs::File::open(path).with_context(|| "Failed to open template file")?;
+        let mut bytes = Vec::new();
+        file.read_to_end(&mut bytes)?;
+
+        Ok(bytes)
+    }
+}
+
+/// List all of the templates in the cache
 pub fn get_template_paths() -> anyhow::Result<Vec<String>> {
     let dir: Vec<DirEntry> = fs::read_dir::<&std::path::Path>(CACHE_DIR.as_ref())
         .context("Failed to read cache directory")?
@@ -103,20 +106,23 @@ pub fn get_template_paths() -> anyhow::Result<Vec<String>> {
     Ok(ignores)
 }
 
-pub fn get_template(name: &str) -> anyhow::Result<Vec<u8>> {
-    let filename = name.to_owned() + ".gitignore";
+fn clone_templates() -> anyhow::Result<()> {
+    let templates = crate::templates::github::GithubApi::new()?;
+    let cache_dir = CACHE_DIR.clone();
 
-    let path = CACHE_DIR.join(filename);
+    for gitignore in templates.response {
+        let path = gitignore.path(&cache_dir);
 
-    if !path.exists() {
-        return Err(anyhow::anyhow!("Template not found"));
-    } else {
-        let mut file = fs::File::open(path).with_context(|| "Failed to open template file")?;
-        let mut bytes = Vec::new();
-        file.read_to_end(&mut bytes)?;
+        if !path.exists() {
+            fs::create_dir_all(path.parent().context("Path was root for some reason")?)
+                .context("Failed to create dir")?;
+            let mut file = fs::File::create(path).context("Failed to create file")?;
 
-        Ok(bytes)
+            file.write_all(gitignore.bytes())?;
+        }
     }
+
+    Ok(())
 }
 
 #[cfg(test)]
