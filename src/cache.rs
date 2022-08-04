@@ -45,7 +45,7 @@ static HAS_RECURSED: Mutex<usize> = const_mutex(0);
 pub fn init_cache() -> anyhow::Result<()> {
     {
         if *HAS_RECURSED.lock() > 2 {
-            panic!("Recursed too much during cache initialization");
+            anyhow::bail!("Recursed too much during cache initialization");
         }
 
         *HAS_RECURSED.lock() += 1;
