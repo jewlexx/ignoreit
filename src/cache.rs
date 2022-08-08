@@ -3,7 +3,6 @@ use std::{
     fs::{self, read_to_string},
     io::{Read, Write},
     path::{Path, PathBuf},
-    time::{Duration, SystemTime},
 };
 
 use anyhow::Context;
