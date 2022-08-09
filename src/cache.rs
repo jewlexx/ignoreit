@@ -81,8 +81,23 @@ pub fn get_template(name: &str) -> anyhow::Result<Vec<u8>> {
     }
 }
 
+#[derive(PartialEq)]
+/// Structural representation of a template path
+pub struct TemplatePath {
+    /// Lowercase name
+    pub lower: String,
+    /// Cased name
+    pub capped: String,
+}
+
+impl std::fmt::Display for TemplatePath {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.capped)
+    }
+}
+
 /// List all of the templates in the cache
-pub fn get_template_paths() -> anyhow::Result<Vec<String>> {
+pub fn get_template_paths() -> anyhow::Result<Vec<TemplatePath>> {
     let dir: Vec<DirEntry> = fs::read_dir::<&std::path::Path>(CACHE_DIR.as_ref())
         .context("Failed to read cache directory")?
         .collect::<Result<_, _>>()?;
@@ -95,11 +110,14 @@ pub fn get_template_paths() -> anyhow::Result<Vec<String>> {
         })
         .map(|entry| {
             let file_name = entry.file_name();
-
-            file_name
+            let capped = file_name
                 .to_str()
                 .expect("invalid utf-8 file name")
-                .to_string()
+                .to_string();
+
+            let lower = capped.to_lowercase();
+
+            TemplatePath { lower, capped }
         })
         .collect();
 

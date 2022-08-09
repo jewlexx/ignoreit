@@ -44,7 +44,7 @@ pub fn run(
 
     let template_map = get_template_paths()?;
 
-    if !template_map.contains(&template_name) {
+    if !template_map.iter().any(|f| f.lower == template_name) {
         return Err(anyhow::anyhow!("Template not found: {}", template_name));
     }
 
