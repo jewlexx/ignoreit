@@ -10,6 +10,9 @@ pub mod macros;
 pub mod templates;
 pub mod utils;
 
+#[cfg(all(feature = "native-tls", feature = "vendored-tls"))]
+compile_error!("Cannot have both \"native-tls\" and \"vendored-tls\" enabled at the same time");
+
 // TODO: add custom errors with `thiserror`
 
 use commands::args::Args;
