@@ -65,10 +65,8 @@ pub fn init_cache() -> anyhow::Result<()> {
 }
 
 /// Get a given template by name and return it's byte representation
-pub fn get_template(name: &str) -> anyhow::Result<Vec<u8>> {
-    let filename = name.to_owned() + ".gitignore";
-
-    let path = CACHE_DIR.join(filename);
+pub fn get_template(name: &TemplatePath) -> anyhow::Result<Vec<u8>> {
+    let path = CACHE_DIR.join(&name.capped);
 
     if !path.exists() {
         return Err(anyhow::anyhow!("Template not found"));

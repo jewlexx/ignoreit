@@ -44,9 +44,11 @@ pub fn run(
 
     let template_map = get_template_paths()?;
 
-    if !template_map.iter().any(|f| f.lower == template_name) {
+    let template_path = if let Some(v) = template_map.iter().find(|f| f.lower == template_name) {
+        v
+    } else {
         return Err(anyhow::anyhow!("Template not found: {}", template_name));
-    }
+    };
 
     let path = env::current_dir()
         .with_context(|| "Failed to get current directory")?
@@ -90,9 +92,9 @@ pub fn run(
         }
 
         if *crate::utils::CACHE_ENABLED {
-            println!("Getting template {}", template_name);
-            let template = get_template(&template_name)?;
-            let title = format!("# {}.gitignore\n", template_name);
+            println!("Getting template {}", template_path);
+            let template = get_template(template_path)?;
+            let title = format!("# {}.gitignore\n", template_path);
             contents.push_str(&title);
             contents.push_str(std::str::from_utf8(&template)?);
         }
