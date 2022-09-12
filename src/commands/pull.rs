@@ -71,8 +71,8 @@ pub fn run(
                         .interact()?;
 
                     let a = match selection {
-                        0 => PullOpts::Overwrite,
                         1 => PullOpts::Append,
+                        0 => PullOpts::Overwrite,
                         // 2 and anything else
                         _ => PullOpts::NoOverwrite,
                     };
