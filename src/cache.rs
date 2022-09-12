@@ -29,11 +29,12 @@ static HAS_RECURSED: Mutex<usize> = const_mutex(0);
 /// Initialize cache
 pub fn init_cache() -> anyhow::Result<()> {
     {
-        if *HAS_RECURSED.lock() > 2 {
+        let mut has_recursed = HAS_RECURSED.lock();
+        if *has_recursed > 2 {
             anyhow::bail!("Recursed too much during cache initialization");
         }
 
-        *HAS_RECURSED.lock() += 1;
+        *has_recursed += 1;
     }
 
     let fetch_path = CACHE_DIR.join(".timestamp");
