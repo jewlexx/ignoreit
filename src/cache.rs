@@ -69,7 +69,7 @@ pub fn get_template(name: &TemplatePath) -> anyhow::Result<Vec<u8>> {
     let path = CACHE_DIR.join(&name.capped);
 
     if !path.exists() {
-        return Err(anyhow::anyhow!("Template not found"));
+        Err(anyhow::anyhow!("Template not found"))
     } else {
         let mut file = fs::File::open(path).with_context(|| "Failed to open template file")?;
         let mut bytes = Vec::new();
@@ -79,7 +79,7 @@ pub fn get_template(name: &TemplatePath) -> anyhow::Result<Vec<u8>> {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Eq)]
 /// Structural representation of a template path
 pub struct TemplatePath {
     /// Lowercase name
