@@ -3,7 +3,7 @@
 use clap::{Parser, Subcommand};
 
 use crate::{
-    cache,
+    cache::{self, init_cache},
     commands::{list_templates, pull_template},
 };
 
@@ -43,14 +43,26 @@ impl Commands {
     /// Runs the subcommand
     pub fn run(&self) -> anyhow::Result<()> {
         match self {
-            Commands::List => list_templates()?,
+            Commands::List => {
+                if *crate::utils::CACHE_ENABLED {
+                    init_cache()?;
+                }
+
+                list_templates()?;
+            }
             Commands::Pull {
                 output,
                 template,
                 append,
                 overwrite,
                 no_overwrite,
-            } => pull_template(output, template.clone(), append, overwrite, no_overwrite)?,
+            } => {
+                if *crate::utils::CACHE_ENABLED {
+                    init_cache()?;
+                }
+
+                pull_template(output, template.clone(), append, overwrite, no_overwrite)?;
+            }
             Commands::Purge => cache::purge()?,
         };
 

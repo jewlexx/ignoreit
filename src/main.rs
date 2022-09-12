@@ -20,9 +20,7 @@ use commands::args::Args;
 fn main() -> anyhow::Result<()> {
     lazy_static::initialize(&utils::TIMESTAMP);
 
-    if *utils::CACHE_ENABLED {
-        cache::init_cache()?;
-    } else {
+    if !*utils::CACHE_ENABLED {
         use mincolor::Colorize;
         println!(
             "{}",
