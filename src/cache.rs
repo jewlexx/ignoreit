@@ -40,7 +40,7 @@ pub fn init_cache() -> anyhow::Result<()> {
     let fetch_path = CACHE_DIR.join(".timestamp");
     let cache_dir = CACHE_DIR.clone();
 
-    if !CACHE_DIR.exists() {
+    if !cache_dir.exists() {
         fs::create_dir_all(&cache_dir)?;
         fs::File::create(&fetch_path)?.write_all(crate::utils::TIMESTAMP.to_string().as_bytes())?;
         return clone_templates();
