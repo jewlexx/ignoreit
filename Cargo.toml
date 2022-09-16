@@ -15,7 +15,7 @@ anyhow = "1.0.59"
 directories = "4.0.1"
 lazy_static = "1.4.0"
 dialoguer = "0.10.2"
-clap = { version = "3.2.16", features = ["derive"] }
+clap = { version = "3.2.22", features = ["derive"] }
 mincolor = "2.0.1"
 reqwest = { version = "0.11.11", features = ["json", "blocking"], default-features = false }
 indicatif = { version = "0.17.0", features = ["rayon"] }
