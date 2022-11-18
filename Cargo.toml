@@ -19,7 +19,7 @@ clap = { version = "4.0.10", features = ["derive"] }
 mincolor = "2.0.1"
 reqwest = { version = "0.11.12", features = ["json", "blocking"], default-features = false }
 indicatif = { version = "0.17.1", features = ["rayon"] }
-rayon = "1.5.3"
+rayon = "1.6.0"
 parking_lot = "0.12.1"
 
 [profile.release]
