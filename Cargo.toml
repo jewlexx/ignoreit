@@ -17,7 +17,7 @@ lazy_static = "1.4.0"
 dialoguer = "0.10.2"
 clap = { version = "4.0.29", features = ["derive"] }
 mincolor = "2.0.1"
-reqwest = { version = "0.11.13", features = ["json", "blocking"], default-features = false }
+reqwest = { version = "0.11.13", features = ["json", "blocking"] }
 indicatif = { version = "0.17.2", features = ["rayon"] }
 rayon = "1.6.0"
 parking_lot = "0.12.1"
@@ -27,6 +27,5 @@ strip = true
 lto = true
 
 [features]
-default = ["native-tls"]
-native-tls = ["reqwest/default-tls"]
+default = []
 vendored-tls = ["reqwest/native-tls-vendored"]
