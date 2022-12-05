@@ -91,7 +91,7 @@ pub fn run(
             }
         }
 
-        if *crate::utils::CACHE_ENABLED {
+        if *crate::cache::CACHE_ENABLED {
             println!("Getting template {}", template_path);
             let template = get_template(template_path)?;
             let title = format!("# {}.gitignore\n", template_path);

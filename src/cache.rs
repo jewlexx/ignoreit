@@ -3,12 +3,29 @@
 use std::{
     fs::{self, read_to_string, DirEntry},
     io::{Read, Write},
+    path::PathBuf,
 };
 
 use anyhow::Context;
 use parking_lot::{const_mutex, Mutex};
 
-use crate::utils::CACHE_DIR;
+use directories::BaseDirs;
+use lazy_static::lazy_static;
+
+lazy_static! {
+    /// The directory containing the cache
+    pub static ref CACHE_DIR: PathBuf = BaseDirs::new()
+        .expect("failed to find cache dir")
+        .cache_dir()
+        .join("gitignore");
+
+    /// If the cache is enabled or not
+    pub static ref CACHE_ENABLED: bool = {
+        let mut dir = CACHE_DIR.clone();
+        dir.pop();
+        dir.exists()
+    };
+}
 
 /// Purge the current cache
 pub fn purge() -> anyhow::Result<()> {
@@ -42,7 +59,7 @@ pub fn init_cache() -> anyhow::Result<()> {
 
     if !cache_dir.exists() {
         fs::create_dir_all(&cache_dir)?;
-        fs::File::create(&fetch_path)?.write_all(crate::utils::TIMESTAMP.to_string().as_bytes())?;
+        fs::File::create(&fetch_path)?.write_all(crate::TIMESTAMP.to_string().as_bytes())?;
         return clone_templates();
     }
 
@@ -53,7 +70,7 @@ pub fn init_cache() -> anyhow::Result<()> {
 
     let timestamp_string = read_to_string(fetch_path)?;
     let timestamp = timestamp_string.parse::<u128>()?;
-    let now = *crate::utils::TIMESTAMP;
+    let now = *crate::TIMESTAMP;
 
     let since = now - timestamp;
 

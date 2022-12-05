@@ -44,7 +44,7 @@ impl Commands {
     pub fn run(&self) -> anyhow::Result<()> {
         match self {
             Commands::List => {
-                if *crate::utils::CACHE_ENABLED {
+                if *crate::cache::CACHE_ENABLED {
                     init_cache()?;
                 }
 
@@ -57,7 +57,7 @@ impl Commands {
                 overwrite,
                 no_overwrite,
             } => {
-                if *crate::utils::CACHE_ENABLED {
+                if *crate::cache::CACHE_ENABLED {
                     init_cache()?;
                 }
 
