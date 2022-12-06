@@ -47,12 +47,14 @@ impl GithubApi {
             "{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] ({pos}/{len}, ETA {eta})",
         )?;
 
-        let response: Gitignores = reqwest::blocking::Client::builder()
+        let text_response = reqwest::blocking::Client::builder()
             .user_agent("ignoreit")
             .build()?
             .get(API_URL)
             .send()?
-            .json()?;
+            .text()?;
+
+        let response: Gitignores = text_response.split(',').map(String::from).collect();
 
         let files = response
             .par_iter()
