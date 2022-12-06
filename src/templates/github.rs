@@ -41,7 +41,7 @@ impl GithubApi {
     // TODO: Implement a better error type
     /// Get the response from Github
     pub fn new() -> anyhow::Result<Self> {
-        const API_URL: &str = "https://api.github.com/gitignore/templates";
+        const API_URL: &str = "https://www.toptal.com/developers/gitignore/api/list";
 
         let style = ProgressStyle::default_bar().template(
             "{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] ({pos}/{len}, ETA {eta})",

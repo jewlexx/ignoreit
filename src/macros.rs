@@ -12,9 +12,6 @@ macro_rules! sleep_for {
 #[macro_export]
 macro_rules! parse_url {
     ($url:tt) => {
-        format!(
-            "https://raw.githubusercontent.com/github/gitignore/main/{}.gitignore",
-            $url
-        )
+        format!("https://www.toptal.com/developers/gitignore/api/{}", $url)
     };
 }
