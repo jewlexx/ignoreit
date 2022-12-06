@@ -54,7 +54,7 @@ impl GithubApi {
             .send()?
             .text()?;
 
-        let response: Gitignores = text_response.split(',').map(String::from).collect();
+        let response: Gitignores = text_response.split([',', '\n']).map(String::from).collect();
 
         let files = response
             .par_iter()
