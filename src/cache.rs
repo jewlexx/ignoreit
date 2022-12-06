@@ -168,10 +168,17 @@ fn clone_templates() -> anyhow::Result<()> {
         })
         .collect::<Vec<_>>();
 
-    for file_name in file_names {
-        let file_path = cache_dir.join(&file_name);
+    for zip_file_name in file_names {
+        let file_path = cache_dir.join(&zip_file_name);
+        let file_name = zip_file_name.split('/').last().unwrap();
 
-        let file = zip.by_name(&file_name).unwrap();
+        let file = zip.by_name(&zip_file_name).unwrap();
+
+        let bytes = file.bytes();
+
+        let file_bytes = bytes.collect::<Result<Vec<_>, _>>()?;
+
+        fs::write(file_path, file_bytes)?;
     }
 
     // for name in  {
