@@ -181,27 +181,6 @@ fn clone_templates() -> anyhow::Result<()> {
         fs::write(file_path, file_bytes)?;
     }
 
-    // for name in  {
-    //     println!("Processing {}", name);
-    // }
-    // let mut decompressed = vec![];
-
-    // flate2::Decompress::new(false).decompress_vec(
-    //     &downloaded,
-    //     &mut decompressed,
-    //     flate2::FlushDecompress::None,
-    // )?;
-
-    // let path = gitignore.path(&cache_dir);
-
-    // if !path.exists() {
-    //     fs::create_dir_all(path.parent().context("Path was root for some reason")?)
-    //         .context("Failed to create dir")?;
-    //     let mut file = fs::File::create(path).context("Failed to create file")?;
-
-    //     file.write_all(gitignore.bytes())?;
-    // }
-
     Ok(())
 }
 
