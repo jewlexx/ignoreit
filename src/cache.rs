@@ -158,8 +158,7 @@ fn clone_templates() -> anyhow::Result<()> {
 
     let file_names = zip
         .file_names()
-        .collect::<Vec<_>>()
-        .par_iter()
+        .par_bridge()
         .filter_map(|file_name| {
             if file_name.ends_with(".gitignore") {
                 Some(file_name.to_owned())
@@ -167,18 +166,20 @@ fn clone_templates() -> anyhow::Result<()> {
                 None
             }
         })
-        .for_each(|zip_file_name| {
-            let file_name = zip_file_name.split('/').last().unwrap();
-            let file_path = cache_dir.join(file_name);
+        .collect::<Vec<_>>();
 
-            let file = zip.by_name(&zip_file_name).unwrap();
+    for zip_file_name in file_names {
+        let file_name = zip_file_name.split('/').last().unwrap();
+        let file_path = cache_dir.join(file_name);
 
-            let bytes = file.bytes();
+        let file = zip.by_name(&zip_file_name).unwrap();
 
-            let file_bytes = bytes.collect::<Result<Vec<_>, _>>().unwrap();
+        let bytes = file.bytes();
 
-            fs::write(file_path, file_bytes).unwrap();
-        });
+        let file_bytes = bytes.collect::<Result<Vec<_>, _>>().unwrap();
+
+        fs::write(file_path, file_bytes).unwrap();
+    }
 
     Ok(())
 }
