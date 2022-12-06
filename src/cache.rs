@@ -141,10 +141,25 @@ pub fn get_template_paths() -> anyhow::Result<Vec<TemplatePath>> {
 }
 
 fn clone_templates() -> anyhow::Result<()> {
+    use std::io::Cursor;
+    use zip::ZipArchive;
+
+    const DOWNLOAD_URL: &str = "https://github.com/toptal/gitignore/archive/refs/heads/master.zip";
     let templates = crate::templates::github::GithubApi::new()?;
     let cache_dir = CACHE_DIR.clone();
 
     for gitignore in templates.response {
+        let downloaded = reqwest::blocking::get(DOWNLOAD_URL)?.bytes()?;
+
+        let mut zip = ZipArchive::new(Cursor::new(downloaded))?;
+        // let mut decompressed = vec![];
+
+        // flate2::Decompress::new(false).decompress_vec(
+        //     &downloaded,
+        //     &mut decompressed,
+        //     flate2::FlushDecompress::None,
+        // )?;
+
         let path = gitignore.path(&cache_dir);
 
         if !path.exists() {
