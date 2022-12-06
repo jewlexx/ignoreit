@@ -8,9 +8,9 @@ use std::{
 
 use anyhow::Context;
 use parking_lot::{const_mutex, Mutex};
-
 use directories::BaseDirs;
 use lazy_static::lazy_static;
+use rayon::prelude::*;
 
 lazy_static! {
     /// The directory containing the cache
@@ -156,7 +156,9 @@ fn clone_templates() -> anyhow::Result<()> {
 
     let mut zip = ZipArchive::new(Cursor::new(downloaded))?;
 
-    for name in zip.file_names() {
+    let file_names = zip.file_names().par_bridge().filter(|file_name| file_name.ends_with(".gitignore")).collect::<Vec<_>>();
+
+    for name in  {
         println!("Processing {}", name);
     }
     // let mut decompressed = vec![];
