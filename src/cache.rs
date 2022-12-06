@@ -151,7 +151,6 @@ fn clone_templates() -> anyhow::Result<()> {
     use zip::ZipArchive;
 
     const DOWNLOAD_URL: &str = "https://github.com/toptal/gitignore/archive/refs/heads/master.zip";
-    // let templates = crate::templates::github::GithubApi::new()?;
     let cache_dir = CACHE_DIR.clone();
 
     let downloaded = reqwest::blocking::get(DOWNLOAD_URL)?.bytes()?;
