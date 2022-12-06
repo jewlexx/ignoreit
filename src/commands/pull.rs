@@ -44,7 +44,10 @@ pub fn run(
 
     let template_map = get_template_paths()?;
 
-    let template_path = if let Some(v) = template_map.iter().find(|f| f.lower == template_name) {
+    let template_path = if let Some(v) = template_map
+        .iter()
+        .find(|f| f.lower == format!("{}.gitignore", template_name))
+    {
         v
     } else {
         return Err(anyhow::anyhow!("Template not found: {}", template_name));
