@@ -176,6 +176,8 @@ fn clone_templates() -> anyhow::Result<()> {
 
     let bar = ProgressBar::new(file_names.len() as u64);
 
+    bar.set_style(style);
+
     for zip_file_name in file_names {
         let file_name = zip_file_name.split('/').last().unwrap();
         let file_path = cache_dir.join(file_name);
