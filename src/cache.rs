@@ -171,7 +171,7 @@ fn clone_templates() -> anyhow::Result<()> {
     for file_name in file_names {
         let file_path = cache_dir.join(file_name);
 
-        let file = zip.by_name(file_name).unwrap();
+        let file = zip.by_name(&file_name).unwrap();
     }
 
     // for name in  {
