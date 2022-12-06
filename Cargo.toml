@@ -21,6 +21,7 @@ reqwest = { version = "0.11.13", features = ["json", "blocking"] }
 indicatif = { version = "0.17.2", features = ["rayon"] }
 rayon = "1.6.0"
 parking_lot = "0.12.1"
+flate2 = "1.0.25"
 
 [profile.release]
 strip = true
