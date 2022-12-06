@@ -9,6 +9,8 @@ use clap::Parser;
 
 use lazy_static::lazy_static;
 
+// TODO: Refactor cache into struct
+
 lazy_static! {
     /// The current time in milliseconds
     pub static ref TIMESTAMP: u128 = SystemTime::now()
