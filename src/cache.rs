@@ -148,28 +148,30 @@ fn clone_templates() -> anyhow::Result<()> {
     let templates = crate::templates::github::GithubApi::new()?;
     let cache_dir = CACHE_DIR.clone();
 
-    for gitignore in templates.response {
-        let downloaded = reqwest::blocking::get(DOWNLOAD_URL)?.bytes()?;
+    let downloaded = reqwest::blocking::get(DOWNLOAD_URL)?.bytes()?;
 
-        let mut zip = ZipArchive::new(Cursor::new(downloaded))?;
-        // let mut decompressed = vec![];
+    let mut zip = ZipArchive::new(Cursor::new(downloaded))?;
 
-        // flate2::Decompress::new(false).decompress_vec(
-        //     &downloaded,
-        //     &mut decompressed,
-        //     flate2::FlushDecompress::None,
-        // )?;
-
-        let path = gitignore.path(&cache_dir);
-
-        if !path.exists() {
-            fs::create_dir_all(path.parent().context("Path was root for some reason")?)
-                .context("Failed to create dir")?;
-            let mut file = fs::File::create(path).context("Failed to create file")?;
-
-            file.write_all(gitignore.bytes())?;
-        }
+    for name in zip.file_names() {
+        println!("Processing {}", name);
     }
+    // let mut decompressed = vec![];
+
+    // flate2::Decompress::new(false).decompress_vec(
+    //     &downloaded,
+    //     &mut decompressed,
+    //     flate2::FlushDecompress::None,
+    // )?;
+
+    // let path = gitignore.path(&cache_dir);
+
+    // if !path.exists() {
+    //     fs::create_dir_all(path.parent().context("Path was root for some reason")?)
+    //         .context("Failed to create dir")?;
+    //     let mut file = fs::File::create(path).context("Failed to create file")?;
+
+    //     file.write_all(gitignore.bytes())?;
+    // }
 
     Ok(())
 }
