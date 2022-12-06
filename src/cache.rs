@@ -151,7 +151,7 @@ fn clone_templates() -> anyhow::Result<()> {
     use zip::ZipArchive;
 
     const DOWNLOAD_URL: &str = "https://github.com/toptal/gitignore/archive/refs/heads/master.zip";
-    let templates = crate::templates::github::GithubApi::new()?;
+    // let templates = crate::templates::github::GithubApi::new()?;
     let cache_dir = CACHE_DIR.clone();
 
     let downloaded = reqwest::blocking::get(DOWNLOAD_URL)?.bytes()?;
@@ -171,7 +171,7 @@ fn clone_templates() -> anyhow::Result<()> {
         .collect::<Vec<_>>();
 
     let style = ProgressStyle::default_bar().template(
-        "{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] ({pos}/{len}, ETA {eta})",
+        "Writing Cache {spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] ({pos}/{len}, ETA {eta})",
     )?;
 
     let bar = ProgressBar::new(file_names.len() as u64);
