@@ -146,6 +146,8 @@ pub fn get_template_paths() -> anyhow::Result<Vec<TemplatePath>> {
 
 fn clone_templates() -> anyhow::Result<()> {
     use std::io::Cursor;
+
+    use indicatif::{ProgressBar, ProgressStyle};
     use zip::ZipArchive;
 
     const DOWNLOAD_URL: &str = "https://github.com/toptal/gitignore/archive/refs/heads/master.zip";
@@ -168,6 +170,12 @@ fn clone_templates() -> anyhow::Result<()> {
         })
         .collect::<Vec<_>>();
 
+    let style = ProgressStyle::default_bar().template(
+        "{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] ({pos}/{len}, ETA {eta})",
+    )?;
+
+    let bar = ProgressBar::new(file_names.len() as u64);
+
     for zip_file_name in file_names {
         let file_name = zip_file_name.split('/').last().unwrap();
         let file_path = cache_dir.join(file_name);
@@ -179,6 +187,8 @@ fn clone_templates() -> anyhow::Result<()> {
         let file_bytes = bytes.collect::<Result<Vec<_>, _>>().unwrap();
 
         fs::write(file_path, file_bytes).unwrap();
+
+        bar.inc(1);
     }
 
     Ok(())
