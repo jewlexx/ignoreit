@@ -31,7 +31,11 @@ lazy_static! {
 pub fn purge() -> anyhow::Result<()> {
     let cache_dir = CACHE_DIR.clone();
 
-    fs::remove_dir_all(cache_dir).context("Failed to purge cache")?;
+    if cache_dir.exists() {
+        fs::remove_dir_all(cache_dir).context("Failed to purge cache")?;
+    } else {
+        println!("No cache to purge.");
+    }
 
     Ok(())
 }
