@@ -169,7 +169,7 @@ fn clone_templates() -> anyhow::Result<()> {
         .collect::<Vec<_>>();
 
     for file_name in file_names {
-        let file_path = cache_dir.join(file_name);
+        let file_path = cache_dir.join(&file_name);
 
         let file = zip.by_name(&file_name).unwrap();
     }
