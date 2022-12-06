@@ -22,7 +22,6 @@ lazy_static! {
 pub mod cache;
 pub mod commands;
 pub mod macros;
-pub mod templates;
 
 // TODO: add custom errors with `thiserror`
 
