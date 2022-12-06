@@ -158,10 +158,11 @@ fn clone_templates() -> anyhow::Result<()> {
 
     let file_names = zip
         .file_names()
-        .par_bridge()
+        .collect::<Vec<_>>()
+        .par_iter()
         .filter_map(|file_name| {
             if file_name.ends_with(".gitignore") {
-                Some(String::from(file_name))
+                Some(file_name.to_owned())
             } else {
                 None
             }
