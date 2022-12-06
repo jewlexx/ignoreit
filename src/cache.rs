@@ -7,9 +7,9 @@ use std::{
 };
 
 use anyhow::Context;
-use parking_lot::{const_mutex, Mutex};
 use directories::BaseDirs;
 use lazy_static::lazy_static;
+use parking_lot::{const_mutex, Mutex};
 use rayon::prelude::*;
 
 lazy_static! {
@@ -156,11 +156,27 @@ fn clone_templates() -> anyhow::Result<()> {
 
     let mut zip = ZipArchive::new(Cursor::new(downloaded))?;
 
-    let file_names = zip.file_names().par_bridge().filter(|file_name| file_name.ends_with(".gitignore")).collect::<Vec<_>>();
+    let file_names = zip
+        .file_names()
+        .par_bridge()
+        .filter_map(|file_name| {
+            if file_name.ends_with(".gitignore") {
+                Some(String::from(file_name))
+            } else {
+                None
+            }
+        })
+        .collect::<Vec<_>>();
 
-    for name in  {
-        println!("Processing {}", name);
+    for file_name in file_names {
+        let file_path = cache_dir.join(file_name);
+
+        let file = zip.by_name(file_name).unwrap();
     }
+
+    // for name in  {
+    //     println!("Processing {}", name);
+    // }
     // let mut decompressed = vec![];
 
     // flate2::Decompress::new(false).decompress_vec(
