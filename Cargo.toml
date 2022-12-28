@@ -11,7 +11,7 @@ keywords = ["git", "ignore", "developer", "tools", "gitignore"]
 categories = ["command-line-utilities", "development-tools"]
 
 [dependencies]
-anyhow = "1.0.66"
+anyhow = "1.0.68"
 directories = "4.0.1"
 lazy_static = "1.4.0"
 dialoguer = "0.10.2"
