@@ -70,14 +70,12 @@ pub fn run(
                         .default(0)
                         .interact()?;
 
-                    let a = match selection {
+                    Ok(match selection {
                         1 => PullOpts::Append,
                         0 => PullOpts::Overwrite,
                         // 2 and anything else
                         _ => PullOpts::NoOverwrite,
-                    };
-
-                    Ok(a)
+                    })
                 })?;
 
             if opt == PullOpts::NoOverwrite {
