@@ -1,6 +1,6 @@
 use std::{
     env,
-    fs::File,
+    fs::{File, OpenOptions},
     io::{Read, Write},
 };
 
@@ -54,55 +54,54 @@ pub fn run(
         .with_context(|| "Failed to get current directory")?
         .join(output);
 
-    let contents = {
-        let mut contents = String::new();
+    let mut openopts = OpenOptions::new();
 
-        if path.exists() {
-            let pull_opt = PullOpts::get_opt(append, overwrite, no_overwrite);
-            let opt = pull_opt
-                .map(anyhow::Ok)
-                .unwrap_or_else(|| -> anyhow::Result<PullOpts> {
-                    use dialoguer::{theme::ColorfulTheme, Select};
+    if path.exists() {
+        let pull_opt = PullOpts::get_opt(append, overwrite, no_overwrite);
+        let opt = pull_opt
+            .map(anyhow::Ok)
+            .unwrap_or_else(|| -> anyhow::Result<PullOpts> {
+                use dialoguer::{theme::ColorfulTheme, Select};
 
-                    let selection = Select::with_theme(&ColorfulTheme::default())
-                        .with_prompt("The gitignore file already exists in your current directory")
-                        .items(&["Append", "Overwrite", "Exit"])
-                        .default(0)
-                        .interact()?;
+                let selection = Select::with_theme(&ColorfulTheme::default())
+                    .with_prompt("The gitignore file already exists in your current directory")
+                    .items(&["Append", "Overwrite", "Exit"])
+                    .default(0)
+                    .interact()?;
 
-                    Ok(match selection {
-                        1 => PullOpts::Append,
-                        0 => PullOpts::Overwrite,
-                        // 2 and anything else
-                        _ => PullOpts::NoOverwrite,
-                    })
-                })?;
+                Ok(match selection {
+                    1 => PullOpts::Append,
+                    0 => PullOpts::Overwrite,
+                    // 2 and anything else
+                    _ => PullOpts::NoOverwrite,
+                })
+            })?;
 
-            if opt == PullOpts::NoOverwrite {
+        match opt {
+            PullOpts::NoOverwrite => {
                 println!("Goodbye!");
                 return Ok(());
-            } else if opt == PullOpts::Append {
-                let mut file = File::open(&path).with_context(|| "Failed to open file")?;
-
-                file.read_to_string(&mut contents)
-                    .with_context(|| "Failed to read file")?;
+            }
+            PullOpts::Append => {
+                // Append written content to the end of the existing file
+                openopts.append(true);
+            }
+            PullOpts::Overwrite => {
+                // [`OpenOptions::append`] implies [`OpenOptions::write`] so we only have to
+                // explicitly write it here
+                openopts.write(true);
             }
         }
+    }
 
-        if *crate::cache::CACHE_ENABLED {
-            println!("Getting template {}", template_path);
-            let template = get_template(template_path)?;
-            let title = format!("# {}.gitignore\n", template_path);
-            contents.push_str(&title);
-            contents.push_str(std::str::from_utf8(&template)?);
-        }
+    let mut file = openopts.open(&path)?;
 
-        contents
-    };
-
-    let mut file = File::create(path).with_context(|| "Failed to create file")?;
-    file.write_all(contents.as_bytes())
-        .with_context(|| "Failed to write to file")?;
+    if *crate::cache::CACHE_ENABLED {
+        println!("Getting template {}", template_path);
+        let template = get_template(template_path)?;
+        writeln!(file, "# {}.gitignore", template_path)?;
+        write!(file, "{}", String::from_utf8(template)?)?;
+    }
 
     Ok(())
 }
