@@ -70,8 +70,8 @@ pub fn run(
                     .interact()?;
 
                 Ok(match selection {
-                    1 => PullOpts::Append,
-                    0 => PullOpts::Overwrite,
+                    0 => PullOpts::Append,
+                    1 => PullOpts::Overwrite,
                     // 2 and anything else
                     _ => PullOpts::NoOverwrite,
                 })
