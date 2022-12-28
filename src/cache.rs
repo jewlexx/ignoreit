@@ -145,6 +145,8 @@ fn clone_templates() -> anyhow::Result<()> {
     let cache_dir = CACHE_DIR.clone();
 
     for gitignore in templates.response {
+        // This is allowed because removing the borrow will create an error
+        #[allow(clippy::needless_borrow)]
         let path = gitignore.path(&cache_dir);
 
         if !path.exists() {
