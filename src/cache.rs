@@ -36,11 +36,6 @@ pub fn purge() -> anyhow::Result<()> {
     Ok(())
 }
 
-/// One Day in seconds
-///
-/// 24 hours -> in minutes -> in seconds -> in milliseconds
-const TO_UPDATE: u128 = 24 * 60 * 60 * 1000;
-
 static HAS_RECURSED: Mutex<usize> = const_mutex(0);
 
 /// Initialize cache
@@ -54,7 +49,7 @@ pub fn init_cache() -> anyhow::Result<()> {
         *has_recursed += 1;
     }
 
-    let fetch_path = CACHE_DIR.join(".timestamp");
+    let fetch_path = CACHE_DIR.join(".hash");
     let cache_dir = CACHE_DIR.clone();
 
     if !cache_dir.exists() {
@@ -68,13 +63,13 @@ pub fn init_cache() -> anyhow::Result<()> {
         return init_cache();
     }
 
-    let timestamp_string = read_to_string(fetch_path)?;
-    let timestamp = timestamp_string.parse::<u128>()?;
-    let now = *crate::TIMESTAMP;
+    let hash = read_to_string(fetch_path)?;
 
-    let since = now - timestamp;
+    let hash_value: serde_json::Value =
+        reqwest::blocking::get("https://api.github.com/repos/github/gitignore/commits/main")?
+            .json()?;
 
-    if since >= TO_UPDATE {
+    if hash_value.as_str() != Some(&hash) {
         fs::remove_dir_all(cache_dir)?;
         clone_templates()?;
     }
@@ -121,8 +116,7 @@ pub fn get_template_paths() -> anyhow::Result<Vec<TemplatePath>> {
     let ignores = dir
         .iter()
         .filter(|entry| {
-            entry.file_type().unwrap().is_file()
-                && entry.file_name().to_str().unwrap() != ".timestamp"
+            entry.file_type().unwrap().is_file() && entry.file_name().to_str().unwrap() != ".hash"
         })
         .map(|entry| {
             let file_name = entry.file_name();
@@ -143,10 +137,12 @@ pub fn get_template_paths() -> anyhow::Result<Vec<TemplatePath>> {
 fn clone_templates() -> anyhow::Result<()> {
     let templates = crate::templates::github::GithubApi::new()?;
     let cache_dir = CACHE_DIR.clone();
+    let hash: serde_json::Value =
+        reqwest::blocking::get("https://api.github.com/repos/github/gitignore/commits/main")?
+            .json()?;
 
     for gitignore in templates.response {
         // This is allowed because removing the borrow will create an error
-        #[allow(clippy::needless_borrow)]
         let path = gitignore.path(&cache_dir);
 
         if !path.exists() {
@@ -158,16 +154,8 @@ fn clone_templates() -> anyhow::Result<()> {
         }
     }
 
+    fs::File::create(cache_dir.join(".hash"))?
+        .write_all(hash.get("sha").unwrap().as_str().unwrap().as_bytes())?;
+
     Ok(())
-}
-
-#[cfg(test)]
-mod tests {
-    /// One day in milliseconds
-    const DAY: u128 = 86400000;
-
-    #[test]
-    fn test_to_update() {
-        assert_eq!(DAY, super::TO_UPDATE);
-    }
 }

@@ -42,27 +42,21 @@ pub enum Commands {
 impl Commands {
     /// Runs the subcommand
     pub fn run(&self) -> anyhow::Result<()> {
-        match self {
-            Commands::List => {
-                if *crate::cache::CACHE_ENABLED {
-                    init_cache()?;
-                }
-
-                list_templates()?;
+        if *crate::cache::CACHE_ENABLED {
+            if init_cache().is_err() {
+                println!("Failed to initialize cache")
             }
+        }
+
+        match self {
+            Commands::List => list_templates()?,
             Commands::Pull {
                 output,
                 template,
                 append,
                 overwrite,
                 no_overwrite,
-            } => {
-                if *crate::cache::CACHE_ENABLED {
-                    init_cache()?;
-                }
-
-                pull_template(output, template.clone(), append, overwrite, no_overwrite)?;
-            }
+            } => pull_template(output, template.clone(), append, overwrite, no_overwrite)?,
             Commands::Purge => cache::purge()?,
         };
 
