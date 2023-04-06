@@ -3,19 +3,7 @@
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 
-use std::time::SystemTime;
-
 use clap::Parser;
-
-use lazy_static::lazy_static;
-
-lazy_static! {
-    /// The current time in milliseconds
-    pub static ref TIMESTAMP: u128 = SystemTime::now()
-        .duration_since(SystemTime::UNIX_EPOCH)
-        .expect("time went backwards")
-        .as_millis();
-}
 
 pub mod cache;
 pub mod commands;
@@ -27,8 +15,6 @@ pub mod templates;
 use commands::args::Args;
 
 fn main() -> anyhow::Result<()> {
-    lazy_static::initialize(&TIMESTAMP);
-
     if !*cache::CACHE_ENABLED {
         use mincolor::Colorize;
         println!(
