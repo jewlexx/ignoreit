@@ -1,32 +1,24 @@
 [package]
-name = "ignoreit"
-description = "Quickly load .gitignore templates"
-version = "2.4.10"
 authors = ["Juliette Cordor"]
-readme = "README.md"
-repository = "https://github.com/jewlexx/ignoreit"
-license = "MIT"
+categories = ["command-line-utilities", "development-tools"]
+description = "Quickly load .gitignore templates"
 edition = "2021"
 keywords = ["git", "ignore", "developer", "tools", "gitignore"]
-categories = ["command-line-utilities", "development-tools"]
+license = "MIT"
+name = "ignoreit"
+readme = "README.md"
+repository = "https://github.com/jewlexx/ignoreit"
+version = "2.4.10"
 
 [dependencies]
-anyhow = "1.0"
-directories = "5.0"
-lazy_static = "1.4"
-dialoguer = "0.10"
-clap = { version = "4.4", features = ["derive"] }
-mincolor = "2.0"
-reqwest = { version = "0.11", features = ["json", "blocking"] }
-indicatif = { version = "0.17", features = ["rayon"] }
-rayon = "1.7"
-parking_lot = "0.12"
-serde_json = "1.0"
+anyhow = "1.0.86"
+clap = { version = "4.5.8", features = ["derive"] }
+git2 = "0.19.0"
+tokio = { version = "1.38.0", features = ["full"] }
 
 [profile.release]
-strip = true
 lto = true
+strip = true
 
 [features]
 default = []
-vendored-tls = ["reqwest/native-tls-vendored"]
