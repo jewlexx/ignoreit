@@ -2,7 +2,9 @@ use std::sync::Arc;
 
 use tokio::sync::Mutex;
 
+mod clone;
 mod config;
+mod dirs;
 
 fn main() {
     if let Err(e) = tokio::runtime::Builder::new_multi_thread()
@@ -30,6 +32,12 @@ async fn _main() -> anyhow::Result<()> {
             // TODO: Check for updates and update if necessary
         }
     });
+
+    let cache_dir = dirs::cache_dir().unwrap();
+
+    if config.lock().await.first_run {
+        clone::clone("https://github.com/jewlexx/ignoreit", "/tmp/ignoreit").unwrap();
+    }
 
     Ok(())
 }

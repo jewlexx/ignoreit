@@ -1,5 +1,9 @@
 use std::path::PathBuf;
 
+use anyhow::Context;
+
+use crate::dirs;
+
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct Config {
     pub last_update: u64,
@@ -17,16 +21,13 @@ impl Default for Config {
 
 impl Config {
     fn config_dir() -> anyhow::Result<PathBuf> {
-        let dirs = directories::ProjectDirs::from("com", "jewlexx", "ignoreit")
-            .ok_or(anyhow::anyhow!("Could not find base directories"))?;
-
-        let path = dirs.config_dir();
+        let path = dirs::config_dir().context("Could not find or create config directory")?;
 
         if !path.exists() {
-            std::fs::create_dir_all(path)?;
+            std::fs::create_dir_all(&path)?;
         }
 
-        Ok(path.to_owned())
+        Ok(path)
     }
 
     fn config_file() -> anyhow::Result<PathBuf> {
