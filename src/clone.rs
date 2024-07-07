@@ -77,7 +77,7 @@ fn print(state: &mut State) {
     io::stdout().flush().unwrap();
 }
 
-pub fn clone(url: &str, path: &str) -> Result<(), git2::Error> {
+pub fn clone(url: &str, path: &Path) -> Result<(), git2::Error> {
     let state = RefCell::new(State {
         progress: None,
         total: 0,
@@ -107,7 +107,7 @@ pub fn clone(url: &str, path: &str) -> Result<(), git2::Error> {
     RepoBuilder::new()
         .fetch_options(fo)
         .with_checkout(co)
-        .clone(url, Path::new(path))?;
+        .clone(url, path)?;
     println!();
 
     Ok(())

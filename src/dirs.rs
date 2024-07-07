@@ -14,6 +14,16 @@ pub fn cache_dir() -> Option<std::path::PathBuf> {
     Some(path.to_owned())
 }
 
+pub fn templates_dir() -> Option<std::path::PathBuf> {
+    let path = cache_dir()?.join("templates");
+
+    if !path.exists() {
+        std::fs::create_dir_all(&path).ok()?;
+    }
+
+    Some(path)
+}
+
 pub fn config_dir() -> Option<std::path::PathBuf> {
     let dirs = project_dirs()?;
 
