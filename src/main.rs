@@ -2,13 +2,15 @@ use std::{sync::Arc, time::Duration};
 
 use clap::Parser;
 use indicatif::ProgressBar;
+use progress::CounterProgress;
 use tokio::sync::Mutex;
 
+mod cache;
 mod clone;
 mod config;
 mod dirs;
-
-const GITIGNORE_REPO_URL: &str = "https://github.com/github/gitignore";
+pub mod progress;
+mod template;
 
 #[derive(Debug, Clone, Parser)]
 struct Args {
@@ -39,23 +41,14 @@ async fn _main() -> anyhow::Result<()> {
     if args.debug_first_run {
         config.lock().await.first_run = true;
 
-        std::fs::remove_dir_all(dirs::templates_dir().unwrap()).unwrap();
+        std::fs::remove_dir_all(cache::Cache::path().unwrap()).unwrap();
     }
 
-    let background_task = tokio::spawn({
-        let config = config.clone();
-        async move {
-            if config.lock().await.first_run {
-                return;
-            }
+    let first_run = config.lock().await.first_run;
 
-            // TODO: Check for updates and update if necessary
-        }
-    });
+    // let file_loading = CounterProgress::new(, callback)
 
-    if config.lock().await.first_run {
-        background_task.await?;
-
+    let cache = if first_run {
         // Lock config after background task has finished
         let mut config = config.lock().await;
 
@@ -67,8 +60,27 @@ async fn _main() -> anyhow::Result<()> {
 
         let pb = ProgressBar::new_spinner();
         pb.enable_steady_tick(Duration::from_millis(100));
-        clone::clone(GITIGNORE_REPO_URL, &dirs::templates_dir().unwrap()).unwrap();
-    }
+        cache::Cache::clone()?
+    } else {
+        let pb = ProgressBar::new_spinner().with_message("Loading templates...");
+        pb.enable_steady_tick(Duration::from_millis(100));
+        cache::Cache::open()?
+    };
+
+    let cache = Arc::new(cache);
+
+    let background_task = tokio::spawn({
+        let config = config.clone();
+        async move {
+            if first_run {
+                return;
+            } else if cache.open_repo().unwrap().outdated().unwrap() {
+                // TODO: Update cache
+            }
+
+            // TODO: Check for updates and update if necessary
+        }
+    });
 
     Ok(())
 }

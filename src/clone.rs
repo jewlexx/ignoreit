@@ -77,7 +77,7 @@ fn print(state: &mut State) {
     io::stdout().flush().unwrap();
 }
 
-pub fn clone(url: &str, path: &Path) -> Result<(), git2::Error> {
+pub fn clone(url: &str, path: &Path) -> Result<git2::Repository, git2::Error> {
     let state = RefCell::new(State {
         progress: None,
         total: 0,
@@ -104,11 +104,12 @@ pub fn clone(url: &str, path: &Path) -> Result<(), git2::Error> {
 
     let mut fo = FetchOptions::new();
     fo.remote_callbacks(cb);
-    RepoBuilder::new()
+
+    // Note the let binding here prevents state from being dropped before the clone is finished
+    let repo = RepoBuilder::new()
         .fetch_options(fo)
         .with_checkout(co)
         .clone(url, path)?;
-    println!();
 
-    Ok(())
+    Ok(repo)
 }
