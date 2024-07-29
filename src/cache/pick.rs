@@ -77,7 +77,7 @@ pub fn pick_template(templates: &[Template]) -> anyhow::Result<Option<Template>>
                 .title_bottom("<Ctrl+C> to quit | <Up/Down> to navigate | <Enter> to select"),
         )
         .style(Style::default().fg(Color::White))
-        .highlight_style(Style::default().fg(Color::Cyan))
+        .highlight_style(Style::default().add_modifier(Modifier::DIM))
         .highlight_symbol("> ");
 
         frame.render_stateful_widget(list, chunks[1], &mut *list_state.lock().unwrap());
