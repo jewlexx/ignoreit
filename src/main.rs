@@ -1,6 +1,7 @@
 use std::{sync::Arc, time::Duration};
 
 use clap::Parser;
+use dialoguer::theme::ColorfulTheme;
 use indicatif::ProgressBar;
 use progress::CounterProgress;
 use tokio::sync::Mutex;
@@ -70,10 +71,10 @@ async fn _main() -> anyhow::Result<()> {
     let cache = Arc::new(cache);
 
     let background_task = tokio::spawn({
+        let cache = cache.clone();
         let config = config.clone();
         async move {
             if first_run {
-                return;
             } else if cache.open_repo().unwrap().outdated().unwrap() {
                 // TODO: Update cache
             }
@@ -81,6 +82,12 @@ async fn _main() -> anyhow::Result<()> {
             // TODO: Check for updates and update if necessary
         }
     });
+
+    let chosen_template = cache.pick_template()?;
+
+    println!("Pulling template {}", chosen_template.name());
+
+    background_task.await?;
 
     Ok(())
 }

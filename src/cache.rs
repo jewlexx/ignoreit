@@ -1,14 +1,15 @@
-use std::path::PathBuf;
+use std::{ffi::OsStr, path::PathBuf};
 
+use dialoguer::theme::ColorfulTheme;
 use git2::{FetchOptions, RemoteCallbacks};
 
-use crate::progress::CounterProgress;
+use crate::{progress::CounterProgress, template::Template};
 
 const GITIGNORE_REPO_URL: &str = "https://github.com/github/gitignore";
 
 pub struct Cache {
     cache_path: PathBuf,
-    templates: Vec<PathBuf>,
+    templates: Vec<Template>,
 }
 
 impl Cache {
@@ -34,15 +35,15 @@ impl Cache {
         })
     }
 
-    pub fn load_files() -> anyhow::Result<Vec<PathBuf>> {
+    pub fn load_files() -> anyhow::Result<Vec<Template>> {
         let mut files = Vec::new();
 
         for entry in walkdir::WalkDir::new(Self::path().unwrap()) {
             let entry = entry?;
             let path = entry.path();
 
-            if path.is_file() && path.extension().unwrap() == "gitignore" {
-                files.push(path.to_path_buf());
+            if path.is_file() && path.extension() == Some(OsStr::new("gitignore")) {
+                files.push(Template::new(path.to_path_buf()));
             }
         }
 
@@ -64,6 +65,22 @@ impl Cache {
             cache_path: Self::path().unwrap(),
             templates: files,
         })
+    }
+
+    pub fn list_templates(&self) -> &[Template] {
+        self.templates.as_ref()
+    }
+
+    pub fn pick_template(&self) -> anyhow::Result<Template> {
+        let templates = self.list_templates();
+
+        let chosen_index = dialoguer::FuzzySelect::with_theme(&ColorfulTheme::default())
+            .items(templates)
+            .with_prompt("Choose a gitignore template")
+            .clear(true)
+            .interact()?;
+
+        Ok(templates[chosen_index].clone())
     }
 }
 
