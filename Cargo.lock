@@ -452,6 +452,7 @@ dependencies = [
  "fuzzy-matcher",
  "git2",
  "indicatif",
+ "itertools",
  "minus",
  "ratatui",
  "rayon",

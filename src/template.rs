@@ -1,10 +1,10 @@
-use std::{fmt::Display, path::PathBuf};
+use std::{cmp::Ordering, fmt::Display, path::PathBuf};
 
 use console::Color;
 
 use crate::cache::Cache;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Category {
     Subfolder(Vec<String>),
     Root,
@@ -25,12 +25,24 @@ impl Display for Category {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Template {
     name: String,
     path: PathBuf,
     #[allow(dead_code)]
     category: Category,
+}
+
+impl PartialOrd for Template {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.name.cmp(&other.name))
+    }
+}
+
+impl Ord for Template {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.name.cmp(&other.name)
+    }
 }
 
 impl Template {

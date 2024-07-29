@@ -1,21 +1,20 @@
-use std::{io::stdout, sync::Mutex};
+use std::{cmp::Ordering, io::stdout, sync::Mutex};
 
-use minus::search;
+use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
+use itertools::Itertools;
 use ratatui::{
     crossterm::{
-        event::{self, Event, KeyCode, KeyEventKind, KeyEventState, KeyModifiers},
+        event::{self, Event, KeyCode, KeyEventKind, KeyModifiers},
         terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
         ExecutableCommand,
     },
     prelude::*,
     widgets::*,
 };
-use serde::de;
-use style::Styled;
 
 use crate::template::Template;
 
-pub fn pick_template(templates: &[super::Template]) -> anyhow::Result<Option<super::Template>> {
+pub fn pick_template(templates: &[Template]) -> anyhow::Result<Option<Template>> {
     enable_raw_mode()?;
     stdout().execute(EnterAlternateScreen)?;
     let mut terminal = Terminal::new(CrosstermBackend::new(stdout()))?;
@@ -27,6 +26,8 @@ pub fn pick_template(templates: &[super::Template]) -> anyhow::Result<Option<sup
     });
 
     let search_term = Mutex::new(String::new());
+
+    let matching_templates = Mutex::new(templates.to_vec());
 
     let ui = |frame: &mut Frame| {
         let chunks = Layout::default()
@@ -40,22 +41,29 @@ pub fn pick_template(templates: &[super::Template]) -> anyhow::Result<Option<sup
 
         frame.render_widget(text_input, chunks[0]);
 
-        let list = List::new(templates.iter().map(|t| t.to_string()))
-            .block(
-                Block::bordered()
-                    .title("Templates")
-                    .title_bottom("<Ctrl+C> to quit | <Up/Down> to navigate | <Enter> to select"),
-            )
-            .style(Style::default().fg(Color::White))
-            .highlight_style(Style::default().fg(Color::Black).bg(Color::LightCyan))
-            .highlight_symbol(">>");
+        let list = List::new(
+            matching_templates
+                .lock()
+                .unwrap()
+                .iter()
+                .map(|t| t.to_string()),
+        )
+        .block(
+            Block::bordered()
+                .title("Templates")
+                .title_bottom("<Ctrl+C> to quit | <Up/Down> to navigate | <Enter> to select"),
+        )
+        .style(Style::default().fg(Color::White))
+        .highlight_style(Style::default().fg(Color::Black).bg(Color::LightCyan))
+        .highlight_symbol(">>");
 
         frame.render_stateful_widget(list, chunks[1], &mut *list_state.lock().unwrap());
     };
 
     let selected = loop {
         terminal.draw(ui)?;
-        let (should_quit, selected) = handle_events(templates, &search_term, &list_state)?;
+        let (should_quit, selected) =
+            handle_events(templates, &matching_templates, &search_term, &list_state)?;
 
         if should_quit {
             break selected;
@@ -69,13 +77,29 @@ pub fn pick_template(templates: &[super::Template]) -> anyhow::Result<Option<sup
 }
 
 fn handle_events(
-    templates: &[super::Template],
+    templates: &[Template],
+    matching_templates: &Mutex<Vec<Template>>,
     search_term: &Mutex<String>,
     list_state: &Mutex<ListState>,
 ) -> anyhow::Result<(bool, Option<Template>)> {
     let mut should_quit = false;
 
     let current_index = list_state.lock().unwrap().selected().unwrap_or(0);
+
+    *matching_templates.lock().unwrap() = templates
+        .iter()
+        .filter_map(|t| {
+            SkimMatcherV2::default()
+                .fuzzy_match(t.name(), search_term.lock().unwrap().as_str())
+                .map(|score| (t, score))
+        })
+        .sorted_by(|(a, score_a), (b, score_b)| match score_b.cmp(score_a) {
+            Ordering::Equal => a.cmp(b),
+            ordering => ordering,
+        })
+        .map(|(t, _)| t)
+        .cloned()
+        .collect();
 
     #[derive(Debug, Clone, Copy, PartialEq, Eq)]
     enum Adjustment {
