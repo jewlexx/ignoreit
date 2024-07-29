@@ -1,9 +1,7 @@
 use std::{sync::Arc, time::Duration};
 
 use clap::Parser;
-use dialoguer::theme::ColorfulTheme;
 use indicatif::ProgressBar;
-use progress::CounterProgress;
 use tokio::sync::Mutex;
 
 mod cache;

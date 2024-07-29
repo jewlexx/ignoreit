@@ -3,7 +3,7 @@ use std::{ffi::OsStr, path::PathBuf};
 use dialoguer::theme::ColorfulTheme;
 use git2::{FetchOptions, RemoteCallbacks};
 
-use crate::{progress::CounterProgress, template::Template};
+use crate::template::Template;
 
 const GITIGNORE_REPO_URL: &str = "https://github.com/github/gitignore";
 
