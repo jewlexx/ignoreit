@@ -38,6 +38,7 @@ impl super::Command for Args {
 
         let mut file = File::open(template.path())?;
         let mut destination = OpenOptions::new()
+            .create(true)
             .write(true)
             .append(self.append)
             .open(&self.output)?;
