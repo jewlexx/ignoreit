@@ -27,7 +27,8 @@ pub fn pick_template(templates: &[Template]) -> anyhow::Result<Option<Template>>
 
     let search_term = Mutex::new(String::new());
 
-    let matching_templates = Mutex::new(templates.to_vec());
+    let matching_templates: Mutex<Vec<(Template, Vec<usize>)>> =
+        Mutex::new(templates.iter().map(|t| (t.clone(), vec![])).collect());
 
     let ui = |frame: &mut Frame| {
         let chunks = Layout::default()
@@ -46,7 +47,7 @@ pub fn pick_template(templates: &[Template]) -> anyhow::Result<Option<Template>>
                 .lock()
                 .unwrap()
                 .iter()
-                .map(|t| t.to_string()),
+                .map(|(t, _)| t.to_string()),
         )
         .block(
             Block::bordered()
@@ -78,7 +79,7 @@ pub fn pick_template(templates: &[Template]) -> anyhow::Result<Option<Template>>
 
 fn handle_events(
     templates: &[Template],
-    matching_templates: &Mutex<Vec<Template>>,
+    matching_templates: &Mutex<Vec<(Template, Vec<usize>)>>,
     search_term: &Mutex<String>,
     list_state: &Mutex<ListState>,
 ) -> anyhow::Result<(bool, Option<Template>)> {
@@ -90,14 +91,16 @@ fn handle_events(
         .iter()
         .filter_map(|t| {
             SkimMatcherV2::default()
-                .fuzzy_match(t.name(), search_term.lock().unwrap().as_str())
-                .map(|score| (t, score))
+                .fuzzy_indices(t.name(), search_term.lock().unwrap().as_str())
+                .map(|(score, indices)| (t, score, indices))
         })
-        .sorted_by(|(a, score_a), (b, score_b)| match score_b.cmp(score_a) {
-            Ordering::Equal => a.cmp(b),
-            ordering => ordering,
-        })
-        .map(|(t, _)| t)
+        .sorted_by(
+            |(a, score_a, _), (b, score_b, _)| match score_b.cmp(score_a) {
+                Ordering::Equal => a.cmp(b),
+                ordering => ordering,
+            },
+        )
+        .map(|(t, _, indices)| (t, indices))
         .cloned()
         .collect();
 
