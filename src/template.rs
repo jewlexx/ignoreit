@@ -2,7 +2,9 @@ use std::{fmt::Display, path::PathBuf};
 
 #[derive(Debug, Clone, Copy)]
 pub enum Category {
+    #[allow(dead_code)]
     Global,
+    #[allow(dead_code)]
     Community,
     Root,
 }
@@ -11,6 +13,7 @@ pub enum Category {
 pub struct Template {
     name: String,
     path: PathBuf,
+    #[allow(dead_code)]
     category: Category,
 }
 

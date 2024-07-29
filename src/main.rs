@@ -6,6 +6,7 @@ use tokio::sync::Mutex;
 
 mod cache;
 mod clone;
+mod commands;
 mod config;
 mod dirs;
 pub mod progress;
@@ -13,9 +14,15 @@ mod template;
 
 #[derive(Debug, Clone, Parser)]
 struct Args {
+    #[clap(subcommand)]
+    command: commands::Commands,
+
     #[cfg(debug_assertions)]
     #[clap(short, long, help = "Debug first run")]
     debug_first_run: bool,
+
+    #[clap(short, long, help = "Dry run", global = true)]
+    dry_run: bool,
 }
 
 fn main() {
@@ -33,8 +40,7 @@ fn main() {
 async fn _main() -> anyhow::Result<()> {
     let args = Args::parse();
 
-    let config = config::Config::load()?;
-    let config = Arc::new(Mutex::new(config));
+    let config = Arc::new(Mutex::new(config::Config::load()?));
 
     #[cfg(debug_assertions)]
     if args.debug_first_run {
