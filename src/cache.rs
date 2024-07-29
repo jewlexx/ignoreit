@@ -9,7 +9,6 @@ const GITIGNORE_REPO_URL: &str = "https://github.com/github/gitignore";
 
 #[derive(Debug, Clone)]
 pub struct Cache {
-    path: PathBuf,
     templates: Vec<Template>,
 }
 
@@ -30,10 +29,7 @@ impl Cache {
 
         let files = Self::load_files()?;
 
-        Ok(Self {
-            path,
-            templates: files,
-        })
+        Ok(Self { templates: files })
     }
 
     pub fn load_files() -> anyhow::Result<Vec<Template>> {
@@ -62,10 +58,7 @@ impl Cache {
 
         let files = Self::load_files()?;
 
-        Ok(Self {
-            path: Self::path().unwrap(),
-            templates: files,
-        })
+        Ok(Self { templates: files })
     }
 
     pub fn list_templates(&self) -> &[Template] {

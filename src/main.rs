@@ -83,20 +83,27 @@ async fn _main() -> anyhow::Result<()> {
 
     CACHE.set(cache).expect("Correctly initialized cache");
 
-    let background_task = tokio::spawn({
-        async move {
-            if first_run {
-            } else if CACHE.open_repo().unwrap().outdated().unwrap() {
-                // TODO: Update cache
-            }
+    let background_task = if !args.command.interrupt_background_task() {
+        Some(tokio::spawn({
+            async move {
+                if first_run {
+                    return;
+                }
 
-            // TODO: Check for updates and update if necessary
-        }
-    });
+                if CACHE.open_repo().unwrap().outdated().unwrap() {
+                    // TODO: Update cache
+                }
+            }
+        }))
+    } else {
+        None
+    };
 
     args.command.run().await?;
 
-    background_task.await?;
+    if let Some(task) = background_task {
+        task.await?;
+    };
 
     Ok(())
 }

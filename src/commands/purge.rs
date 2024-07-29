@@ -7,6 +7,8 @@ pub struct Args {
 }
 
 impl super::Command for Args {
+    const INTERRUPT_BACKGROUND_TASK: bool = true;
+
     async fn run(&self) -> anyhow::Result<()> {
         CACHE.purge()?;
         let mut config = CONFIG.lock().await;
