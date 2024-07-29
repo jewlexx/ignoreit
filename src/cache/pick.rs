@@ -14,6 +14,10 @@ use ratatui::{
 
 use crate::template::Template;
 
+fn indices_template<'a>(template: &Template, indices: &Vec<usize>) -> Vec<Span<'a>> {
+    todo!()
+}
+
 pub fn pick_template(templates: &[Template]) -> anyhow::Result<Option<Template>> {
     enable_raw_mode()?;
     stdout().execute(EnterAlternateScreen)?;
@@ -47,7 +51,7 @@ pub fn pick_template(templates: &[Template]) -> anyhow::Result<Option<Template>>
                 .lock()
                 .unwrap()
                 .iter()
-                .map(|(t, _)| t.to_string()),
+                .map(|(t, indices)| Line::from(indices_template(t, indices))),
         )
         .block(
             Block::bordered()
@@ -100,8 +104,7 @@ fn handle_events(
                 ordering => ordering,
             },
         )
-        .map(|(t, _, indices)| (t, indices))
-        .cloned()
+        .map(|(t, _, indices)| (t.clone(), indices))
         .collect();
 
     #[derive(Debug, Clone, Copy, PartialEq, Eq)]
