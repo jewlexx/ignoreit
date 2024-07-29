@@ -132,9 +132,14 @@ fn handle_events(
     }
 
     let adjust_index = |index: usize, adjustment: Adjustment| {
+        let templates_len = {
+            let matching_templates = matching_templates.lock().unwrap();
+            matching_templates.len()
+        };
+
         if index == 0 && adjustment == Adjustment::Down {
-            templates.len() - 1
-        } else if index == templates.len() - 1 && adjustment == Adjustment::Up {
+            templates_len - 1
+        } else if index == templates_len - 1 && adjustment == Adjustment::Up {
             0
         } else {
             match adjustment {
