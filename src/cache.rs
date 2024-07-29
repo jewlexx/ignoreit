@@ -2,7 +2,6 @@ mod pick;
 
 use std::{ffi::OsStr, path::PathBuf};
 
-use dialoguer::theme::ColorfulTheme;
 use git2::{FetchOptions, RemoteCallbacks};
 
 use crate::template::Template;

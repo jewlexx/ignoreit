@@ -1,7 +1,5 @@
 use std::{cmp::Ordering, fmt::Display, path::PathBuf};
 
-use console::Color;
-
 use crate::cache::Cache;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
