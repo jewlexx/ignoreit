@@ -14,8 +14,26 @@ use ratatui::{
 
 use crate::template::Template;
 
-fn indices_template<'a>(template: &Template, indices: &Vec<usize>) -> Vec<Span<'a>> {
-    todo!()
+fn indices_template<'a>(template: &Template, indices: &[usize]) -> Vec<Span<'a>> {
+    let template_name = template.to_string();
+    let chars = template_name.chars().collect::<Vec<_>>();
+
+    let mut spans = Vec::new();
+
+    for (i, c) in chars.iter().enumerate() {
+        if indices.contains(&i) {
+            spans.push(Span::styled(
+                c.to_string(),
+                Style::default()
+                    .fg(Color::LightCyan)
+                    .add_modifier(Modifier::BOLD),
+            ));
+        } else {
+            spans.push(Span::raw(c.to_string()));
+        }
+    }
+
+    spans
 }
 
 pub fn pick_template(templates: &[Template]) -> anyhow::Result<Option<Template>> {
@@ -59,8 +77,8 @@ pub fn pick_template(templates: &[Template]) -> anyhow::Result<Option<Template>>
                 .title_bottom("<Ctrl+C> to quit | <Up/Down> to navigate | <Enter> to select"),
         )
         .style(Style::default().fg(Color::White))
-        .highlight_style(Style::default().fg(Color::Black).bg(Color::LightCyan))
-        .highlight_symbol(">>");
+        .highlight_style(Style::default().fg(Color::Cyan))
+        .highlight_symbol("> ");
 
         frame.render_stateful_widget(list, chunks[1], &mut *list_state.lock().unwrap());
     };
