@@ -1,7 +1,4 @@
-use std::{
-    sync::{LazyLock, OnceLock},
-    time::Duration,
-};
+use std::{sync::LazyLock, time::Duration};
 
 use clap::Parser;
 use indicatif::ProgressBar;
