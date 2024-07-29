@@ -14,6 +14,9 @@ impl super::Command for Args {
         config.first_run = true;
         config.save()?;
 
+        println!("Cache purged");
+        println!("Please run ignoreit again to reload the cache");
+
         Ok(())
     }
 }
