@@ -44,7 +44,7 @@ impl super::Command for Args {
         writeln!(output, "Available Templates:")?;
 
         for template in CACHE.list_templates() {
-            writeln!(output, "\t{}", template.name())?;
+            writeln!(output, "\t{template}")?;
         }
 
         output.page()?;

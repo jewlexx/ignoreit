@@ -1,12 +1,26 @@
 use std::{fmt::Display, path::PathBuf};
 
-#[derive(Debug, Clone, Copy)]
+use crate::cache::Cache;
+
+#[derive(Debug, Clone)]
 pub enum Category {
-    #[allow(dead_code)]
-    Global,
-    #[allow(dead_code)]
-    Community,
+    Subfolder(Vec<String>),
     Root,
+}
+
+impl Display for Category {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Category::Subfolder(components) => {
+                for component in components {
+                    write!(f, "{}/", component)?;
+                }
+            }
+            Category::Root => {}
+        }
+
+        Ok(())
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -26,10 +40,25 @@ impl Template {
             .to_string_lossy()
             .to_string();
 
+        let category = if let Some(category) = path
+            .strip_prefix(Cache::path().unwrap())
+            .ok()
+            .and_then(|p| p.parent())
+        {
+            Category::Subfolder(
+                category
+                    .components()
+                    .map(|c| c.as_os_str().to_string_lossy().to_string())
+                    .collect(),
+            )
+        } else {
+            Category::Root
+        };
+
         Template {
             name,
             path,
-            category: Category::Root,
+            category,
         }
     }
 
@@ -44,6 +73,9 @@ impl Template {
 
 impl Display for Template {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.name)
+        Display::fmt(&self.category, f)?;
+        Display::fmt(&self.name, f)?;
+
+        Ok(())
     }
 }
