@@ -13,6 +13,7 @@ version = "2.4.10"
 [dependencies]
 anyhow = "1.0.86"
 clap = { version = "4.5.8", features = ["derive"] }
+console = { version = "0.15.8", features = ["windows-console-colors"] }
 dialoguer = { version = "0.11.0", features = ["completion", "fuzzy-select"] }
 directories = "5.0.1"
 fuzzy-matcher = "0.3.7"

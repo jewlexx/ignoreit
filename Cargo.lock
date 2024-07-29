@@ -390,6 +390,7 @@ version = "2.4.10"
 dependencies = [
  "anyhow",
  "clap",
+ "console",
  "dialoguer",
  "directories",
  "fuzzy-matcher",
