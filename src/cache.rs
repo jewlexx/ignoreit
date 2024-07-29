@@ -1,3 +1,5 @@
+mod pick;
+
 use std::{ffi::OsStr, path::PathBuf};
 
 use dialoguer::theme::ColorfulTheme;
@@ -66,15 +68,17 @@ impl Cache {
     }
 
     pub fn pick_template(&self) -> anyhow::Result<Template> {
-        let templates = self.list_templates();
+        // let templates = self.list_templates();
 
-        let chosen_index = dialoguer::FuzzySelect::with_theme(&ColorfulTheme::default())
-            .items(templates)
-            .with_prompt("Choose a gitignore template")
-            .clear(true)
-            .interact()?;
+        // let chosen_index = dialoguer::FuzzySelect::with_theme(&ColorfulTheme::default())
+        //     .items(templates)
+        //     .with_prompt("Choose a gitignore template")
+        //     .clear(true)
+        //     .interact()?;
 
-        Ok(templates[chosen_index].clone())
+        // Ok(templates[chosen_index].clone())
+
+        pick::pick_template(self.list_templates())
     }
 
     pub fn find_template(&self, name: &str) -> Option<Template> {
