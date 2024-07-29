@@ -1,3 +1,5 @@
+#![feature(let_chains)]
+
 use std::{sync::Arc, time::Duration};
 
 use clap::Parser;
@@ -18,7 +20,7 @@ struct Args {
     command: commands::Commands,
 
     #[cfg(debug_assertions)]
-    #[clap(short, long, help = "Debug first run")]
+    #[clap(long, help = "Debug first run")]
     debug_first_run: bool,
 
     #[clap(short, long, help = "Dry run", global = true)]
@@ -87,9 +89,7 @@ async fn _main() -> anyhow::Result<()> {
         }
     });
 
-    let chosen_template = cache.pick_template()?;
-
-    println!("Pulling template {}", chosen_template.name());
+    args.command.run()?;
 
     background_task.await?;
 

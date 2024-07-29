@@ -349,6 +349,7 @@ dependencies = [
  "clap",
  "dialoguer",
  "directories",
+ "fuzzy-matcher",
  "git2",
  "indicatif",
  "rayon",

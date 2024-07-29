@@ -82,6 +82,13 @@ impl Cache {
 
         Ok(templates[chosen_index].clone())
     }
+
+    pub fn find_template(&self, name: &str) -> Option<Template> {
+        self.templates
+            .iter()
+            .find(|t| t.name().to_lowercase() == name.to_lowercase())
+            .cloned()
+    }
 }
 
 pub struct CacheRepo {
