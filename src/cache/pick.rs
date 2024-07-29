@@ -12,7 +12,9 @@ use ratatui::{
 use serde::de;
 use style::Styled;
 
-pub fn pick_template(templates: &[super::Template]) -> anyhow::Result<super::Template> {
+use crate::template::Template;
+
+pub fn pick_template(templates: &[super::Template]) -> anyhow::Result<Option<super::Template>> {
     enable_raw_mode()?;
     stdout().execute(EnterAlternateScreen)?;
     let mut terminal = Terminal::new(CrosstermBackend::new(stdout()))?;
@@ -38,22 +40,25 @@ pub fn pick_template(templates: &[super::Template]) -> anyhow::Result<super::Tem
         frame.render_stateful_widget(list, chunks[0], &mut *list_state.lock().unwrap());
     };
 
-    let mut should_quit = false;
-    while !should_quit {
+    let selected = loop {
         terminal.draw(ui)?;
-        should_quit = handle_events(templates, &list_state)?;
-    }
+        let (should_quit, selected) = handle_events(templates, &list_state)?;
+
+        if should_quit {
+            break selected;
+        }
+    };
 
     disable_raw_mode()?;
     stdout().execute(LeaveAlternateScreen)?;
 
-    Ok(todo!())
+    Ok(selected)
 }
 
 fn handle_events(
     templates: &[super::Template],
     list_state: &Mutex<ListState>,
-) -> anyhow::Result<bool> {
+) -> anyhow::Result<(bool, Option<Template>)> {
     let mut should_quit = false;
 
     let current_index = list_state.lock().unwrap().selected().unwrap_or(0);
@@ -89,10 +94,17 @@ fn handle_events(
                     .lock()
                     .unwrap()
                     .select(Some(adjust_index(current_index, Adjustment::Up))),
+                KeyCode::Enter => {
+                    let selected = list_state.lock().unwrap().selected();
+
+                    if let Some(selected) = selected {
+                        return Ok((false, Some(templates[selected].clone())));
+                    }
+                }
                 _ => {}
             }
         }
     }
 
-    Ok(should_quit)
+    Ok((should_quit, None))
 }

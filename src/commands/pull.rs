@@ -31,7 +31,9 @@ impl super::Command for Args {
                 .find_template(template_name)
                 .expect("template found in cache")
         } else {
-            CACHE.pick_template()?
+            CACHE
+                .pick_template()?
+                .unwrap_or_else(|| std::process::exit(1))
         };
 
         let mut file = File::open(template.path())?;

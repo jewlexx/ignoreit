@@ -67,7 +67,7 @@ impl Cache {
         self.templates.as_ref()
     }
 
-    pub fn pick_template(&self) -> anyhow::Result<Template> {
+    pub fn pick_template(&self) -> anyhow::Result<Option<Template>> {
         // let templates = self.list_templates();
 
         // let chosen_index = dialoguer::FuzzySelect::with_theme(&ColorfulTheme::default())
