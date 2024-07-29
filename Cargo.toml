@@ -18,6 +18,7 @@ directories = "5.0.1"
 fuzzy-matcher = "0.3.7"
 git2 = "0.19.0"
 indicatif = { version = "0.17.8", features = ["tokio"] }
+minus = { version = "5.6.1", features = ["search", "static_output"] }
 rayon = "1.10.0"
 serde = { version = "1.0.204", features = ["derive"] }
 serde_json = "1.0.120"

@@ -1,4 +1,7 @@
-use std::time::Duration;
+use std::{
+    sync::{LazyLock, OnceLock},
+    time::Duration,
+};
 
 use clap::Parser;
 use indicatif::ProgressBar;
@@ -27,6 +30,8 @@ struct Args {
     dry_run: bool,
 }
 
+static IS_TERMINAL: LazyLock<bool> =
+    LazyLock::new(|| std::io::IsTerminal::is_terminal(&std::io::stdout()));
 static CONFIG: UnsafeOnce<Mutex<config::Config>> = UnsafeOnce::new();
 static CACHE: UnsafeOnce<cache::Cache> = UnsafeOnce::new();
 
