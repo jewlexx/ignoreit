@@ -1,16 +1,6 @@
-use std::{fmt::Write, io::Write as _};
+use std::fmt::Write;
 
 use crate::CACHE;
-
-struct NoPager;
-
-impl std::fmt::Write for NoPager {
-    fn write_str(&mut self, s: &str) -> std::fmt::Result {
-        std::io::stdout().write_all(s.as_bytes()).unwrap();
-
-        Ok(())
-    }
-}
 
 enum Output {
     Pager(minus::Pager),
