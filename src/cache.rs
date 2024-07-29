@@ -8,7 +8,7 @@ use crate::template::Template;
 const GITIGNORE_REPO_URL: &str = "https://github.com/github/gitignore";
 
 pub struct Cache {
-    cache_path: PathBuf,
+    path: PathBuf,
     templates: Vec<Template>,
 }
 
@@ -30,7 +30,7 @@ impl Cache {
         let files = Self::load_files()?;
 
         Ok(Self {
-            cache_path: path,
+            path,
             templates: files,
         })
     }
@@ -62,7 +62,7 @@ impl Cache {
         let files = Self::load_files()?;
 
         Ok(Self {
-            cache_path: Self::path().unwrap(),
+            path: Self::path().unwrap(),
             templates: files,
         })
     }
