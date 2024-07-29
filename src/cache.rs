@@ -7,6 +7,7 @@ use crate::template::Template;
 
 const GITIGNORE_REPO_URL: &str = "https://github.com/github/gitignore";
 
+#[derive(Debug, Clone)]
 pub struct Cache {
     path: PathBuf,
     templates: Vec<Template>,
@@ -88,6 +89,14 @@ impl Cache {
             .iter()
             .find(|t| t.name().to_lowercase() == name.to_lowercase())
             .cloned()
+    }
+
+    pub fn purge(&self) -> anyhow::Result<()> {
+        let path = Self::path().unwrap();
+
+        std::fs::remove_dir_all(&path)?;
+
+        Ok(())
     }
 }
 

@@ -3,7 +3,7 @@ mod pull;
 mod purge;
 
 pub trait Command {
-    fn run(&self) -> anyhow::Result<()>;
+    async fn run(&self) -> anyhow::Result<()>;
 }
 
 #[derive(Debug, Clone, clap::Subcommand)]
@@ -17,11 +17,11 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub fn run(&self) -> anyhow::Result<()> {
+    pub async fn run(&self) -> anyhow::Result<()> {
         match self {
-            Commands::List(args) => args.run(),
-            Commands::Pull(args) => args.run(),
-            Commands::Purge(args) => args.run(),
+            Commands::List(args) => args.run().await,
+            Commands::Pull(args) => args.run().await,
+            Commands::Purge(args) => args.run().await,
         }
     }
 }

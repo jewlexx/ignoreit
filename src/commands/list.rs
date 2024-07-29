@@ -2,7 +2,7 @@
 pub struct Args;
 
 impl super::Command for Args {
-    fn run(&self) -> anyhow::Result<()> {
+    async fn run(&self) -> anyhow::Result<()> {
         println!("Listing templates...");
 
         Ok(())

@@ -1,7 +1,8 @@
-use std::{sync::Arc, time::Duration};
+use std::time::Duration;
 
 use clap::Parser;
 use indicatif::ProgressBar;
+use once::UnsafeOnce;
 use tokio::sync::Mutex;
 
 mod cache;
@@ -9,6 +10,7 @@ mod clone;
 mod commands;
 mod config;
 mod dirs;
+mod once;
 pub mod progress;
 mod template;
 
@@ -25,6 +27,9 @@ struct Args {
     dry_run: bool,
 }
 
+static CONFIG: UnsafeOnce<Mutex<config::Config>> = UnsafeOnce::new();
+static CACHE: UnsafeOnce<cache::Cache> = UnsafeOnce::new();
+
 fn main() {
     if let Err(e) = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
@@ -40,25 +45,29 @@ fn main() {
 async fn _main() -> anyhow::Result<()> {
     let args = Args::parse();
 
-    let config = Arc::new(Mutex::new(config::Config::load()?));
+    CONFIG
+        .set(Mutex::new(config::Config::load()?))
+        .expect("Correctly initialized config");
 
     #[cfg(debug_assertions)]
     if args.debug_first_run {
-        config.lock().await.first_run = true;
+        CONFIG.lock().await.first_run = true;
 
         std::fs::remove_dir_all(cache::Cache::path().unwrap()).unwrap();
     }
 
-    let first_run = config.lock().await.first_run;
+    let first_run = CONFIG.lock().await.first_run;
 
     // let file_loading = CounterProgress::new(, callback)
 
     let cache = if first_run {
         // Lock config after background task has finished
-        let mut config = config.lock().await;
+        let mut config = CONFIG.lock().await;
 
         config.first_run = false;
         config.save()?;
+
+        drop(config);
 
         println!("Cloning templates...");
         println!("This will only happen once");
@@ -72,14 +81,12 @@ async fn _main() -> anyhow::Result<()> {
         cache::Cache::open()?
     };
 
-    let cache = Arc::new(cache);
+    CACHE.set(cache).expect("Correctly initialized cache");
 
     let background_task = tokio::spawn({
-        let cache = cache.clone();
-        let config = config.clone();
         async move {
             if first_run {
-            } else if cache.open_repo().unwrap().outdated().unwrap() {
+            } else if CACHE.open_repo().unwrap().outdated().unwrap() {
                 // TODO: Update cache
             }
 
@@ -87,7 +94,7 @@ async fn _main() -> anyhow::Result<()> {
         }
     });
 
-    args.command.run()?;
+    args.command.run().await?;
 
     background_task.await?;
 

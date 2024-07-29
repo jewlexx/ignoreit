@@ -1,6 +1,9 @@
-use std::path::PathBuf;
+use std::{
+    fs::{File, OpenOptions},
+    path::PathBuf,
+};
 
-use crate::cache;
+use crate::CACHE;
 
 #[derive(Debug, Clone, clap::Parser)]
 pub struct Args {
@@ -14,23 +17,30 @@ pub struct Args {
 
     #[clap(help = "Template name to pull")]
     template_name: Option<String>,
+
+    #[clap(short, long, help = "Append to the end of the file")]
+    append: bool,
 }
 
 impl super::Command for Args {
-    fn run(&self) -> anyhow::Result<()> {
-        let cache = cache::Cache::open()?;
-
+    async fn run(&self) -> anyhow::Result<()> {
         println!("Loading template...");
 
         let template = if let Some(template_name) = &self.template_name {
-            cache
+            CACHE
                 .find_template(template_name)
                 .expect("template found in cache")
         } else {
-            cache.pick_template()?
+            CACHE.pick_template()?
         };
 
-        std::fs::copy(template.path(), &self.output)?;
+        let mut file = File::open(template.path())?;
+        let mut destination = OpenOptions::new()
+            .write(true)
+            .append(self.append)
+            .open(&self.output)?;
+
+        std::io::copy(&mut file, &mut destination)?;
 
         println!("Template saved to {}", self.output.display());
 

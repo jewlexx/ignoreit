@@ -1,3 +1,5 @@
+use crate::{CACHE, CONFIG};
+
 #[derive(Debug, Clone, clap::Parser)]
 pub struct Args {
     #[clap(from_global)]
@@ -5,8 +7,12 @@ pub struct Args {
 }
 
 impl super::Command for Args {
-    fn run(&self) -> anyhow::Result<()> {
-        println!("Purging cache...");
+    async fn run(&self) -> anyhow::Result<()> {
+        CACHE.purge()?;
+        let mut config = CONFIG.lock().await;
+
+        config.first_run = true;
+        config.save()?;
 
         Ok(())
     }
