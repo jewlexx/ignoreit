@@ -101,7 +101,7 @@ pub fn pick_template() -> anyhow::Result<Option<Template>> {
         .block(
             Block::bordered()
                 .title("Templates")
-                .title_bottom("<Ctrl+C> to quit | <Up/Down> to navigate | <Enter> to select"),
+                .title_bottom("<Ctrl+C> to quit | <Up/Down> to navigate | <Enter> to select | <Left Arrow> to leave the current folder"),
         )
         .style(Style::default().fg(Color::White))
         .highlight_style(Style::default().remove_modifier(Modifier::DIM))
