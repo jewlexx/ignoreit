@@ -100,15 +100,31 @@ pub fn pick_template() -> anyhow::Result<Option<Template>> {
             let mut breadcrumbs = String::new();
 
             for folder in previous_folders {
-                breadcrumbs.push_str(&format!("{}/", folder.folder.name))
+                let name = if folder.folder.name == "templates" {
+                    "Gitignore Templates"
+                } else {
+                    &folder.folder.name
+                };
+
+                breadcrumbs.push_str(&format!("{name}/"))
             }
 
-            Paragraph::new(Line::from(vec![
-                crate::icons::FOLDER_OPEN.to_string().into(),
-                " ".into(),
-                breadcrumbs.into(),
-                current_folder.name.clone().into(),
-            ]))
+            let name = if current_folder.name == "templates" {
+                "Gitignore Templates"
+            } else {
+                &current_folder.name
+            };
+
+            Paragraph::new(
+                Line::from(vec![
+                    crate::icons::FOLDER_OPEN.to_string().into(),
+                    " ".into(),
+                    breadcrumbs.into(),
+                    name.to_string().into(),
+                ])
+                .bold()
+                .centered(),
+            )
         };
 
         let text_input = Paragraph::new(state.lock().search_term.clone().cyan())
