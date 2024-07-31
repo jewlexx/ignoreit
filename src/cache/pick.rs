@@ -16,6 +16,7 @@ use ratatui::{
 use crate::{
     cache::Cache,
     template::{Category, Template},
+    CACHE,
 };
 
 use super::Folder;
@@ -44,84 +45,27 @@ fn indices_template<'a>(template: &Template, indices: &[usize]) -> Vec<Span<'a>>
 
 static mut FOLDER_CALL_COUNT: usize = 0;
 
-impl Folder {
-    pub fn new(name: String, templates: &[Template]) -> Self {
-        let mut files = Vec::new();
-        let mut folders = HashMap::<String, Vec<Template>>::new();
-
-        for template in templates {
-            if template.category().is_root() {
-                files.push(template.clone());
-            } else {
-                // surely this isnt the best way to do this
-                let category = dbg!(template.given_relative_path(
-                    Cache::path()
-                        .unwrap()
-                        .join(dbg!(template.category().to_string())),
-                ))
-                .unwrap()
-                .components()
-                .next()
-                .unwrap()
-                .as_os_str()
-                .to_string_lossy()
-                .to_string();
-
-                let mut template = template.clone();
-
-                match template.category_mut() {
-                    Category::Root => unsafe { unreachable_unchecked() },
-                    Category::Subfolder(components) => {
-                        components.pop_front();
-                    }
-                }
-
-                if let Some(folder) = folders.get_mut(&category) {
-                    folder.push(template);
-                } else {
-                    folders.insert(category, vec![template]);
-                }
-            }
-        }
-
-        unsafe {
-            FOLDER_CALL_COUNT += 1;
-        }
-
-        let folders = folders
-            .into_iter()
-            .map(|(name, templates)| Folder::new(name, &templates))
-            .collect();
-
-        Self {
-            name,
-            files,
-            folders,
-        }
-    }
-}
-
-struct State {
-    matching_templates: Vec<(Template, Vec<usize>)>,
+struct State<'cache> {
+    // matching_templates: Vec<(Template, Vec<usize>)>,
     search_term: String,
     list_state: ListState,
+    current_folder: &'cache Folder,
 }
 
-pub fn pick_template(templates: &[Template]) -> anyhow::Result<Option<Template>> {
-    let root_folder = Folder::new("Root".to_string(), templates);
-
+pub fn pick_template() -> anyhow::Result<Option<Template>> {
     enable_raw_mode()?;
     stdout().execute(EnterAlternateScreen)?;
     let mut terminal = Terminal::new(CrosstermBackend::new(stdout()))?;
 
     let state = Mutex::new(State {
-        matching_templates: templates.iter().map(|t| (t.clone(), vec![])).collect(),
+        // matching_templates: templates.iter().map(|t| (t.clone(), vec![])).collect(),
         search_term: String::new(),
         list_state: {
             let mut state = ListState::default();
             state.select(Some(0));
             state
         },
+        current_folder: &CACHE.root,
     });
 
     let ui = |frame: &mut Frame| {
@@ -136,12 +80,23 @@ pub fn pick_template(templates: &[Template]) -> anyhow::Result<Option<Template>>
 
         frame.render_widget(text_input, chunks[0]);
 
-        let list = List::new(state.lock().matching_templates.iter().map(|(t, indices)| {
-            let mut spans = vec![Span::raw(crate::icons::FILE.to_string()), Span::raw(" ")];
-            spans.extend(indices_template(t, indices));
+        let list = List::new(
+            state
+                .lock()
+                .current_folder
+                .list_templates()
+                .iter()
+                .map(|t| {
+                    let mut spans = vec![
+                        Span::raw(crate::icons::FILE.to_string()),
+                        Span::raw(" "),
+                        Span::raw(t.to_string()),
+                    ];
+                    // spans.extend(indices_template(t, indices));
 
-            Line::from(spans).add_modifier(Modifier::DIM)
-        }))
+                    Line::from(spans).add_modifier(Modifier::DIM)
+                }),
+        )
         .block(
             Block::bordered()
                 .title("Templates")
@@ -156,7 +111,7 @@ pub fn pick_template(templates: &[Template]) -> anyhow::Result<Option<Template>>
 
     let selected = loop {
         terminal.draw(ui)?;
-        let (should_quit, selected) = handle_events(templates, &state)?;
+        let (should_quit, selected) = handle_events(&state)?;
 
         if should_quit {
             break selected;
@@ -169,31 +124,28 @@ pub fn pick_template(templates: &[Template]) -> anyhow::Result<Option<Template>>
     Ok(selected)
 }
 
-fn handle_events(
-    templates: &[Template],
-    state: &Mutex<State>,
-) -> anyhow::Result<(bool, Option<Template>)> {
+fn handle_events(state: &Mutex<State>) -> anyhow::Result<(bool, Option<Template>)> {
     let mut state = state.lock();
 
     let mut should_quit = false;
 
     let current_index = state.list_state.selected().unwrap_or(0);
 
-    state.matching_templates = templates
-        .iter()
-        .filter_map(|t| {
-            SkimMatcherV2::default()
-                .fuzzy_indices(t.name(), state.search_term.as_str())
-                .map(|(score, indices)| (t, score, indices))
-        })
-        .sorted_by(
-            |(a, score_a, _), (b, score_b, _)| match score_b.cmp(score_a) {
-                Ordering::Equal => a.cmp(b),
-                ordering => ordering,
-            },
-        )
-        .map(|(t, _, indices)| (t.clone(), indices))
-        .collect();
+    // state.matching_templates = templates
+    //     .iter()
+    //     .filter_map(|t| {
+    //         SkimMatcherV2::default()
+    //             .fuzzy_indices(t.name(), state.search_term.as_str())
+    //             .map(|(score, indices)| (t, score, indices))
+    //     })
+    //     .sorted_by(
+    //         |(a, score_a, _), (b, score_b, _)| match score_b.cmp(score_a) {
+    //             Ordering::Equal => a.cmp(b),
+    //             ordering => ordering,
+    //         },
+    //     )
+    //     .map(|(t, _, indices)| (t.clone(), indices))
+    //     .collect();
 
     #[derive(Debug, Clone, Copy, PartialEq, Eq)]
     enum Adjustment {
@@ -201,10 +153,7 @@ fn handle_events(
         Down,
     }
 
-    let templates_len = {
-        let matching_templates = &state.matching_templates;
-        matching_templates.len()
-    };
+    let templates_len = state.current_folder.list_templates().len();
 
     let adjust_index = |index: usize, adjustment: Adjustment| {
         if index == 0 && adjustment == Adjustment::Down {
@@ -235,7 +184,10 @@ fn handle_events(
                     let selected = state.list_state.selected();
 
                     if let Some(selected) = selected {
-                        return Ok((true, Some(templates[selected].clone())));
+                        return Ok((
+                            true,
+                            Some(state.current_folder.list_templates()[selected].clone()),
+                        ));
                     }
                 }
                 KeyCode::Backspace => {

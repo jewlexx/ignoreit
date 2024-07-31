@@ -141,7 +141,7 @@ impl Cache {
 
         // Ok(templates[chosen_index].clone())
 
-        pick::pick_template(&self.root.list_templates_recursively())
+        pick::pick_template()
     }
 
     pub fn find_template(&self, name: &str) -> Option<Template> {
