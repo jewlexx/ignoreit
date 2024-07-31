@@ -18,7 +18,10 @@ use ratatui::{
     widgets::*,
 };
 
-use crate::template::{Category, Template};
+use crate::{
+    cache::Cache,
+    template::{Category, Template},
+};
 
 fn indices_template<'a>(template: &Template, indices: &[usize]) -> Vec<Span<'a>> {
     let template_name = template.to_string();
@@ -61,15 +64,18 @@ impl Folder {
                 files.push(template.clone());
             } else {
                 // surely this isnt the best way to do this
-                let category = template
-                    .relative_path()
-                    .unwrap()
-                    .components()
-                    .next()
-                    .unwrap()
-                    .as_os_str()
-                    .to_string_lossy()
-                    .to_string();
+                let category = dbg!(template.given_relative_path(
+                    Cache::path()
+                        .unwrap()
+                        .join(dbg!(template.category().to_string())),
+                ))
+                .unwrap()
+                .components()
+                .next()
+                .unwrap()
+                .as_os_str()
+                .to_string_lossy()
+                .to_string();
 
                 let mut template = template.clone();
 
@@ -81,25 +87,21 @@ impl Folder {
                 }
 
                 if let Some(folder) = folders.get_mut(&category) {
-                    folder.push(template.clone());
+                    folder.push(template);
                 } else {
-                    folders.insert(category, vec![template.clone()]);
+                    folders.insert(category, vec![template]);
                 }
             }
         }
 
-        if unsafe { FOLDER_CALL_COUNT } > 1 {
-            dbg!(&folders);
+        unsafe {
+            FOLDER_CALL_COUNT += 1;
         }
 
         let folders = folders
             .into_iter()
             .map(|(name, templates)| Folder::new(name, &templates))
             .collect();
-
-        unsafe {
-            FOLDER_CALL_COUNT += 1;
-        }
 
         Self {
             name,

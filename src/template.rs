@@ -1,4 +1,9 @@
-use std::{cmp::Ordering, collections::VecDeque, fmt::Display, path::PathBuf};
+use std::{
+    cmp::Ordering,
+    collections::VecDeque,
+    fmt::Display,
+    path::{Path, PathBuf},
+};
 
 use crate::cache::Cache;
 
@@ -108,10 +113,11 @@ impl Template {
 
     /// Returns the path relative to the cache folder
     pub fn relative_path(&self) -> Option<PathBuf> {
-        self.path
-            .strip_prefix(Cache::path().unwrap())
-            .ok()
-            .map(ToOwned::to_owned)
+        self.given_relative_path(Cache::path().unwrap())
+    }
+
+    pub fn given_relative_path(&self, path: impl AsRef<Path>) -> Option<PathBuf> {
+        self.path.strip_prefix(path).ok().map(ToOwned::to_owned)
     }
 }
 
