@@ -71,7 +71,10 @@ pub fn pick_template(templates: &[Template]) -> anyhow::Result<Option<Template>>
         frame.render_widget(text_input, chunks[0]);
 
         let list = List::new(state.lock().matching_templates.iter().map(|(t, indices)| {
-            Line::from(indices_template(t, indices)).add_modifier(Modifier::DIM)
+            let mut spans = vec![Span::raw(crate::icons::FILE.to_string()), Span::raw(" ")];
+            spans.extend(indices_template(t, indices));
+
+            Line::from(spans).add_modifier(Modifier::DIM)
         }))
         .block(
             Block::bordered()
