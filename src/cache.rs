@@ -54,9 +54,9 @@ impl From<Folder> for Item {
 
 #[derive(Debug, Clone)]
 pub struct Folder {
-    name: String,
-    files: Vec<Template>,
-    folders: Vec<Folder>,
+    pub name: String,
+    pub files: Vec<Template>,
+    pub folders: Vec<Folder>,
 }
 
 impl Folder {
@@ -113,7 +113,7 @@ impl Folder {
     pub fn list_items(&self) -> Vec<Item> {
         let mut items = self.files.clone().into_iter().map(Item::from).collect_vec();
         items.extend(self.folders.clone().into_iter().map(Item::from));
-        items.sort_unstable_by(|a, b| a.name().cmp(b.name()));
+        items.sort_unstable_by_key(|a| a.name().to_lowercase());
 
         items
     }
@@ -131,7 +131,7 @@ impl Folder {
 
 #[derive(Debug, Clone)]
 pub struct Cache {
-    root: Folder,
+    pub root: Folder,
 }
 
 impl Cache {
