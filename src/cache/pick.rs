@@ -82,14 +82,38 @@ pub fn pick_template() -> anyhow::Result<Option<Template>> {
     let ui = |frame: &mut Frame| {
         let chunks = Layout::default()
             .direction(Direction::Vertical)
-            .constraints([Constraint::Percentage(10), Constraint::Percentage(90)].as_ref())
+            .constraints(
+                [
+                    Constraint::Percentage(2),
+                    Constraint::Percentage(10),
+                    Constraint::Percentage(88),
+                ]
+                .as_ref(),
+            )
             .split(frame.size());
+
+        let folder_title = {
+            let state = &state.lock();
+            let current_folder = &state.current_folder;
+            let previous_folders = &state.past_folders;
+
+            let mut breadcrumbs = String::new();
+
+            for folder in previous_folders {
+                breadcrumbs.push_str(&format!("{}/", folder.folder.name))
+            }
+
+            Paragraph::new(Line::from(vec![
+                crate::icons::FOLDER_OPEN.to_string().into(),
+                " ".into(),
+                breadcrumbs.into(),
+                current_folder.name.clone().into(),
+            ]))
+        };
 
         let text_input = Paragraph::new(state.lock().search_term.clone().cyan())
             .block(Block::bordered().title("Fuzzy Search"))
             .style(Style::default().fg(Color::White));
-
-        frame.render_widget(text_input, chunks[0]);
 
         let items = state.lock().current_folder.list_items();
 
@@ -112,7 +136,9 @@ pub fn pick_template() -> anyhow::Result<Option<Template>> {
         .highlight_style(Style::default().remove_modifier(Modifier::DIM))
         .highlight_symbol("> ");
 
-        frame.render_stateful_widget(list, chunks[1], &mut state.lock().list_state);
+        frame.render_widget(folder_title, chunks[0]);
+        frame.render_widget(text_input, chunks[1]);
+        frame.render_stateful_widget(list, chunks[2], &mut state.lock().list_state);
     };
 
     let selected = loop {
