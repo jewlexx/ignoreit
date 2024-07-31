@@ -19,7 +19,7 @@ use crate::{
     CACHE,
 };
 
-use super::Folder;
+use super::{Folder, Item};
 
 fn indices_template<'a>(template: &Template, indices: &[usize]) -> Vec<Span<'a>> {
     let template_name = template.to_string();
@@ -80,23 +80,18 @@ pub fn pick_template() -> anyhow::Result<Option<Template>> {
 
         frame.render_widget(text_input, chunks[0]);
 
-        let list = List::new(
-            state
-                .lock()
-                .current_folder
-                .list_templates()
-                .iter()
-                .map(|t| {
-                    let mut spans = vec![
-                        Span::raw(crate::icons::FILE.to_string()),
-                        Span::raw(" "),
-                        Span::raw(t.to_string()),
-                    ];
-                    // spans.extend(indices_template(t, indices));
+        let items = state.lock().current_folder.list_items();
 
-                    Line::from(spans).add_modifier(Modifier::DIM)
-                }),
-        )
+        let list = List::new(items.iter().map(|t| {
+            let spans = vec![
+                Span::raw(crate::icons::FILE.to_string()),
+                Span::raw(" "),
+                Span::raw(t.name()),
+            ];
+            // spans.extend(indices_template(t, indices));
+
+            Line::from(spans).add_modifier(Modifier::DIM)
+        }))
         .block(
             Block::bordered()
                 .title("Templates")
@@ -114,7 +109,11 @@ pub fn pick_template() -> anyhow::Result<Option<Template>> {
         let (should_quit, selected) = handle_events(&state)?;
 
         if should_quit {
-            break selected;
+            if let Some(Item::Template(t)) = selected {
+                break Some(t);
+            } else if selected.is_none() {
+                break None;
+            }
         }
     };
 
@@ -124,7 +123,7 @@ pub fn pick_template() -> anyhow::Result<Option<Template>> {
     Ok(selected)
 }
 
-fn handle_events(state: &Mutex<State>) -> anyhow::Result<(bool, Option<Template>)> {
+fn handle_events(state: &Mutex<State>) -> anyhow::Result<(bool, Option<Item>)> {
     let mut state = state.lock();
 
     let mut should_quit = false;
@@ -153,7 +152,7 @@ fn handle_events(state: &Mutex<State>) -> anyhow::Result<(bool, Option<Template>
         Down,
     }
 
-    let templates_len = state.current_folder.list_templates().len();
+    let templates_len = state.current_folder.list_items().len();
 
     let adjust_index = |index: usize, adjustment: Adjustment| {
         if index == 0 && adjustment == Adjustment::Down {
@@ -186,7 +185,7 @@ fn handle_events(state: &Mutex<State>) -> anyhow::Result<(bool, Option<Template>
                     if let Some(selected) = selected {
                         return Ok((
                             true,
-                            Some(state.current_folder.list_templates()[selected].clone()),
+                            Some(state.current_folder.list_items()[selected].clone()),
                         ));
                     }
                 }

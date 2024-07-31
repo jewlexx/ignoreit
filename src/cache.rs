@@ -7,10 +7,38 @@ use std::{
 
 use anyhow::Context;
 use git2::{FetchOptions, RemoteCallbacks};
+use itertools::Itertools;
 
 use crate::template::Template;
 
 const GITIGNORE_REPO_URL: &str = "https://github.com/github/gitignore";
+
+#[derive(Debug, Clone)]
+pub enum Item {
+    Template(Template),
+    Folder(Folder),
+}
+
+impl Item {
+    pub fn name(&self) -> &str {
+        match self {
+            Item::Template(t) => t.name(),
+            Item::Folder(f) => &f.name,
+        }
+    }
+}
+
+impl From<Template> for Item {
+    fn from(value: Template) -> Self {
+        Item::Template(value)
+    }
+}
+
+impl From<Folder> for Item {
+    fn from(value: Folder) -> Self {
+        Item::Folder(value)
+    }
+}
 
 #[derive(Debug, Clone)]
 pub struct Folder {
@@ -68,6 +96,14 @@ impl Folder {
 
     pub fn list_templates(&self) -> &[Template] {
         &self.files
+    }
+
+    pub fn list_items(&self) -> Vec<Item> {
+        let mut items = self.files.clone().into_iter().map(Item::from).collect_vec();
+        items.extend(self.folders.clone().into_iter().map(Item::from));
+        items.sort_unstable_by(|a, b| a.name().cmp(b.name()));
+
+        items
     }
 
     pub fn list_templates_recursively(&self) -> Vec<Template> {
