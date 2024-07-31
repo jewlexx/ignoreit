@@ -1,4 +1,10 @@
-use std::{cmp::Ordering, collections::HashMap, hint::unreachable_unchecked, io::stdout, rc::Rc};
+use std::{
+    cmp::Ordering,
+    collections::{HashMap, VecDeque},
+    hint::unreachable_unchecked,
+    io::stdout,
+    rc::Rc,
+};
 
 use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
 use itertools::Itertools;
@@ -48,6 +54,7 @@ struct State {
     search_term: String,
     list_state: ListState,
     current_folder: Folder,
+    past_folders: Vec<Folder>,
 }
 
 pub fn pick_template() -> anyhow::Result<Option<Template>> {
@@ -64,6 +71,7 @@ pub fn pick_template() -> anyhow::Result<Option<Template>> {
             state
         },
         current_folder: CACHE.root.clone(),
+        past_folders: Vec::new(),
     });
 
     let ui = |frame: &mut Frame| {
@@ -173,20 +181,32 @@ fn handle_events(state: &Mutex<State>) -> anyhow::Result<(bool, Option<Template>
                 KeyCode::Down => state
                     .list_state
                     .select(Some(adjust_index(current_index, Adjustment::Up))),
-                KeyCode::Enter => {
+                KeyCode::Enter | KeyCode::Right => {
                     let selected = state.list_state.selected();
 
                     if let Some(selected) = selected {
                         let item = state.current_folder.list_items()[selected].clone();
 
                         match item {
-                            Item::Folder(folder) => {
-                                state.current_folder = folder;
+                            Item::Folder(mut folder) => {
+                                let old_folder = {
+                                    std::mem::swap(&mut state.current_folder, &mut folder);
+                                    folder
+                                };
+
+                                state.past_folders.push(old_folder);
                             }
                             Item::Template(template) => {
-                                return Ok((true, Some(template)));
+                                if key.code != KeyCode::Right {
+                                    return Ok((true, Some(template)));
+                                }
                             }
                         }
+                    }
+                }
+                KeyCode::Left => {
+                    if let Some(new_folder) = state.past_folders.pop() {
+                        state.current_folder = new_folder;
                     }
                 }
                 KeyCode::Backspace => {
