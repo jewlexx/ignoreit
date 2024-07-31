@@ -84,7 +84,7 @@ pub fn pick_template() -> anyhow::Result<Option<Template>> {
 
         let list = List::new(items.iter().map(|t| {
             let spans = vec![
-                Span::raw(crate::icons::FILE.to_string()),
+                Span::raw(t.get_icon().to_string()),
                 Span::raw(" "),
                 Span::raw(t.name()),
             ];

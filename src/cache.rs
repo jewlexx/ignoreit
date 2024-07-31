@@ -26,6 +26,18 @@ impl Item {
             Item::Folder(f) => &f.name,
         }
     }
+
+    pub fn is_folder(&self) -> bool {
+        matches!(self, Self::Folder(_))
+    }
+
+    pub fn get_icon(&self) -> char {
+        if self.is_folder() {
+            crate::icons::FOLDER_CLOSED
+        } else {
+            crate::icons::FILE
+        }
+    }
 }
 
 impl From<Template> for Item {
