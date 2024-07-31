@@ -1,7 +1,11 @@
 mod pick;
 
-use std::{ffi::OsStr, path::PathBuf};
+use std::{
+    ffi::OsStr,
+    path::{Path, PathBuf},
+};
 
+use anyhow::Context;
 use git2::{FetchOptions, RemoteCallbacks};
 
 use crate::template::Template;
@@ -9,8 +13,41 @@ use crate::template::Template;
 const GITIGNORE_REPO_URL: &str = "https://github.com/github/gitignore";
 
 #[derive(Debug, Clone)]
+pub struct Folder {
+    name: String,
+    files: Vec<Template>,
+    folders: Vec<Folder>,
+}
+
+impl Folder {
+    pub fn load_path(path: impl AsRef<Path>) -> anyhow::Result<Self> {
+        let name = path.as_ref().file_name().context("missing file name")?;
+        let mut files = vec![];
+        let mut folders = vec![];
+
+        let folder_read = std::fs::read_dir(&path)?;
+
+        for entry in folder_read {
+            let entry = entry?;
+            let path = entry.path();
+            if entry.path().is_dir() {
+                folders.push(Folder::load_path(path)?);
+            } else {
+                files.push(Template::new(path));
+            }
+        }
+
+        Ok(Self {
+            name: name.to_string_lossy().to_string(),
+            files,
+            folders,
+        })
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct Cache {
-    templates: Vec<Template>,
+    root: Folder,
 }
 
 impl Cache {
@@ -28,28 +65,19 @@ impl Cache {
         let path = Self::path().unwrap();
         crate::clone::clone(GITIGNORE_REPO_URL, &path).unwrap();
 
-        let files = Self::load_files()?;
+        let root = Self::load_root()?;
 
-        Ok(Self { templates: files })
+        Ok(Self { root })
     }
 
-    pub fn load_files() -> anyhow::Result<Vec<Template>> {
-        let mut files = Vec::new();
+    pub fn load_root() -> anyhow::Result<Folder> {
+        let root_folder = Folder::load_path(Self::path().context("missing cache path")?)?;
 
-        for entry in walkdir::WalkDir::new(Self::path().unwrap()) {
-            let entry = entry?;
-            let path = entry.path();
-
-            if path.is_file() && path.extension() == Some(OsStr::new("gitignore")) {
-                files.push(Template::new(path.to_path_buf()));
-            }
-        }
-
-        Ok(files)
+        Ok(root_folder)
     }
 
     pub fn reload_files(&mut self) -> anyhow::Result<()> {
-        self.templates = Self::load_files()?;
+        self.root = Self::load_root()?;
 
         Ok(())
     }
@@ -57,14 +85,14 @@ impl Cache {
     pub fn open() -> anyhow::Result<Self> {
         // let repo = git2::Repository::open(Self::path().unwrap())?;
 
-        let files = Self::load_files()?;
+        let root = Self::load_root()?;
 
-        Ok(Self { templates: files })
+        Ok(Self { root })
     }
 
-    pub fn list_templates(&self) -> &[Template] {
-        self.templates.as_ref()
-    }
+    // pub fn list_templates(&self) -> &[Template] {
+    //     self.root.as_ref()
+    // }
 
     pub fn pick_template(&self) -> anyhow::Result<Option<Template>> {
         // let templates = self.list_templates();

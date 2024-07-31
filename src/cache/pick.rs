@@ -23,6 +23,8 @@ use crate::{
     template::{Category, Template},
 };
 
+use super::Folder;
+
 fn indices_template<'a>(template: &Template, indices: &[usize]) -> Vec<Span<'a>> {
     let template_name = template.to_string();
     let chars = template_name.chars().collect::<Vec<_>>();
@@ -43,13 +45,6 @@ fn indices_template<'a>(template: &Template, indices: &[usize]) -> Vec<Span<'a>>
     }
 
     spans
-}
-
-#[derive(Debug, Clone)]
-struct Folder {
-    name: String,
-    files: Vec<Template>,
-    folders: Vec<Folder>,
 }
 
 static mut FOLDER_CALL_COUNT: usize = 0;
