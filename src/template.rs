@@ -8,6 +8,12 @@ pub enum Category {
     Root,
 }
 
+impl Category {
+    pub fn is_root(&self) -> bool {
+        matches!(self, Category::Root)
+    }
+}
+
 impl Display for Category {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -27,7 +33,6 @@ impl Display for Category {
 pub struct Template {
     name: String,
     path: PathBuf,
-    #[allow(dead_code)]
     category: Category,
 }
 
@@ -56,13 +61,20 @@ impl Template {
             .strip_prefix(Cache::path().unwrap())
             .ok()
             .and_then(|p| p.parent())
-        {
-            Category::Subfolder(
+            .map(|category| {
                 category
                     .components()
                     .map(|c| c.as_os_str().to_string_lossy().to_string())
-                    .collect(),
-            )
+                    .collect::<Vec<String>>()
+            })
+            .and_then(|category| {
+                if category.is_empty() {
+                    None
+                } else {
+                    Some(category)
+                }
+            }) {
+            Category::Subfolder(category)
         } else {
             Category::Root
         };
@@ -80,6 +92,18 @@ impl Template {
 
     pub fn path(&self) -> &PathBuf {
         &self.path
+    }
+
+    pub fn category(&self) -> &Category {
+        &self.category
+    }
+
+    /// Returns the path relative to the cache folder
+    pub fn relative_path(&self) -> Option<PathBuf> {
+        self.path
+            .strip_prefix(Cache::path().unwrap())
+            .ok()
+            .map(ToOwned::to_owned)
     }
 }
 

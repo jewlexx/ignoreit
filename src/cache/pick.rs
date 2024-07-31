@@ -1,4 +1,4 @@
-use std::{cmp::Ordering, io::stdout};
+use std::{cmp::Ordering, collections::HashMap, io::stdout};
 
 use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
 use itertools::Itertools;
@@ -37,6 +37,54 @@ fn indices_template<'a>(template: &Template, indices: &[usize]) -> Vec<Span<'a>>
     spans
 }
 
+#[derive(Debug, Clone)]
+struct Folder {
+    name: String,
+    files: Vec<Template>,
+    folders: Vec<Folder>,
+}
+
+impl Folder {
+    pub fn new(name: String, templates: &[Template]) -> Self {
+        let mut files = Vec::new();
+        let mut folders = HashMap::<String, Vec<Template>>::new();
+
+        for template in templates {
+            if template.category().is_root() {
+                files.push(template.clone());
+            } else {
+                // surely this isnt the best way to do this
+                let category = template
+                    .relative_path()
+                    .unwrap()
+                    .components()
+                    .next()
+                    .unwrap()
+                    .as_os_str()
+                    .to_string_lossy()
+                    .to_string();
+
+                if let Some(folder) = folders.get_mut(&category) {
+                    folder.push(template.clone());
+                } else {
+                    folders.insert(category, vec![template.clone()]);
+                }
+            }
+        }
+
+        let folders = folders
+            .into_iter()
+            .map(|(name, templates)| Folder::new(name, &templates))
+            .collect();
+
+        Self {
+            name,
+            files,
+            folders,
+        }
+    }
+}
+
 struct State {
     matching_templates: Vec<(Template, Vec<usize>)>,
     search_term: String,
@@ -44,6 +92,8 @@ struct State {
 }
 
 pub fn pick_template(templates: &[Template]) -> anyhow::Result<Option<Template>> {
+    let root_folder = Folder::new("Root".to_string(), templates);
+
     enable_raw_mode()?;
     stdout().execute(EnterAlternateScreen)?;
     let mut terminal = Terminal::new(CrosstermBackend::new(stdout()))?;
