@@ -49,12 +49,17 @@ fn indices_template<'a>(template: &Template, indices: &[usize]) -> Vec<Span<'a>>
     spans
 }
 
+struct PastFolder {
+    folder: Folder,
+    selection: Option<usize>,
+}
+
 struct State {
     // matching_templates: Vec<(Template, Vec<usize>)>,
     search_term: String,
     list_state: ListState,
     current_folder: Folder,
-    past_folders: Vec<Folder>,
+    past_folders: Vec<PastFolder>,
 }
 
 pub fn pick_template() -> anyhow::Result<Option<Template>> {
@@ -101,7 +106,7 @@ pub fn pick_template() -> anyhow::Result<Option<Template>> {
         .block(
             Block::bordered()
                 .title("Templates")
-                .title_bottom("<Ctrl+C> to quit | <Up/Down> to navigate | <Enter> to select | <Left Arrow> to leave the current folder"),
+                .title_bottom("<Ctrl+C> to quit | <Up/Down> to navigate | <Enter> to select | <Left | Right Arrows> to navigate folders"),
         )
         .style(Style::default().fg(Color::White))
         .highlight_style(Style::default().remove_modifier(Modifier::DIM))
@@ -194,7 +199,12 @@ fn handle_events(state: &Mutex<State>) -> anyhow::Result<(bool, Option<Template>
                                     folder
                                 };
 
-                                state.past_folders.push(old_folder);
+                                let selection = state.list_state.selected();
+
+                                state.past_folders.push(PastFolder {
+                                    folder: old_folder,
+                                    selection,
+                                });
                             }
                             Item::Template(template) => {
                                 if key.code != KeyCode::Right {
@@ -205,8 +215,9 @@ fn handle_events(state: &Mutex<State>) -> anyhow::Result<(bool, Option<Template>
                     }
                 }
                 KeyCode::Left => {
-                    if let Some(new_folder) = state.past_folders.pop() {
-                        state.current_folder = new_folder;
+                    if let Some(PastFolder { folder, selection }) = state.past_folders.pop() {
+                        state.current_folder = folder;
+                        state.list_state.select(selection);
                     }
                 }
                 KeyCode::Backspace => {
