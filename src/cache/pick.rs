@@ -1,4 +1,4 @@
-use std::{cmp::Ordering, collections::HashMap, hint::unreachable_unchecked, io::stdout};
+use std::{cmp::Ordering, collections::HashMap, hint::unreachable_unchecked, io::stdout, rc::Rc};
 
 use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
 use itertools::Itertools;
@@ -43,11 +43,11 @@ fn indices_template<'a>(template: &Template, indices: &[usize]) -> Vec<Span<'a>>
     spans
 }
 
-struct State<'cache> {
+struct State {
     // matching_templates: Vec<(Template, Vec<usize>)>,
     search_term: String,
     list_state: ListState,
-    current_folder: &'cache Folder,
+    current_folder: Folder,
 }
 
 pub fn pick_template() -> anyhow::Result<Option<Template>> {
@@ -63,7 +63,7 @@ pub fn pick_template() -> anyhow::Result<Option<Template>> {
             state.select(Some(0));
             state
         },
-        current_folder: &CACHE.root,
+        current_folder: CACHE.root.clone(),
     });
 
     let ui = |frame: &mut Frame| {
@@ -107,11 +107,7 @@ pub fn pick_template() -> anyhow::Result<Option<Template>> {
         let (should_quit, selected) = handle_events(&state)?;
 
         if should_quit {
-            if let Some(Item::Template(t)) = selected {
-                break Some(t);
-            } else if selected.is_none() {
-                break None;
-            }
+            break selected;
         }
     };
 
@@ -121,7 +117,7 @@ pub fn pick_template() -> anyhow::Result<Option<Template>> {
     Ok(selected)
 }
 
-fn handle_events(state: &Mutex<State>) -> anyhow::Result<(bool, Option<Item>)> {
+fn handle_events(state: &Mutex<State>) -> anyhow::Result<(bool, Option<Template>)> {
     let mut state = state.lock();
 
     let mut should_quit = false;
@@ -181,10 +177,16 @@ fn handle_events(state: &Mutex<State>) -> anyhow::Result<(bool, Option<Item>)> {
                     let selected = state.list_state.selected();
 
                     if let Some(selected) = selected {
-                        return Ok((
-                            true,
-                            Some(state.current_folder.list_items()[selected].clone()),
-                        ));
+                        let item = state.current_folder.list_items()[selected].clone();
+
+                        match item {
+                            Item::Folder(folder) => {
+                                state.current_folder = folder;
+                            }
+                            Item::Template(template) => {
+                                return Ok((true, Some(template)));
+                            }
+                        }
                     }
                 }
                 KeyCode::Backspace => {
