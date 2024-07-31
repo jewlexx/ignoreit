@@ -43,8 +43,6 @@ fn indices_template<'a>(template: &Template, indices: &[usize]) -> Vec<Span<'a>>
     spans
 }
 
-static mut FOLDER_CALL_COUNT: usize = 0;
-
 struct State<'cache> {
     // matching_templates: Vec<(Template, Vec<usize>)>,
     search_term: String,
