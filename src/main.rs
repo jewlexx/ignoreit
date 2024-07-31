@@ -10,6 +10,7 @@ mod clone;
 mod commands;
 mod config;
 mod dirs;
+mod icons;
 mod once;
 pub mod progress;
 mod template;
