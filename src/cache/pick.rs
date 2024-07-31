@@ -1,4 +1,9 @@
-use std::{cmp::Ordering, collections::HashMap, io::stdout};
+use std::{
+    cmp::Ordering,
+    collections::{HashMap, VecDeque},
+    hint::unreachable_unchecked,
+    io::stdout,
+};
 
 use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
 use itertools::Itertools;
@@ -13,7 +18,7 @@ use ratatui::{
     widgets::*,
 };
 
-use crate::template::Template;
+use crate::template::{Category, Template};
 
 fn indices_template<'a>(template: &Template, indices: &[usize]) -> Vec<Span<'a>> {
     let template_name = template.to_string();
@@ -63,6 +68,15 @@ impl Folder {
                     .as_os_str()
                     .to_string_lossy()
                     .to_string();
+
+                let mut template = template.clone();
+
+                match template.category_mut() {
+                    Category::Root => unsafe { unreachable_unchecked() },
+                    Category::Subfolder(components) => {
+                        components.pop_front();
+                    }
+                }
 
                 if let Some(folder) = folders.get_mut(&category) {
                     folder.push(template.clone());

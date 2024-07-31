@@ -1,10 +1,10 @@
-use std::{cmp::Ordering, fmt::Display, path::PathBuf};
+use std::{cmp::Ordering, collections::VecDeque, fmt::Display, path::PathBuf};
 
 use crate::cache::Cache;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Category {
-    Subfolder(Vec<String>),
+    Subfolder(VecDeque<String>),
     Root,
 }
 
@@ -65,7 +65,7 @@ impl Template {
                 category
                     .components()
                     .map(|c| c.as_os_str().to_string_lossy().to_string())
-                    .collect::<Vec<String>>()
+                    .collect::<VecDeque<String>>()
             })
             .and_then(|category| {
                 if category.is_empty() {
@@ -96,6 +96,14 @@ impl Template {
 
     pub fn category(&self) -> &Category {
         &self.category
+    }
+
+    pub fn category_mut(&mut self) -> &mut Category {
+        &mut self.category
+    }
+
+    pub fn set_category(&mut self, category: Category) {
+        self.category = category;
     }
 
     /// Returns the path relative to the cache folder
