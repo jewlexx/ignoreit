@@ -43,6 +43,20 @@ impl Folder {
             folders,
         })
     }
+
+    pub fn list_templates(&self) -> &[Template] {
+        &self.files
+    }
+
+    pub fn list_templates_recursively(&self) -> Vec<Template> {
+        let mut templates = self.list_templates().to_vec();
+
+        for folder in &self.folders {
+            templates.extend(folder.list_templates_recursively());
+        }
+
+        templates
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -90,9 +104,9 @@ impl Cache {
         Ok(Self { root })
     }
 
-    // pub fn list_templates(&self) -> &[Template] {
-    //     self.root.as_ref()
-    // }
+    pub fn list_templates(&self) -> Vec<Template> {
+        self.root.list_templates_recursively()
+    }
 
     pub fn pick_template(&self) -> anyhow::Result<Option<Template>> {
         // let templates = self.list_templates();
@@ -105,11 +119,12 @@ impl Cache {
 
         // Ok(templates[chosen_index].clone())
 
-        pick::pick_template(self.list_templates())
+        pick::pick_template(&self.root.list_templates_recursively())
     }
 
     pub fn find_template(&self, name: &str) -> Option<Template> {
-        self.templates
+        self.root
+            .list_templates_recursively()
             .iter()
             .find(|t| t.name().to_lowercase() == name.to_lowercase())
             .cloned()
