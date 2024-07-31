@@ -1,9 +1,4 @@
-use std::{
-    cmp::Ordering,
-    collections::{HashMap, VecDeque},
-    hint::unreachable_unchecked,
-    io::stdout,
-};
+use std::{cmp::Ordering, collections::HashMap, hint::unreachable_unchecked, io::stdout};
 
 use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
 use itertools::Itertools;

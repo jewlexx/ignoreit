@@ -20,6 +20,10 @@ pub struct Folder {
 }
 
 impl Folder {
+    pub fn is_empty(&self) -> bool {
+        self.files.is_empty() && self.folders.iter().all(|folder| folder.is_empty())
+    }
+
     pub fn load_path(path: impl AsRef<Path>) -> anyhow::Result<Self> {
         let name = path.as_ref().file_name().context("missing file name")?;
         let mut files = vec![];
@@ -32,16 +36,34 @@ impl Folder {
             let path = entry.path();
             if entry.path().is_dir() {
                 folders.push(Folder::load_path(path)?);
-            } else {
+            } else if path.extension() == Some(OsStr::new("gitignore")) {
                 files.push(Template::new(path));
             }
         }
 
-        Ok(Self {
+        let folder = Self {
             name: name.to_string_lossy().to_string(),
             files,
             folders,
-        })
+        };
+
+        Ok(folder.cleanup())
+    }
+
+    fn cleanup(self) -> Self {
+        let mut cleaned_folders = vec![];
+
+        for folder in self.folders {
+            if !folder.is_empty() {
+                cleaned_folders.push(folder.cleanup());
+            }
+        }
+
+        Self {
+            name: self.name,
+            files: self.files,
+            folders: cleaned_folders,
+        }
     }
 
     pub fn list_templates(&self) -> &[Template] {
