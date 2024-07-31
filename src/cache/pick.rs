@@ -49,6 +49,8 @@ struct Folder {
     folders: Vec<Folder>,
 }
 
+static mut FOLDER_CALL_COUNT: usize = 0;
+
 impl Folder {
     pub fn new(name: String, templates: &[Template]) -> Self {
         let mut files = Vec::new();
@@ -86,10 +88,18 @@ impl Folder {
             }
         }
 
+        if unsafe { FOLDER_CALL_COUNT } > 1 {
+            dbg!(&folders);
+        }
+
         let folders = folders
             .into_iter()
             .map(|(name, templates)| Folder::new(name, &templates))
             .collect();
+
+        unsafe {
+            FOLDER_CALL_COUNT += 1;
+        }
 
         Self {
             name,
