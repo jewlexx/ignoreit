@@ -454,6 +454,7 @@ dependencies = [
  "indicatif",
  "itertools",
  "minus",
+ "parking_lot",
  "ratatui",
  "rayon",
  "serde",
