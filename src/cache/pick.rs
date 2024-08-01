@@ -88,10 +88,6 @@ pub fn pick_template() -> anyhow::Result<Option<Template>> {
 fn handle_events(state: &Mutex<State>) -> anyhow::Result<(bool, Option<Template>)> {
     let mut state = state.lock();
 
-    let mut should_quit = false;
-
-    let current_index = state.list_state.selected().unwrap_or(0);
-
     // state.matching_templates = templates
     //     .iter()
     //     .filter_map(|t| {
@@ -108,89 +104,9 @@ fn handle_events(state: &Mutex<State>) -> anyhow::Result<(bool, Option<Template>
     //     .map(|(t, _, indices)| (t.clone(), indices))
     //     .collect();
 
-    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-    enum Adjustment {
-        Up,
-        Down,
-    }
-
-    let templates_len = state.current_folder.list_items().len();
-
-    let adjust_index = |index: usize, adjustment: Adjustment| {
-        if index == 0 && adjustment == Adjustment::Down {
-            templates_len - 1
-        } else if index == templates_len - 1 && adjustment == Adjustment::Up {
-            0
-        } else {
-            match adjustment {
-                Adjustment::Up => index + 1,
-                Adjustment::Down => index - 1,
-            }
-        }
-    };
-
     if let Event::Key(key) = event::read()? {
-        if key.kind == KeyEventKind::Press {
-            match key.code {
-                KeyCode::Char('c') if key.modifiers.contains(KeyModifiers::CONTROL) => {
-                    should_quit = true
-                }
-                KeyCode::Up => state
-                    .list_state
-                    .select(Some(adjust_index(current_index, Adjustment::Down))),
-                KeyCode::Down => state
-                    .list_state
-                    .select(Some(adjust_index(current_index, Adjustment::Up))),
-                KeyCode::Enter | KeyCode::Right => {
-                    let selected = state.list_state.selected();
-
-                    if let Some(selected) = selected {
-                        let item = state.current_folder.list_items()[selected].clone();
-
-                        match item {
-                            Item::Folder(mut folder) => {
-                                let old_folder = {
-                                    std::mem::swap(&mut state.current_folder, &mut folder);
-                                    folder
-                                };
-
-                                let selection = state.list_state.selected();
-
-                                state.history.push(HistoryEntry {
-                                    folder: old_folder,
-                                    selection,
-                                });
-                            }
-                            Item::Template(template) => {
-                                if key.code != KeyCode::Right {
-                                    return Ok((true, Some(template)));
-                                }
-                            }
-                        }
-                    }
-                }
-                KeyCode::Left => {
-                    if let Some(HistoryEntry { folder, selection }) = state.history.pop() {
-                        state.current_folder = folder;
-                        state.list_state.select(selection);
-                    }
-                }
-                KeyCode::Backspace => {
-                    let search_term = &mut state.search_term;
-
-                    if !search_term.is_empty() {
-                        search_term.pop();
-                    }
-                }
-                KeyCode::Char(c) => {
-                    let search_term = &mut state.search_term;
-
-                    search_term.push(c);
-                }
-                _ => {}
-            }
-        }
+        Ok(state.handle_key_event(key))
+    } else {
+        Ok((false, None))
     }
-
-    Ok((should_quit, None))
 }
