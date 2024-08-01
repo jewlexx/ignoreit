@@ -75,8 +75,6 @@ async fn _main() -> anyhow::Result<()> {
         println!("Cloning templates...");
         println!("This will only happen once");
 
-        let pb = ProgressBar::new_spinner();
-        pb.enable_steady_tick(Duration::from_millis(100));
         cache::Cache::clone()?
     } else {
         let pb = ProgressBar::new_spinner().with_message("Loading templates...");
