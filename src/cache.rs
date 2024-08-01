@@ -31,7 +31,7 @@ impl Item {
         matches!(self, Self::Folder(_))
     }
 
-    pub fn get_icon(&self) -> &str {
+    pub fn get_icon(&self) -> &'static str {
         if self.is_folder() {
             crate::icons::strings::FOLDER_CLOSED
         } else {

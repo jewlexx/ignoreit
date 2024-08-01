@@ -82,20 +82,18 @@ pub fn ui(state: Rc<Mutex<super::State>>) -> impl Fn(&mut ratatui::Frame<'_>) {
             state.update_matching_templates();
 
             State::list_matching_templates()
+                .iter()
+                .map(|(t, indices)| {
+                    let mut spans = vec![t.get_icon().into(), " ".into()];
+
+                    spans.extend(indices_template(t, indices));
+
+                    spans
+                })
+                .collect_vec()
         };
 
-        let list = List::new(items.iter().map(|(t, indices)|
-            Line::from({
-                            let mut spans = vec![
-                            t.get_icon().into(),
-                            " ".into(),
-                        ];
-
-                        spans.extend(indices_template(t, indices));
-
-                        spans
-                    }).add_modifier(Modifier::DIM)
-        ))
+        let list = List::new(items.into_iter().map(Line::from))
         .block(
             Block::bordered()
                 .title("Templates")
