@@ -84,7 +84,10 @@ pub fn ui(state: Rc<Mutex<super::State>>) -> impl Fn(&mut ratatui::Frame<'_>) {
                 " ".into(),
             ];
 
-            spans.extend(indices_template(t, &[]));
+let indices =              SkimMatcherV2::default()
+                .fuzzy_indices(t.name(), state.lock().search_term.as_str()).unwrap_or_default();
+
+            spans.extend(indices_template(t, &indices.1));
 
             spans
         }).add_modifier(Modifier::DIM)
