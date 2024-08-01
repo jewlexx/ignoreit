@@ -37,11 +37,19 @@ enum Adjustment {
 }
 
 impl State {
-    pub fn update_hash(&self) {
+    pub fn state_changed(&self) -> bool {
+        self.get_hash() != *STATE_HASH.lock()
+    }
+
+    pub fn get_hash(&self) -> u64 {
         let mut hasher = hash::DefaultHasher::new();
         self.hash(&mut hasher);
 
-        *STATE_HASH.lock() = hasher.finish();
+        hasher.finish()
+    }
+
+    pub fn update_hash(&self) {
+        *STATE_HASH.lock() = self.get_hash();
     }
 
     pub fn handle_key_event(&mut self, key: KeyEvent) -> (bool, Option<Template>) {
