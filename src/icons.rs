@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 pub mod nerd_icons {
     pub const FOLDER_OPEN: char = '\u{e5fe}';
     pub const FOLDER_CLOSED: char = '\u{e5ff}';
