@@ -77,7 +77,7 @@ impl State {
             })
             .sorted_by(
                 |(a, score_a, _), (b, score_b, _)| match score_b.cmp(score_a) {
-                    Ordering::Equal => a.name().cmp(b.name()),
+                    Ordering::Equal => a.name().to_lowercase().cmp(&b.name().to_lowercase()),
                     ordering => ordering,
                 },
             )
