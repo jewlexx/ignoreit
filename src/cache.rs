@@ -52,7 +52,7 @@ impl From<Folder> for Item {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Folder {
     pub name: String,
     pub files: Vec<Template>,

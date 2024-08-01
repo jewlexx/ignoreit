@@ -1,3 +1,6 @@
+use std::hash::{self, Hash, Hasher};
+
+use parking_lot::Mutex;
 use ratatui::{
     crossterm::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers},
     widgets::ListState,
@@ -10,11 +13,15 @@ use crate::{
 
 pub type History = Vec<HistoryEntry>;
 
+pub static STATE_HASH: Mutex<u64> = Mutex::new(0);
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct HistoryEntry {
     pub folder: Folder,
     pub selection: Option<usize>,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct State {
     // matching_templates: Vec<(Template, Vec<usize>)>,
     pub search_term: String,
@@ -30,6 +37,13 @@ enum Adjustment {
 }
 
 impl State {
+    pub fn update_hash(&self) {
+        let mut hasher = hash::DefaultHasher::new();
+        self.hash(&mut hasher);
+
+        *STATE_HASH.lock() = hasher.finish();
+    }
+
     pub fn handle_key_event(&mut self, key: KeyEvent) -> (bool, Option<Template>) {
         if key.kind == KeyEventKind::Press {
             match key.code {

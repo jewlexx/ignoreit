@@ -7,7 +7,7 @@ use std::{
 
 use crate::cache::Cache;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Category {
     Subfolder(VecDeque<String>),
     Root,
@@ -34,7 +34,7 @@ impl Display for Category {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Template {
     name: String,
     path: PathBuf,

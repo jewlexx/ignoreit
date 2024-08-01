@@ -48,6 +48,8 @@ pub fn pick_template() -> anyhow::Result<Option<Template>> {
         history: Vec::new(),
     }));
 
+    state.lock().update_hash();
+
     let selected = loop {
         terminal.draw(ui::ui(state.clone()))?;
         let (should_quit, selected) = handle_events(&state)?;

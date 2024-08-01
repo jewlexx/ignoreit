@@ -78,7 +78,7 @@ pub fn ui(state: Rc<Mutex<super::State>>) -> impl Fn(&mut ratatui::Frame<'_>) {
         let items = state.lock().current_folder.list_items();
 
         let list = List::new(items.iter().filter_map(|t| {
-            Some(Line::from({
+            let spans = {
                             let mut spans = vec![
                             t.get_icon().into(),
                             " ".into(),
@@ -96,7 +96,9 @@ pub fn ui(state: Rc<Mutex<super::State>>) -> impl Fn(&mut ratatui::Frame<'_>) {
                         spans.extend(indices_template(t, &indices));
 
                         spans
-                    }).add_modifier(Modifier::DIM))
+                    };
+
+            Some(Line::from(spans).add_modifier(Modifier::DIM))
         }))
         .block(
             Block::bordered()
