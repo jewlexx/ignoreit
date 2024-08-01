@@ -7,3 +7,9 @@ pub mod nerd_icons {
 pub const FOLDER_OPEN: char = '📂';
 pub const FOLDER_CLOSED: char = '📁';
 pub const FILE: char = '📄';
+
+pub mod strings {
+    pub const FOLDER_OPEN: &str = "📂";
+    pub const FOLDER_CLOSED: &str = "📁";
+    pub const FILE: &str = "📄";
+}

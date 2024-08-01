@@ -49,7 +49,9 @@ fn indices_template<'a>(template: &Template, indices: &[usize]) -> Vec<Span<'a>>
     spans
 }
 
-struct PastFolder {
+type History = Vec<HistoryEntry>;
+
+struct HistoryEntry {
     folder: Folder,
     selection: Option<usize>,
 }
@@ -59,7 +61,7 @@ struct State {
     search_term: String,
     list_state: ListState,
     current_folder: Folder,
-    past_folders: Vec<PastFolder>,
+    history: History,
 }
 
 pub fn pick_template() -> anyhow::Result<Option<Template>> {
@@ -76,7 +78,7 @@ pub fn pick_template() -> anyhow::Result<Option<Template>> {
             state
         },
         current_folder: CACHE.root.clone(),
-        past_folders: Vec::new(),
+        history: Vec::new(),
     });
 
     let ui = |frame: &mut Frame| {
@@ -93,34 +95,30 @@ pub fn pick_template() -> anyhow::Result<Option<Template>> {
             .split(frame.size());
 
         let folder_title = {
-            let state = &state.lock();
-            let current_folder = &state.current_folder;
-            let previous_folders = &state.past_folders;
+            fn folder_name(name: &str) -> &str {
+                const REAL_ROOT_NAME: &str = "templates";
+                const NICE_ROOT_NAME: &str = "Gitignore Templates";
 
-            let mut breadcrumbs = String::new();
-
-            for folder in previous_folders {
-                let name = if folder.folder.name == "templates" {
-                    "Gitignore Templates"
+                if name == REAL_ROOT_NAME {
+                    NICE_ROOT_NAME
                 } else {
-                    &folder.folder.name
-                };
-
-                breadcrumbs.push_str(&format!("{name}/"))
+                    name
+                }
             }
 
-            let name = if current_folder.name == "templates" {
-                "Gitignore Templates"
-            } else {
-                &current_folder.name
-            };
+            let state = &state.lock();
+            let mut breadcrumbs = String::new();
+
+            for folder in &state.history {
+                breadcrumbs.extend(format!("{}/", folder_name(&folder.folder.name)).chars())
+            }
 
             Paragraph::new(
                 Line::from(vec![
-                    crate::icons::FOLDER_OPEN.to_string().into(),
+                    crate::icons::strings::FOLDER_OPEN.into(),
                     " ".into(),
                     breadcrumbs.into(),
-                    name.to_string().into(),
+                    folder_name(&state.current_folder.name).to_string().into(),
                 ])
                 .bold()
                 .centered(),
@@ -243,7 +241,7 @@ fn handle_events(state: &Mutex<State>) -> anyhow::Result<(bool, Option<Template>
 
                                 let selection = state.list_state.selected();
 
-                                state.past_folders.push(PastFolder {
+                                state.history.push(HistoryEntry {
                                     folder: old_folder,
                                     selection,
                                 });
@@ -257,7 +255,7 @@ fn handle_events(state: &Mutex<State>) -> anyhow::Result<(bool, Option<Template>
                     }
                 }
                 KeyCode::Left => {
-                    if let Some(PastFolder { folder, selection }) = state.past_folders.pop() {
+                    if let Some(HistoryEntry { folder, selection }) = state.history.pop() {
                         state.current_folder = folder;
                         state.list_state.select(selection);
                     }
