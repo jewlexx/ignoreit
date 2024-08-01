@@ -31,28 +31,6 @@ use crate::{
 
 use super::{Folder, Item};
 
-fn indices_template<'a>(template: &Template, indices: &[usize]) -> Vec<Span<'a>> {
-    let template_name = template.to_string();
-    let chars = template_name.chars().collect::<Vec<_>>();
-
-    let mut spans = Vec::new();
-
-    for (i, c) in chars.iter().enumerate() {
-        if indices.contains(&i) {
-            spans.push(Span::styled(
-                c.to_string(),
-                Style::default()
-                    .fg(Color::LightCyan)
-                    .add_modifier(Modifier::BOLD),
-            ));
-        } else {
-            spans.push(Span::raw(c.to_string()));
-        }
-    }
-
-    spans
-}
-
 pub fn pick_template() -> anyhow::Result<Option<Template>> {
     enable_raw_mode()?;
     stdout().execute(EnterAlternateScreen)?;

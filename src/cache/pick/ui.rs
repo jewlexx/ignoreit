@@ -19,6 +19,8 @@ use ratatui::{
     widgets::*,
 };
 
+use crate::{cache::Item, template::Template};
+
 pub fn ui(state: Rc<Mutex<super::State>>) -> impl Fn(&mut ratatui::Frame<'_>) {
     let state = state.clone();
     move |frame: &mut Frame| {
@@ -76,11 +78,16 @@ pub fn ui(state: Rc<Mutex<super::State>>) -> impl Fn(&mut ratatui::Frame<'_>) {
         let items = state.lock().current_folder.list_items();
 
         let list = List::new(items.iter().map(|t| {
-            Line::from(vec![
+            Line::from({
+                let mut spans = vec![
                 t.get_icon().into(),
                 " ".into(),
-                t.name().into(),
-            ]).add_modifier(Modifier::DIM)
+            ];
+
+            spans.extend(indices_template(t, &[]));
+
+            spans
+        }).add_modifier(Modifier::DIM)
         }))
         .block(
             Block::bordered()
@@ -95,4 +102,26 @@ pub fn ui(state: Rc<Mutex<super::State>>) -> impl Fn(&mut ratatui::Frame<'_>) {
         frame.render_widget(text_input, chunks[1]);
         frame.render_stateful_widget(list, chunks[2], &mut state.lock().list_state);
     }
+}
+
+fn indices_template<'a>(template: &Item, indices: &[usize]) -> Vec<Span<'a>> {
+    let template_name = template.name();
+    let chars = template_name.chars().collect::<Vec<_>>();
+
+    let mut spans = Vec::new();
+
+    for (i, c) in chars.iter().enumerate() {
+        if indices.contains(&i) {
+            spans.push(Span::styled(
+                c.to_string(),
+                Style::default()
+                    .fg(Color::LightCyan)
+                    .add_modifier(Modifier::BOLD),
+            ));
+        } else {
+            spans.push(Span::raw(c.to_string()));
+        }
+    }
+
+    spans
 }
