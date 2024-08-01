@@ -1,25 +1,10 @@
-use std::{
-    cmp::Ordering,
-    collections::{HashMap, VecDeque},
-    hint::unreachable_unchecked,
-    io::stdout,
-    rc::Rc,
-};
+use std::rc::Rc;
 
-use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
 use itertools::Itertools;
 use parking_lot::Mutex;
-use ratatui::{
-    crossterm::{
-        event::{self, Event, KeyCode, KeyEventKind, KeyModifiers},
-        terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
-        ExecutableCommand,
-    },
-    prelude::*,
-    widgets::*,
-};
+use ratatui::{prelude::*, widgets::*};
 
-use crate::{cache::Item, template::Template};
+use crate::cache::Item;
 
 use super::state::State;
 

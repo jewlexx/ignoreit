@@ -1,35 +1,21 @@
 mod state;
 mod ui;
 
-use std::{
-    cmp::Ordering,
-    collections::{HashMap, VecDeque},
-    hint::unreachable_unchecked,
-    io::stdout,
-    rc::Rc,
-};
+use std::{io::stdout, rc::Rc};
 
-use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
-use itertools::Itertools;
 use parking_lot::Mutex;
 use ratatui::{
     crossterm::{
-        event::{self, Event, KeyCode, KeyEventKind, KeyModifiers},
+        event::{self, Event},
         terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
         ExecutableCommand,
     },
     prelude::*,
     widgets::*,
 };
-use state::{HistoryEntry, State};
+use state::State;
 
-use crate::{
-    cache::Cache,
-    template::{Category, Template},
-    CACHE,
-};
-
-use super::{Folder, Item};
+use crate::{template::Template, CACHE};
 
 pub fn pick_template() -> anyhow::Result<Option<Template>> {
     enable_raw_mode()?;
