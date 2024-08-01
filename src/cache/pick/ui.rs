@@ -124,7 +124,7 @@ fn indices_template<'a>(template: &Item, indices: &[usize]) -> Vec<Span<'a>> {
                     .add_modifier(Modifier::BOLD),
             ));
         } else {
-            spans.push(Span::raw(c.to_string()));
+            spans.push(c.to_string().into());
         }
     }
 
