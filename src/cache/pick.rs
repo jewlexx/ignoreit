@@ -1,3 +1,6 @@
+mod state;
+mod ui;
+
 use std::{
     cmp::Ordering,
     collections::{HashMap, VecDeque},
@@ -18,6 +21,7 @@ use ratatui::{
     prelude::*,
     widgets::*,
 };
+use state::{HistoryEntry, State};
 
 use crate::{
     cache::Cache,
@@ -49,27 +53,12 @@ fn indices_template<'a>(template: &Template, indices: &[usize]) -> Vec<Span<'a>>
     spans
 }
 
-type History = Vec<HistoryEntry>;
-
-struct HistoryEntry {
-    folder: Folder,
-    selection: Option<usize>,
-}
-
-struct State {
-    // matching_templates: Vec<(Template, Vec<usize>)>,
-    search_term: String,
-    list_state: ListState,
-    current_folder: Folder,
-    history: History,
-}
-
 pub fn pick_template() -> anyhow::Result<Option<Template>> {
     enable_raw_mode()?;
     stdout().execute(EnterAlternateScreen)?;
     let mut terminal = Terminal::new(CrosstermBackend::new(stdout()))?;
 
-    let state = Mutex::new(State {
+    let state = Rc::new(Mutex::new(State {
         // matching_templates: templates.iter().map(|t| (t.clone(), vec![])).collect(),
         search_term: String::new(),
         list_state: {
@@ -79,85 +68,10 @@ pub fn pick_template() -> anyhow::Result<Option<Template>> {
         },
         current_folder: CACHE.root.clone(),
         history: Vec::new(),
-    });
-
-    let ui = |frame: &mut Frame| {
-        let chunks = Layout::default()
-            .direction(Direction::Vertical)
-            .constraints(
-                [
-                    Constraint::Percentage(2),
-                    Constraint::Percentage(10),
-                    Constraint::Percentage(88),
-                ]
-                .as_ref(),
-            )
-            .split(frame.size());
-
-        let folder_title = {
-            fn folder_name(name: &str) -> &str {
-                const REAL_ROOT_NAME: &str = "templates";
-                const NICE_ROOT_NAME: &str = "Gitignore Templates";
-
-                if name == REAL_ROOT_NAME {
-                    NICE_ROOT_NAME
-                } else {
-                    name
-                }
-            }
-
-            let state = &state.lock();
-            let breadcrumbs: String =
-                state
-                    .history
-                    .iter()
-                    .fold(String::new(), |mut output, folder| {
-                        use std::fmt::Write;
-                        _ = write!(output, "{}/", folder_name(&folder.folder.name));
-                        output
-                    });
-
-            Paragraph::new(
-                Line::from(vec![
-                    crate::icons::strings::FOLDER_OPEN.into(),
-                    " ".into(),
-                    breadcrumbs.into(),
-                    folder_name(&state.current_folder.name).to_string().into(),
-                ])
-                .bold()
-                .centered(),
-            )
-        };
-
-        let text_input = Paragraph::new(state.lock().search_term.clone().cyan())
-            .block(Block::bordered().title("Fuzzy Search"))
-            .style(Style::default().fg(Color::White));
-
-        let items = state.lock().current_folder.list_items();
-
-        let list = List::new(items.iter().map(|t| {
-            Line::from(vec![
-                t.get_icon().into(),
-                " ".into(),
-                t.name().into(),
-            ]).add_modifier(Modifier::DIM)
-        }))
-        .block(
-            Block::bordered()
-                .title("Templates")
-                .title_bottom("<Ctrl+C> to quit | <Up/Down> to navigate | <Enter> to select | <Left | Right Arrows> to navigate folders"),
-        )
-        .style(Style::default().fg(Color::White))
-        .highlight_style(Style::default().remove_modifier(Modifier::DIM))
-        .highlight_symbol("> ");
-
-        frame.render_widget(folder_title, chunks[0]);
-        frame.render_widget(text_input, chunks[1]);
-        frame.render_stateful_widget(list, chunks[2], &mut state.lock().list_state);
-    };
+    }));
 
     let selected = loop {
-        terminal.draw(ui)?;
+        terminal.draw(ui::ui(state.clone()))?;
         let (should_quit, selected) = handle_events(&state)?;
 
         if should_quit {
