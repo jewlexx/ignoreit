@@ -77,20 +77,26 @@ pub fn ui(state: Rc<Mutex<super::State>>) -> impl Fn(&mut ratatui::Frame<'_>) {
 
         let items = state.lock().current_folder.list_items();
 
-        let list = List::new(items.iter().map(|t| {
-            Line::from({
-                let mut spans = vec![
-                t.get_icon().into(),
-                " ".into(),
-            ];
+        let list = List::new(items.iter().filter_map(|t| {
+            Some(Line::from({
+                            let mut spans = vec![
+                            t.get_icon().into(),
+                            " ".into(),
+                        ];
 
-let indices =              SkimMatcherV2::default()
-                .fuzzy_indices(t.name(), state.lock().search_term.as_str()).unwrap_or_default();
+                            let search_term = state.lock().search_term.clone();
 
-            spans.extend(indices_template(t, &indices.1));
+            let indices = if !search_term.is_empty() {
+                       SkimMatcherV2::default()
+                            .fuzzy_indices(t.name(), state.lock().search_term.as_str()).map(|(_, indices)| indices)?
 
-            spans
-        }).add_modifier(Modifier::DIM)
+            } else {
+                Vec::new()
+            };
+                        spans.extend(indices_template(t, &indices));
+
+                        spans
+                    }).add_modifier(Modifier::DIM))
         }))
         .block(
             Block::bordered()
