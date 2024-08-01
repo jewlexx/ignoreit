@@ -107,11 +107,15 @@ pub fn pick_template() -> anyhow::Result<Option<Template>> {
             }
 
             let state = &state.lock();
-            let mut breadcrumbs = String::new();
-
-            for folder in &state.history {
-                breadcrumbs.extend(format!("{}/", folder_name(&folder.folder.name)).chars())
-            }
+            let breadcrumbs: String =
+                state
+                    .history
+                    .iter()
+                    .fold(String::new(), |mut output, folder| {
+                        use std::fmt::Write;
+                        _ = write!(output, "{}/", folder_name(&folder.folder.name));
+                        output
+                    });
 
             Paragraph::new(
                 Line::from(vec![
@@ -132,14 +136,11 @@ pub fn pick_template() -> anyhow::Result<Option<Template>> {
         let items = state.lock().current_folder.list_items();
 
         let list = List::new(items.iter().map(|t| {
-            let spans = vec![
-                Span::raw(t.get_icon().to_string()),
-                Span::raw(" "),
-                Span::raw(t.name()),
-            ];
-            // spans.extend(indices_template(t, indices));
-
-            Line::from(spans).add_modifier(Modifier::DIM)
+            Line::from(vec![
+                t.get_icon().into(),
+                " ".into(),
+                t.name().into(),
+            ]).add_modifier(Modifier::DIM)
         }))
         .block(
             Block::bordered()

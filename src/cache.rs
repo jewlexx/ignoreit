@@ -31,11 +31,11 @@ impl Item {
         matches!(self, Self::Folder(_))
     }
 
-    pub fn get_icon(&self) -> char {
+    pub fn get_icon(&self) -> &str {
         if self.is_folder() {
-            crate::icons::FOLDER_CLOSED
+            crate::icons::strings::FOLDER_CLOSED
         } else {
-            crate::icons::FILE
+            crate::icons::strings::FILE
         }
     }
 }
