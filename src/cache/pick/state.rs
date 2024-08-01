@@ -66,6 +66,17 @@ impl State {
             return;
         }
 
+        if self.search_term.is_empty() {
+            *MATCHING_TEMPLATES.lock() = self
+                .current_folder
+                .list_items()
+                .into_iter()
+                .map(|item| (item, Vec::new()))
+                .collect();
+
+            return;
+        }
+
         *MATCHING_TEMPLATES.lock() = self
             .current_folder
             .list_items()
@@ -101,7 +112,7 @@ impl State {
                     let selected = self.list_state.selected();
 
                     if let Some(selected) = selected {
-                        let item = self.current_folder.list_items()[selected].clone();
+                        let (item, _) = Self::list_matching_templates()[selected].clone();
 
                         match item {
                             Item::Folder(mut folder) => {
@@ -116,6 +127,8 @@ impl State {
                                     folder: old_folder,
                                     selection,
                                 });
+
+                                self.search_term.clear();
                             }
                             Item::Template(template) => {
                                 if key.code != KeyCode::Right {
