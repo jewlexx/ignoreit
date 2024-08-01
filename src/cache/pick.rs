@@ -68,22 +68,6 @@ pub fn pick_template() -> anyhow::Result<Option<Template>> {
 fn handle_events(state: &Mutex<State>) -> anyhow::Result<(bool, Option<Template>)> {
     let mut state = state.lock();
 
-    // state.matching_templates = templates
-    //     .iter()
-    //     .filter_map(|t| {
-    //         SkimMatcherV2::default()
-    //             .fuzzy_indices(t.name(), state.search_term.as_str())
-    //             .map(|(score, indices)| (t, score, indices))
-    //     })
-    //     .sorted_by(
-    //         |(a, score_a, _), (b, score_b, _)| match score_b.cmp(score_a) {
-    //             Ordering::Equal => a.cmp(b),
-    //             ordering => ordering,
-    //         },
-    //     )
-    //     .map(|(t, _, indices)| (t.clone(), indices))
-    //     .collect();
-
     if let Event::Key(key) = event::read()? {
         Ok(state.handle_key_event(key))
     } else {

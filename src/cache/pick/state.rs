@@ -1,6 +1,11 @@
-use std::hash::{self, Hash, Hasher};
+use std::{
+    cmp::Ordering,
+    hash::{self, Hash, Hasher},
+};
 
-use parking_lot::Mutex;
+use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
+use itertools::Itertools;
+use parking_lot::{Mutex, MutexGuard};
 use ratatui::{
     crossterm::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers},
     widgets::ListState,
@@ -13,7 +18,8 @@ use crate::{
 
 pub type History = Vec<HistoryEntry>;
 
-pub static STATE_HASH: Mutex<u64> = Mutex::new(0);
+static STATE_HASH: Mutex<u64> = Mutex::new(0);
+static MATCHING_TEMPLATES: Mutex<Vec<(Item, Vec<usize>)>> = Mutex::new(Vec::new());
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct HistoryEntry {
@@ -23,7 +29,6 @@ pub struct HistoryEntry {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct State {
-    // matching_templates: Vec<(Template, Vec<usize>)>,
     pub search_term: String,
     pub list_state: ListState,
     pub current_folder: Folder,
@@ -50,6 +55,34 @@ impl State {
 
     pub fn update_hash(&self) {
         *STATE_HASH.lock() = self.get_hash();
+    }
+
+    pub fn list_matching_templates<'a>() -> MutexGuard<'a, Vec<(Item, Vec<usize>)>> {
+        MATCHING_TEMPLATES.lock()
+    }
+
+    pub fn update_matching_templates(&self) {
+        if !self.state_changed() {
+            return;
+        }
+
+        *MATCHING_TEMPLATES.lock() = self
+            .current_folder
+            .list_items()
+            .iter()
+            .filter_map(|t| {
+                SkimMatcherV2::default()
+                    .fuzzy_indices(t.name(), self.search_term.as_str())
+                    .map(|(score, indices)| (t, score, indices))
+            })
+            .sorted_by(
+                |(a, score_a, _), (b, score_b, _)| match score_b.cmp(score_a) {
+                    Ordering::Equal => a.name().cmp(b.name()),
+                    ordering => ordering,
+                },
+            )
+            .map(|(t, _, indices)| (t.clone(), indices))
+            .collect();
     }
 
     pub fn handle_key_event(&mut self, key: KeyEvent) -> (bool, Option<Template>) {

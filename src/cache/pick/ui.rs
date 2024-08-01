@@ -21,6 +21,8 @@ use ratatui::{
 
 use crate::{cache::Item, template::Template};
 
+use super::state::State;
+
 pub fn ui(state: Rc<Mutex<super::State>>) -> impl Fn(&mut ratatui::Frame<'_>) {
     let state = state.clone();
     move |frame: &mut Frame| {
@@ -75,31 +77,25 @@ pub fn ui(state: Rc<Mutex<super::State>>) -> impl Fn(&mut ratatui::Frame<'_>) {
             .block(Block::bordered().title("Fuzzy Search"))
             .style(Style::default().fg(Color::White));
 
-        let items = state.lock().current_folder.list_items();
+        let items = {
+            let state = state.lock();
+            state.update_matching_templates();
 
-        let list = List::new(items.iter().filter_map(|t| {
-            let spans = {
+            State::list_matching_templates()
+        };
+
+        let list = List::new(items.iter().map(|(t, indices)|
+            Line::from({
                             let mut spans = vec![
                             t.get_icon().into(),
                             " ".into(),
                         ];
 
-                            let search_term = state.lock().search_term.clone();
-
-            let indices = if !search_term.is_empty() {
-                       SkimMatcherV2::default()
-                            .fuzzy_indices(t.name(), state.lock().search_term.as_str()).map(|(_, indices)| indices)?
-
-            } else {
-                Vec::new()
-            };
-                        spans.extend(indices_template(t, &indices));
+                        spans.extend(indices_template(t, indices));
 
                         spans
-                    };
-
-            Some(Line::from(spans).add_modifier(Modifier::DIM))
-        }))
+                    }).add_modifier(Modifier::DIM)
+        ))
         .block(
             Block::bordered()
                 .title("Templates")
