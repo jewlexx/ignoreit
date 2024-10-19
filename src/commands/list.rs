@@ -1,7 +1,5 @@
 use std::fmt::Write;
 
-use crate::CACHE;
-
 enum Output {
     Pager(minus::Pager),
     NoPager,
@@ -35,6 +33,8 @@ pub struct Args {
 
 impl super::Command for Args {
     async fn run(&self) -> anyhow::Result<()> {
+        unimplemented!();
+
         let mut output = if self.no_paging || !*crate::IS_TERMINAL {
             Output::NoPager
         } else {

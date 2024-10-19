@@ -3,8 +3,6 @@ use std::{
     path::PathBuf,
 };
 
-use crate::CACHE;
-
 #[derive(Debug, Clone, clap::Parser)]
 pub struct Args {
     #[clap(
@@ -24,6 +22,8 @@ pub struct Args {
 
 impl super::Command for Args {
     async fn run(&self) -> anyhow::Result<()> {
+        unimplemented!();
+
         println!("Loading template...");
 
         let template = if let Some(template_name) = &self.template_name {
