@@ -1,11 +1,7 @@
-use std::{sync::LazyLock, time::Duration};
+use std::sync::LazyLock;
 
 use clap::Parser;
-use indicatif::ProgressBar;
-use tokio::sync::Mutex;
 
-mod cache;
-mod clone;
 mod commands;
 mod config;
 mod dirs;
