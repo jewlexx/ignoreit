@@ -1,46 +1,42 @@
-//! CLI application to pull gitignore templates with ease
-
-#![forbid(unsafe_code)]
-#![warn(missing_docs)]
-
-use std::time::SystemTime;
+use std::sync::LazyLock;
 
 use clap::Parser;
 
-use lazy_static::lazy_static;
+mod commands;
+mod templates;
 
-lazy_static! {
-    /// The current time in milliseconds
-    pub static ref TIMESTAMP: u128 = SystemTime::now()
-        .duration_since(SystemTime::UNIX_EPOCH)
-        .expect("time went backwards")
-        .as_millis();
+#[derive(Debug, Clone, Parser)]
+struct Args {
+    #[clap(subcommand)]
+    command: commands::Commands,
+
+    #[cfg(debug_assertions)]
+    #[clap(long, help = "Debug first run")]
+    debug_first_run: bool,
+
+    #[clap(short, long, help = "Dry run", global = true)]
+    dry_run: bool,
 }
 
-pub mod cache;
-pub mod commands;
-pub mod macros;
-pub mod templates;
+static IS_TERMINAL: LazyLock<bool> =
+    LazyLock::new(|| std::io::IsTerminal::is_terminal(&std::io::stdout()));
 
-// TODO: add custom errors with `thiserror`
-
-use commands::args::Args;
-
-fn main() -> anyhow::Result<()> {
-    lazy_static::initialize(&TIMESTAMP);
-
-    if !*cache::CACHE_ENABLED {
-        use mincolor::Colorize;
-        println!(
-            "{}",
-            "warning: cache is disabled. performance will not be optimal".yellow()
-        );
-        sleep_for!(3000);
+fn main() {
+    if let Err(e) = tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .build()
+        .expect("Correctly initialized asynchronous runtime")
+        .block_on(_main())
+    {
+        // TODO: Better error handling
+        panic!("{:?}", e)
     }
+}
 
+async fn _main() -> anyhow::Result<()> {
     let args = Args::parse();
 
-    args.command.run()?;
+    args.command.run().await?;
 
     Ok(())
 }

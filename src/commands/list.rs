@@ -1,15 +1,54 @@
-use crate::cache::get_template_paths;
+use std::fmt::Write;
 
-pub fn run() -> anyhow::Result<()> {
-    let templates = get_template_paths()?;
+enum Output {
+    Pager(minus::Pager),
+    NoPager,
+}
 
-    println!("Available templates:");
-
-    for item in templates {
-        println!("  {}", item);
+impl Output {
+    fn page(self) -> Result<(), minus::MinusError> {
+        match self {
+            Output::Pager(pager) => minus::page_all(pager),
+            Output::NoPager => Ok(()),
+        }
     }
+}
 
-    println!("\nEnter one of the above names eg. Rust");
+impl std::fmt::Write for Output {
+    fn write_str(&mut self, s: &str) -> std::fmt::Result {
+        match self {
+            Output::Pager(pager) => pager.write_str(s)?,
+            Output::NoPager => print!("{s}"),
+        };
 
-    Ok(())
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone, clap::Parser)]
+pub struct Args {
+    #[clap(short = 'P', long, help = "Disable the paging of the output")]
+    no_paging: bool,
+}
+
+impl super::Command for Args {
+    async fn run(&self) -> anyhow::Result<()> {
+        unimplemented!();
+
+        // let mut output = if self.no_paging || !*crate::IS_TERMINAL {
+        //     Output::NoPager
+        // } else {
+        //     Output::Pager(minus::Pager::new())
+        // };
+
+        // writeln!(output, "Available Templates:")?;
+
+        // for template in CACHE.list_templates() {
+        //     writeln!(output, "\t{template}")?;
+        // }
+
+        // output.page()?;
+
+        Ok(())
+    }
 }
