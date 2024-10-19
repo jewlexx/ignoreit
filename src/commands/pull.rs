@@ -1,7 +1,4 @@
-use std::{
-    fs::{File, OpenOptions},
-    path::PathBuf,
-};
+use std::path::PathBuf;
 
 #[derive(Debug, Clone, clap::Parser)]
 pub struct Args {
@@ -22,30 +19,20 @@ pub struct Args {
 
 impl super::Command for Args {
     async fn run(&self) -> anyhow::Result<()> {
-        unimplemented!();
-
         println!("Loading template...");
 
-        let template = if let Some(template_name) = &self.template_name {
-            CACHE
-                .find_template(template_name)
-                .expect("template found in cache")
-        } else {
-            CACHE
-                .pick_template()?
-                .unwrap_or_else(|| std::process::exit(1))
-        };
+        // let template = unimplemented!();
 
-        let mut file = File::open(template.path())?;
-        let mut destination = OpenOptions::new()
-            .create(true)
-            .write(true)
-            .append(self.append)
-            .open(&self.output)?;
+        // let mut file = File::open(template.path())?;
+        // let mut destination = OpenOptions::new()
+        //     .create(true)
+        //     .write(true)
+        //     .append(self.append)
+        //     .open(&self.output)?;
 
-        std::io::copy(&mut file, &mut destination)?;
+        // std::io::copy(&mut file, &mut destination)?;
 
-        println!("Template saved to {}", self.output.display());
+        // println!("Template saved to {}", self.output.display());
 
         Ok(())
     }

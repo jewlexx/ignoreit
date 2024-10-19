@@ -3,9 +3,6 @@ use std::sync::LazyLock;
 use clap::Parser;
 
 mod commands;
-mod config;
-mod dirs;
-mod icons;
 mod templates;
 
 #[derive(Debug, Clone, Parser)]

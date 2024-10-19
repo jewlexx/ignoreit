@@ -35,19 +35,19 @@ impl super::Command for Args {
     async fn run(&self) -> anyhow::Result<()> {
         unimplemented!();
 
-        let mut output = if self.no_paging || !*crate::IS_TERMINAL {
-            Output::NoPager
-        } else {
-            Output::Pager(minus::Pager::new())
-        };
+        // let mut output = if self.no_paging || !*crate::IS_TERMINAL {
+        //     Output::NoPager
+        // } else {
+        //     Output::Pager(minus::Pager::new())
+        // };
 
-        writeln!(output, "Available Templates:")?;
+        // writeln!(output, "Available Templates:")?;
 
-        for template in CACHE.list_templates() {
-            writeln!(output, "\t{template}")?;
-        }
+        // for template in CACHE.list_templates() {
+        //     writeln!(output, "\t{template}")?;
+        // }
 
-        output.page()?;
+        // output.page()?;
 
         Ok(())
     }
