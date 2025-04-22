@@ -1,31 +1,33 @@
 //! Handle gitignore cache
 
+// TODO: Refactor into cache struct
+
 use std::{
     fs::{self, read_to_string, DirEntry},
     io::{Read, Write},
     path::PathBuf,
+    sync::LazyLock,
 };
 
 use anyhow::Context;
 use parking_lot::{const_mutex, Mutex};
 
 use directories::BaseDirs;
-use lazy_static::lazy_static;
 
-lazy_static! {
-    /// The directory containing the cache
-    pub static ref CACHE_DIR: PathBuf = BaseDirs::new()
+/// The directory containing the cache
+pub static CACHE_DIR: LazyLock<PathBuf> = LazyLock::new(|| {
+    BaseDirs::new()
         .expect("failed to find cache dir")
         .cache_dir()
-        .join("gitignore");
+        .join("gitignore")
+});
 
-    /// If the cache is enabled or not
-    pub static ref CACHE_ENABLED: bool = {
-        let mut dir = CACHE_DIR.clone();
-        dir.pop();
-        dir.exists()
-    };
-}
+/// If the cache is enabled or not
+pub static CACHE_ENABLED: LazyLock<bool> = LazyLock::new(|| {
+    let mut dir = CACHE_DIR.clone();
+    dir.pop();
+    dir.exists()
+});
 
 /// Purge the current cache
 pub fn purge() -> anyhow::Result<()> {
