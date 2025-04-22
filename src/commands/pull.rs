@@ -2,19 +2,17 @@ use std::{env, fs::OpenOptions, io::Write};
 
 use anyhow::Context;
 
-use crate::{
-    cache::{get_template, get_template_paths},
-    commands::args::PullOpts,
-};
+use crate::{cache::CacheHandler, commands::args::PullOpts};
 
 pub fn run(
+    cache: &CacheHandler,
     output: &str,
     template: Option<String>,
     append: &bool,
     overwrite: &bool,
     no_overwrite: &bool,
 ) -> anyhow::Result<()> {
-    let template_paths = get_template_paths();
+    let template_paths = cache.get_template_paths();
 
     let template_name = template
         .or_else(|| {
@@ -38,7 +36,7 @@ pub fn run(
         })
         .context("Failed to get template. Please double check your input")?;
 
-    let template_map = get_template_paths()?;
+    let template_map = cache.get_template_paths()?;
 
     let template_path = if let Some(v) = template_map.iter().find(|f| f.lower == template_name) {
         v
@@ -92,12 +90,10 @@ pub fn run(
 
     let mut file = openopts.open(&path)?;
 
-    if *crate::cache::CACHE_ENABLED {
-        println!("Getting template {}", template_path);
-        let template = get_template(template_path)?;
-        writeln!(file, "# {}.gitignore", template_path)?;
-        write!(file, "{}", String::from_utf8(template)?)?;
-    }
+    println!("Getting template {}", template_path);
+    let template = cache.get_template(template_path)?;
+    writeln!(file, "# {}.gitignore", template_path)?;
+    write!(file, "{}", String::from_utf8(template)?)?;
 
     Ok(())
 }

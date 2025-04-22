@@ -23,7 +23,9 @@ use commands::args::Args;
 fn main() -> anyhow::Result<()> {
     LazyLock::force(&STARTUP_TIMESTAMP);
 
-    if !*cache::CACHE_ENABLED {
+    let cache = cache::CacheHandler::new();
+
+    if cache.is_none() {
         use mincolor::Colorize;
         println!(
             "{}",
@@ -34,7 +36,7 @@ fn main() -> anyhow::Result<()> {
 
     let args = Args::parse();
 
-    args.command.run()?;
+    args.command.run(cache.as_ref())?;
 
     Ok(())
 }

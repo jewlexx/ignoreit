@@ -1,7 +1,7 @@
-use crate::cache::get_template_paths;
+use crate::cache::CacheHandler;
 
-pub fn run() -> anyhow::Result<()> {
-    let templates = get_template_paths()?;
+pub fn run(cache: &CacheHandler) -> anyhow::Result<()> {
+    let templates = cache.get_template_paths()?;
 
     println!("Available templates:");
 

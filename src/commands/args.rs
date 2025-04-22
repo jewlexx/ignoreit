@@ -3,7 +3,7 @@
 use clap::{Parser, Subcommand};
 
 use crate::{
-    cache::{self, init_cache},
+    cache::CacheHandler,
     commands::{list_templates, pull_template},
 };
 
@@ -41,26 +41,37 @@ pub enum Commands {
 
 impl Commands {
     /// Runs the subcommand
-    pub fn run(&self) -> anyhow::Result<()> {
-        if *crate::cache::CACHE_ENABLED {
-            if init_cache().is_err() {
+    pub fn run(&self, cache: Option<&CacheHandler>) -> anyhow::Result<()> {
+        if let Some(cache) = cache {
+            if cache.init_cache().is_err() {
                 println!("Failed to initialize cache")
             }
+
+            match self {
+                Commands::List => list_templates(cache)?,
+                Commands::Pull {
+                    output,
+                    template,
+                    append,
+                    overwrite,
+                    no_overwrite,
+                } => pull_template(
+                    cache,
+                    output,
+                    template.clone(),
+                    append,
+                    overwrite,
+                    no_overwrite,
+                )?,
+                Commands::Purge => {
+                    cache.purge()?;
+                }
+            };
+
+            Ok(())
+        } else {
+            anyhow::bail!("Cache disabled")
         }
-
-        match self {
-            Commands::List => list_templates()?,
-            Commands::Pull {
-                output,
-                template,
-                append,
-                overwrite,
-                no_overwrite,
-            } => pull_template(output, template.clone(), append, overwrite, no_overwrite)?,
-            Commands::Purge => cache::purge()?,
-        };
-
-        Ok(())
     }
 }
 
