@@ -69,6 +69,8 @@ impl super::Command for Args {
             .join(&self.output);
 
         let mut openopts = OpenOptions::new();
+        openopts.create(true);
+        openopts.write(true);
 
         if path.exists() {
             let pull_opt = PullOpts::get_opt(self.append, self.overwrite, self.no_overwrite);
@@ -101,9 +103,8 @@ impl super::Command for Args {
                     openopts.append(true);
                 }
                 PullOpts::Overwrite => {
-                    // [`OpenOptions::append`] implies [`OpenOptions::write`] so we only have to
-                    // explicitly write it here
                     openopts.write(true);
+                    openopts.truncate(true);
                 }
             }
         }
