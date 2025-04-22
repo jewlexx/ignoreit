@@ -54,7 +54,8 @@ pub fn init_cache() -> anyhow::Result<()> {
 
     if !cache_dir.exists() {
         fs::create_dir_all(&cache_dir)?;
-        fs::File::create(&fetch_path)?.write_all(crate::TIMESTAMP.to_string().as_bytes())?;
+        fs::File::create(&fetch_path)?
+            .write_all(crate::STARTUP_TIMESTAMP.as_millis().to_string().as_bytes())?;
         return clone_templates();
     }
 

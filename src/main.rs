@@ -1,33 +1,27 @@
 //! CLI application to pull gitignore templates with ease
 
-#![forbid(unsafe_code)]
-#![warn(missing_docs)]
-
-use std::time::SystemTime;
+use std::{
+    sync::LazyLock,
+    time::{Duration, SystemTime},
+};
 
 use clap::Parser;
 
-use lazy_static::lazy_static;
-
-lazy_static! {
-    /// The current time in milliseconds
-    pub static ref TIMESTAMP: u128 = SystemTime::now()
+pub static STARTUP_TIMESTAMP: LazyLock<Duration> = LazyLock::new(|| {
+    SystemTime::now()
         .duration_since(SystemTime::UNIX_EPOCH)
         .expect("time went backwards")
-        .as_millis();
-}
+});
 
 pub mod cache;
 pub mod commands;
 pub mod macros;
 pub mod templates;
 
-// TODO: add custom errors with `thiserror`
-
 use commands::args::Args;
 
 fn main() -> anyhow::Result<()> {
-    lazy_static::initialize(&TIMESTAMP);
+    LazyLock::force(&STARTUP_TIMESTAMP);
 
     if !*cache::CACHE_ENABLED {
         use mincolor::Colorize;
