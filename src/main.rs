@@ -23,20 +23,13 @@ use commands::args::Args;
 fn main() -> anyhow::Result<()> {
     LazyLock::force(&STARTUP_TIMESTAMP);
 
-    let cache = cache::CacheHandler::new();
-
-    if cache.is_none() {
-        use mincolor::Colorize;
-        println!(
-            "{}",
-            "warning: cache is disabled. performance will not be optimal".yellow()
-        );
-        sleep_for!(3000);
-    }
+    let Some(cache) = cache::CacheHandler::new() else {
+        anyhow::bail!("failed to initialize cache");
+    };
 
     let args = Args::parse();
 
-    args.command.run(cache.as_ref())?;
+    args.command.run(cache)?;
 
     Ok(())
 }

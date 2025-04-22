@@ -41,37 +41,33 @@ pub enum Commands {
 
 impl Commands {
     /// Runs the subcommand
-    pub fn run(&self, cache: Option<&CacheHandler>) -> anyhow::Result<()> {
-        if let Some(cache) = cache {
-            if cache.init_cache().is_err() {
-                println!("Failed to initialize cache")
-            }
-
-            match self {
-                Commands::List => list_templates(cache)?,
-                Commands::Pull {
-                    output,
-                    template,
-                    append,
-                    overwrite,
-                    no_overwrite,
-                } => pull_template(
-                    cache,
-                    output,
-                    template.clone(),
-                    append,
-                    overwrite,
-                    no_overwrite,
-                )?,
-                Commands::Purge => {
-                    cache.purge()?;
-                }
-            };
-
-            Ok(())
-        } else {
-            anyhow::bail!("Cache disabled")
+    pub fn run(&self, cache: CacheHandler) -> anyhow::Result<()> {
+        if cache.init_cache().is_err() {
+            println!("Failed to initialize cache")
         }
+
+        match self {
+            Commands::List => list_templates(&cache)?,
+            Commands::Pull {
+                output,
+                template,
+                append,
+                overwrite,
+                no_overwrite,
+            } => pull_template(
+                &cache,
+                output,
+                template.clone(),
+                append,
+                overwrite,
+                no_overwrite,
+            )?,
+            Commands::Purge => {
+                cache.purge()?;
+            }
+        };
+
+        Ok(())
     }
 }
 
