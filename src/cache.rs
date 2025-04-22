@@ -3,7 +3,7 @@
 // TODO: Refactor into cache struct
 
 use std::{
-    fs::{self, read_to_string, DirEntry},
+    fs::{self, DirEntry},
     io::{Read, Write},
     path::{Path, PathBuf},
 };
@@ -76,7 +76,7 @@ impl CacheHandler {
             return self.init_cache();
         }
 
-        let hash = read_to_string(fetch_path)?;
+        let hash = fs::read_to_string(fetch_path)?;
 
         let client = reqwest::blocking::Client::builder()
             .user_agent("ignoreit")
@@ -94,9 +94,10 @@ impl CacheHandler {
             ));
         }
 
-        let hash_value: serde_json::Value = serde_json::from_str(&dbg!(response.text()?))?;
+        let response: serde_json::Value = serde_json::from_str(&response.text()?)?;
+        let hash_value = response.get("sha").and_then(|sha| sha.as_str());
 
-        if hash_value.as_str() != Some(&hash) {
+        if hash_value != Some(&hash) {
             fs::remove_dir_all(cache_dir)?;
             self.clone_templates()?;
         }
