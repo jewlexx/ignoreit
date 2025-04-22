@@ -78,9 +78,23 @@ impl CacheHandler {
 
         let hash = read_to_string(fetch_path)?;
 
-        let hash_value: serde_json::Value =
-            reqwest::blocking::get("https://api.github.com/repos/github/gitignore/commits/main")?
-                .json()?;
+        let client = reqwest::blocking::Client::builder()
+            .user_agent("ignoreit")
+            .build()?;
+
+        let response = client
+            .get("https://api.github.com/repos/github/gitignore/commits/main")
+            .send()?;
+
+        if !response.status().is_success() {
+            return Err(anyhow::anyhow!(
+                "Failed to fetch gitignore template. Status code: {}, body: {}",
+                response.status(),
+                response.text()?
+            ));
+        }
+
+        let hash_value: serde_json::Value = serde_json::from_str(&dbg!(response.text()?))?;
 
         if hash_value.as_str() != Some(&hash) {
             fs::remove_dir_all(cache_dir)?;
@@ -136,9 +150,15 @@ impl CacheHandler {
     fn clone_templates(&self) -> anyhow::Result<()> {
         let templates = crate::templates::github::GithubApi::new()?;
         let cache_dir = self.cache_dir();
-        let hash: serde_json::Value =
-            reqwest::blocking::get("https://api.github.com/repos/github/gitignore/commits/main")?
-                .json()?;
+
+        let client = reqwest::blocking::Client::builder()
+            .user_agent("ignoreit")
+            .build()?;
+
+        let hash: serde_json::Value = client
+            .get("https://api.github.com/repos/github/gitignore/commits/main")
+            .send()?
+            .json()?;
 
         for gitignore in templates.response {
             // This is allowed because removing the borrow will create an error

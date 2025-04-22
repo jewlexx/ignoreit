@@ -1,3 +1,4 @@
+use anyhow::Context;
 use clap::Subcommand;
 
 use crate::cache::CacheHandler;
@@ -21,9 +22,7 @@ pub enum Commands {
 
 impl Command for Commands {
     fn run(&self, cache: CacheHandler) -> anyhow::Result<()> {
-        if cache.init_cache().is_err() {
-            println!("Failed to initialize cache")
-        }
+        cache.init_cache().context("Failed to initialize cache")?;
 
         match self {
             Commands::List(args) => args.run(cache)?,
