@@ -135,7 +135,7 @@ impl CacheHandler {
 
     fn clone_templates(&self) -> anyhow::Result<()> {
         let templates = crate::templates::github::GithubApi::new()?;
-        let cache_dir = self.cache_dir().clone();
+        let cache_dir = self.cache_dir();
         let hash: serde_json::Value =
             reqwest::blocking::get("https://api.github.com/repos/github/gitignore/commits/main")?
                 .json()?;

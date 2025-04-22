@@ -6,6 +6,7 @@ use std::{
 };
 
 use clap::Parser;
+use commands::Command;
 
 pub static STARTUP_TIMESTAMP: LazyLock<Duration> = LazyLock::new(|| {
     SystemTime::now()
@@ -18,7 +19,14 @@ pub mod commands;
 pub mod macros;
 pub mod templates;
 
-use commands::args::Args;
+/// CLI Args
+#[derive(Parser, Clone, Debug)]
+#[clap(author, version, about)]
+pub struct Args {
+    /// The command to execute
+    #[clap(subcommand)]
+    pub command: commands::Commands,
+}
 
 fn main() -> anyhow::Result<()> {
     LazyLock::force(&STARTUP_TIMESTAMP);
