@@ -13,7 +13,7 @@ categories = ["command-line-utilities", "development-tools"]
 [dependencies]
 anyhow = "1.0"
 directories = "5.0"
-dialoguer = "0.10"
+dialoguer = "0.12"
 clap = { version = "4.4", features = ["derive"] }
 mincolor = "2.0"
 reqwest = { version = "0.11", features = ["json", "blocking"] }
