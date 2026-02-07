@@ -3,64 +3,35 @@ use std::{env, fs::OpenOptions, io::Write};
 use anyhow::Context;
 use clap::Parser;
 
-use crate::{cache::CacheHandler, commands::PullOpts};
+use crate::cache::CacheHandler;
+
+#[derive(Debug, Copy, Clone, Parser)]
+#[group(multiple = false)]
+pub struct OverwriteOpts {
+    /// Append the template to the end an existing gitignore
+    #[clap(long)]
+    append: bool,
+    /// Overwrite the template if it already exists
+    #[clap(long)]
+    overwrite: bool,
+}
 
 #[derive(Debug, Parser, Clone)]
 pub struct Args {
-    /// The name fo the template to pull
-    template: Option<String>,
+    /// The name of the template to pull
+    template: String,
 
     /// The path to output the template to
     #[clap(short, long, default_value = ".gitignore")]
     output: String,
 
-    /// Whether to append the template to the end an existing gitignore
-    #[clap(long)]
-    append: bool,
-
-    /// Whether to overwrite the template if it already exists
-    #[clap(long)]
-    overwrite: bool,
-
-    /// Whether to exit if the template already exists
-    #[clap(long)]
-    no_overwrite: bool,
+    #[clap(flatten)]
+    overwite_opts: OverwriteOpts,
 }
 
 impl super::Command for Args {
     async fn run(&self, cache: CacheHandler) -> anyhow::Result<()> {
-        let template_paths = cache.list_templates().await?;
-
-        let template_name = self
-            .template
-            .clone()
-            .or_else(|| {
-                use dialoguer::{theme::ColorfulTheme, Select};
-
-                let mut items = template_paths
-                    .iter()
-                    .map(|template| &template.name)
-                    .collect::<Vec<_>>();
-                items.sort();
-
-                let selection = Select::with_theme(&ColorfulTheme::default())
-                    .with_prompt("Choose one of the following templates")
-                    .items(items)
-                    .default(0)
-                    .interact();
-
-                match selection {
-                    Ok(v) => template_paths.get(v).map(|x| x.key.clone()),
-                    Err(_) => None,
-                }
-            })
-            .context("Failed to get template. Please double check your input")?;
-
-        let template = if let Some(v) = template_paths.iter().find(|f| f.key == template_name) {
-            v
-        } else {
-            return Err(anyhow::anyhow!("Template not found: {}", template_name));
-        };
+        let template = cache.get_template(&self.template).await?;
 
         let path = env::current_dir()
             .with_context(|| "Failed to get current directory")?
@@ -71,39 +42,17 @@ impl super::Command for Args {
         openopts.write(true);
 
         if path.exists() {
-            let pull_opt = PullOpts::get_opt(self.append, self.overwrite, self.no_overwrite);
-            let opt = pull_opt
-                .map(anyhow::Ok)
-                .unwrap_or_else(|| -> anyhow::Result<PullOpts> {
-                    use dialoguer::{theme::ColorfulTheme, Select};
-
-                    let selection = Select::with_theme(&ColorfulTheme::default())
-                        .with_prompt("The gitignore file already exists in your current directory")
-                        .items(["Append", "Overwrite", "Exit"])
-                        .default(0)
-                        .interact()?;
-
-                    Ok(match selection {
-                        0 => PullOpts::Append,
-                        1 => PullOpts::Overwrite,
-                        // 2 and anything else
-                        _ => PullOpts::NoOverwrite,
-                    })
-                })?;
-
-            match opt {
-                PullOpts::NoOverwrite => {
-                    println!("Goodbye!");
-                    return Ok(());
-                }
-                PullOpts::Append => {
-                    // Append written content to the end of the existing file
-                    openopts.append(true);
-                }
-                PullOpts::Overwrite => {
-                    openopts.write(true);
-                    openopts.truncate(true);
-                }
+            if self.overwite_opts.append {
+                // Append written content to the end of the existing file
+                openopts.append(true);
+            } else if self.overwite_opts.overwrite {
+                openopts.write(true);
+                openopts.truncate(true);
+            } else {
+                println!("Ignore file already exists.");
+                println!("Pass --overwrite or --append to edit existing gitignore,");
+                println!("or pass -o <filename> to change the output path.");
+                return Ok(());
             }
         }
 
