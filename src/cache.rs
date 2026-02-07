@@ -16,7 +16,7 @@ use anyhow::Context;
 
 use directories::ProjectDirs;
 use reqwest::Url;
-use sqlx::{sqlite::SqliteConnectOptions, ConnectOptions, SqlitePool};
+use sqlx::{migrate::Migrate, sqlite::SqliteConnectOptions, ConnectOptions, SqlitePool};
 
 use crate::{api, cache::update::LastUpdate};
 
@@ -88,6 +88,8 @@ VALUES ( ?1, ?2, ?3, ?4 )
             .execute(&mut *txn)
             .await?;
         }
+
+        txn.commit().await?;
 
         Ok(())
     }
