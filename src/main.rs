@@ -15,10 +15,9 @@ pub static STARTUP_TIMESTAMP: LazyLock<Duration> = LazyLock::new(|| {
 });
 
 mod api;
-pub mod cache;
-pub mod commands;
-pub mod macros;
-pub mod templates;
+mod cache;
+mod commands;
+mod macros;
 
 /// CLI Args
 #[derive(Parser, Clone, Debug)]

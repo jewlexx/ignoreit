@@ -3,7 +3,21 @@ use std::{env, fs::OpenOptions, io::Write};
 use anyhow::Context;
 use clap::Parser;
 
-use crate::{cache::CacheHandler, commands::PullOpts};
+use crate::cache::CacheHandler;
+
+#[derive(Debug, Copy, Clone, Parser)]
+#[group(required = true, multiple = false)]
+pub struct OverwriteOpts {
+    /// Append the template to the end an existing gitignore
+    #[clap(long)]
+    append: bool,
+    /// Overwrite the template if it already exists
+    #[clap(long)]
+    overwrite: bool,
+    /// Exit if the template already exists
+    #[clap(long)]
+    no_overwrite: bool,
+}
 
 #[derive(Debug, Parser, Clone)]
 pub struct Args {
@@ -14,17 +28,8 @@ pub struct Args {
     #[clap(short, long, default_value = ".gitignore")]
     output: String,
 
-    /// Whether to append the template to the end an existing gitignore
-    #[clap(long)]
-    append: bool,
-
-    /// Whether to overwrite the template if it already exists
-    #[clap(long)]
-    overwrite: bool,
-
-    /// Whether to exit if the template already exists
-    #[clap(long)]
-    no_overwrite: bool,
+    #[clap(flatten)]
+    overwite_opts: Option<OverwriteOpts>,
 }
 
 impl super::Command for Args {
@@ -40,39 +45,23 @@ impl super::Command for Args {
         openopts.write(true);
 
         if path.exists() {
-            let pull_opt = PullOpts::get_opt(self.append, self.overwrite, self.no_overwrite);
-            let opt = pull_opt
-                .map(anyhow::Ok)
-                .unwrap_or_else(|| -> anyhow::Result<PullOpts> {
-                    use dialoguer::{theme::ColorfulTheme, Select};
+            let Some(opts) = self.overwite_opts else {
+                println!("The gitignore file already exists in your current directory");
+                println!("Please elect to either overwrite, append or exit");
+                anyhow::bail!("");
+            };
 
-                    let selection = Select::with_theme(&ColorfulTheme::default())
-                        .with_prompt("The gitignore file already exists in your current directory")
-                        .items(["Append", "Overwrite", "Exit"])
-                        .default(0)
-                        .interact()?;
-
-                    Ok(match selection {
-                        0 => PullOpts::Append,
-                        1 => PullOpts::Overwrite,
-                        // 2 and anything else
-                        _ => PullOpts::NoOverwrite,
-                    })
-                })?;
-
-            match opt {
-                PullOpts::NoOverwrite => {
-                    println!("Goodbye!");
-                    return Ok(());
-                }
-                PullOpts::Append => {
-                    // Append written content to the end of the existing file
-                    openopts.append(true);
-                }
-                PullOpts::Overwrite => {
-                    openopts.write(true);
-                    openopts.truncate(true);
-                }
+            if opts.no_overwrite {
+                println!("Goodbye!");
+                return Ok(());
+            }
+            if opts.append {
+                // Append written content to the end of the existing file
+                openopts.append(true);
+            }
+            if opts.overwrite {
+                openopts.write(true);
+                openopts.truncate(true);
             }
         }
 
