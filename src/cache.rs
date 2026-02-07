@@ -149,35 +149,7 @@ impl CacheHandler {
     }
 
     fn clone_templates(&self) -> anyhow::Result<()> {
-        let templates = crate::templates::github::GithubApi::new()?;
-        let cache_dir = self.cache_dir();
-
-        let client = reqwest::blocking::Client::builder()
-            .user_agent("ignoreit")
-            .build()?;
-
-        let hash: serde_json::Value = client
-            .get("https://api.github.com/repos/github/gitignore/commits/main")
-            .send()?
-            .json()?;
-
-        for gitignore in templates.response {
-            // This is allowed because removing the borrow will create an error
-            let path = gitignore.path(&cache_dir);
-
-            if !path.exists() {
-                fs::create_dir_all(path.parent().context("Path was root for some reason")?)
-                    .context("Failed to create dir")?;
-                let mut file = fs::File::create(path).context("Failed to create file")?;
-
-                file.write_all(gitignore.bytes())?;
-            }
-        }
-
-        fs::File::create(cache_dir.join(".hash"))?
-            .write_all(hash.get("sha").unwrap().as_str().unwrap().as_bytes())?;
-
-        Ok(())
+        unimplemented!("Implement cloning all templates into db")
     }
 }
 
