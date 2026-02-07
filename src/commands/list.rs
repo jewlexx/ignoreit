@@ -6,7 +6,7 @@ use crate::cache::CacheHandler;
 pub struct Args;
 
 impl super::Command for Args {
-    fn run(&self, cache: CacheHandler) -> anyhow::Result<()> {
+    async fn run(&self, cache: CacheHandler) -> anyhow::Result<()> {
         let templates = cache.get_template_paths()?;
 
         println!("Available templates:");

@@ -2,40 +2,100 @@
 
 // TODO: Refactor into cache struct
 
+mod update;
+
 use std::{
     fs::{self, DirEntry},
-    io::{Read, Write},
+    io::Read,
     path::{Path, PathBuf},
 };
 
+const ALL_GITIGNORES: &str = "https://www.toptal.com/developers/gitignore/api/list?format=json";
+
 use anyhow::Context;
 
-use directories::BaseDirs;
+use directories::ProjectDirs;
+use reqwest::Url;
+use sqlx::{sqlite::SqliteConnectOptions, ConnectOptions, SqlitePool};
+
+use crate::{api, cache::update::LastUpdate};
+
+pub const DB_PATH: &str = "gitignores.db";
 
 pub struct CacheHandler {
     cache_dir: PathBuf,
+    pool: SqlitePool,
 }
 
 impl CacheHandler {
-    pub fn new() -> Option<Self> {
-        let dirs = BaseDirs::new()?;
+    pub async fn new() -> anyhow::Result<Self> {
+        let dirs = ProjectDirs::from("dev", "cordor", "ignoreit")
+            .context("project directories creation")?;
         let cache_dir = dirs.cache_dir();
 
-        cache_dir.exists().then(|| {
-            let project_cache_dir = cache_dir.join("gitignore");
+        if !cache_dir.try_exists()? {
+            std::fs::create_dir_all(cache_dir)?;
+        }
 
-            CacheHandler {
-                cache_dir: project_cache_dir,
-            }
+        let path = cache_dir.join(DB_PATH);
+        let db_url = Url::from_file_path(&path).expect("valid file path url");
+        let opts = SqliteConnectOptions::from_url(&db_url)?;
+        let pool = SqlitePool::connect_with(opts).await?;
+
+        Ok(Self {
+            cache_dir: cache_dir.to_owned(),
+            pool,
         })
+    }
+
+    pub async fn update(&self, force: bool) -> anyhow::Result<()> {
+        if force {
+            return Self::update_inner(self).await;
+        }
+
+        let last_update = LastUpdate::get(self.cache_dir());
+
+        match last_update {
+            Ok(last_update) => todo!("handle updating after timeout or forced update"),
+            Err(error) => match error {
+                update::Error::MissingLastUpdate => Self::update_inner(self).await,
+                error => Err(error)?,
+            },
+        }
+    }
+
+    async fn update_inner(&self) -> anyhow::Result<()> {
+        let response: api::Gitignores = reqwest::get(ALL_GITIGNORES).await?.json().await?;
+
+        let mut txn = self.pool.begin().await?;
+        for row in response.values() {
+            sqlx::query!(
+                r#"
+INSERT INTO gitignores ( key, contents, file_name, name )
+VALUES ( ?1, ?2, ?3, ?4 )
+                "#,
+                row.key,
+                row.contents,
+                row.file_name,
+                row.name,
+            )
+            .execute(&mut *txn)
+            .await?;
+        }
+
+        Ok(())
+    }
+
+    pub fn db_path(&self) -> PathBuf {
+        self.cache_dir.join(DB_PATH)
     }
 
     pub fn cache_dir(&self) -> &Path {
         &self.cache_dir
     }
 
-    pub fn fetch_path(&self) -> PathBuf {
-        self.cache_dir().join(".hash")
+    fn update_path(&self) -> PathBuf {
+        self.cache_dir().join(LastUpdate::file_name())
     }
 
     /// Purge the current cache
@@ -45,69 +105,9 @@ impl CacheHandler {
         Ok(())
     }
 
-    /// Initialize cache
-    pub fn init_cache(&self) -> anyhow::Result<()> {
-        unsafe fn check_recursion() -> anyhow::Result<()> {
-            static mut HAS_RECURSED: usize = 0;
-
-            if HAS_RECURSED > 2 {
-                anyhow::bail!("Recursed too much during cache initialization");
-            }
-
-            HAS_RECURSED += 1;
-
-            Ok(())
-        }
-
-        unsafe { check_recursion() }?;
-
-        let cache_dir = self.cache_dir();
-        let fetch_path = self.fetch_path();
-
-        if !cache_dir.exists() {
-            fs::create_dir_all(&cache_dir)?;
-            fs::File::create(&fetch_path)?
-                .write_all(crate::STARTUP_TIMESTAMP.as_millis().to_string().as_bytes())?;
-            return self.clone_templates();
-        }
-
-        if !fetch_path.exists() {
-            fs::remove_dir_all(&cache_dir)?;
-            return self.init_cache();
-        }
-
-        let hash = fs::read_to_string(fetch_path)?;
-
-        let client = reqwest::blocking::Client::builder()
-            .user_agent("ignoreit")
-            .build()?;
-
-        let response = client
-            .get("https://api.github.com/repos/github/gitignore/commits/main")
-            .send()?;
-
-        if !response.status().is_success() {
-            return Err(anyhow::anyhow!(
-                "Failed to fetch gitignore template. Status code: {}, body: {}",
-                response.status(),
-                response.text()?
-            ));
-        }
-
-        let response: serde_json::Value = serde_json::from_str(&response.text()?)?;
-        let hash_value = response.get("sha").and_then(|sha| sha.as_str());
-
-        if hash_value != Some(&hash) {
-            fs::remove_dir_all(cache_dir)?;
-            self.clone_templates()?;
-        }
-
-        Ok(())
-    }
-
     /// Get a given template by name and return it's byte representation
     pub fn get_template(&self, name: &TemplatePath) -> anyhow::Result<Vec<u8>> {
-        let path = self.cache_dir().join(&name.capped);
+        let path = self.db_path().join(&name.capped);
 
         if !path.exists() {
             Err(anyhow::anyhow!("Template not found"))
@@ -122,7 +122,7 @@ impl CacheHandler {
 
     /// List all of the templates in the cache
     pub fn get_template_paths(&self) -> anyhow::Result<Vec<TemplatePath>> {
-        let dir: Vec<DirEntry> = fs::read_dir(self.cache_dir())
+        let dir: Vec<DirEntry> = fs::read_dir(self.db_path())
             .context("Failed to read cache directory")?
             .collect::<Result<_, _>>()?;
 
@@ -146,10 +146,6 @@ impl CacheHandler {
             .collect();
 
         Ok(ignores)
-    }
-
-    fn clone_templates(&self) -> anyhow::Result<()> {
-        unimplemented!("Implement cloning all templates into db")
     }
 }
 

@@ -28,7 +28,7 @@ pub struct Args {
 }
 
 impl super::Command for Args {
-    fn run(&self, cache: CacheHandler) -> anyhow::Result<()> {
+    async fn run(&self, cache: CacheHandler) -> anyhow::Result<()> {
         let template_paths = cache.get_template_paths();
 
         let template_name = self
@@ -81,7 +81,7 @@ impl super::Command for Args {
 
                     let selection = Select::with_theme(&ColorfulTheme::default())
                         .with_prompt("The gitignore file already exists in your current directory")
-                        .items(&["Append", "Overwrite", "Exit"])
+                        .items(["Append", "Overwrite", "Exit"])
                         .default(0)
                         .interact()?;
 

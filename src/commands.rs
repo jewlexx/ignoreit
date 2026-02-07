@@ -1,4 +1,3 @@
-use anyhow::Context;
 use clap::Subcommand;
 
 use crate::cache::CacheHandler;
@@ -21,12 +20,12 @@ pub enum Commands {
 }
 
 impl Command for Commands {
-    fn run(&self, cache: CacheHandler) -> anyhow::Result<()> {
-        cache.init_cache().context("Failed to initialize cache")?;
+    async fn run(&self, cache: CacheHandler) -> anyhow::Result<()> {
+        cache.update(false).await?;
 
         match self {
-            Commands::List(args) => args.run(cache)?,
-            Commands::Pull(args) => args.run(cache)?,
+            Commands::List(args) => args.run(cache).await?,
+            Commands::Pull(args) => args.run(cache).await?,
             Commands::Purge => {
                 cache.purge()?;
             }
@@ -38,7 +37,10 @@ impl Command for Commands {
 
 pub trait Command {
     /// Runs the subcommand
-    fn run(&self, cache: CacheHandler) -> anyhow::Result<()>;
+    fn run(
+        &self,
+        cache: CacheHandler,
+    ) -> impl std::future::Future<Output = anyhow::Result<()>> + Send;
 }
 
 /// The list of options the user can give when the gitignore exists
