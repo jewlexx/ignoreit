@@ -1,6 +1,9 @@
+use std::{env, fs::OpenOptions, io::Write};
+
+use anyhow::Context;
 use clap::Parser;
 
-use crate::cache::CacheHandler;
+use crate::{cache::CacheHandler, commands::PullOpts};
 
 #[derive(Debug, Parser, Clone)]
 pub struct Args {
@@ -26,7 +29,7 @@ pub struct Args {
 
 impl super::Command for Args {
     async fn run(&self, cache: CacheHandler) -> anyhow::Result<()> {
-        let template_paths = cache.list_templates();
+        let template_paths = cache.list_templates().await?;
 
         let template_name = self
             .template
@@ -34,28 +37,20 @@ impl super::Command for Args {
             .or_else(|| {
                 use dialoguer::{theme::ColorfulTheme, Select};
 
-                let values = match template_paths {
-                    Ok(v) => v,
-                    Err(_) => return None,
-                };
-
                 let selection = Select::with_theme(&ColorfulTheme::default())
                     .with_prompt("Choose one of the following templates")
-                    .items(values.as_slice())
+                    .items(template_paths.iter().map(|template| &template.name))
                     .default(0)
                     .interact();
 
                 match selection {
-                    Ok(v) => values.get(v).map(|x| x.to_string()),
+                    Ok(v) => template_paths.get(v).map(|x| x.key.clone()),
                     Err(_) => None,
                 }
             })
             .context("Failed to get template. Please double check your input")?;
 
-        let template_map = cache.list_templates()?;
-
-        let template_path = if let Some(v) = template_map.iter().find(|f| f.lower == template_name)
-        {
+        let template = if let Some(v) = template_paths.iter().find(|f| f.key == template_name) {
             v
         } else {
             return Err(anyhow::anyhow!("Template not found: {}", template_name));
@@ -70,7 +65,7 @@ impl super::Command for Args {
         openopts.write(true);
 
         if path.exists() {
-            let pull_opt = PullOpts::get_opt(self.append, self.overwrite, se f.no_overwrite);
+            let pull_opt = PullOpts::get_opt(self.append, self.overwrite, self.no_overwrite);
             let opt = pull_opt
                 .map(anyhow::Ok)
                 .unwrap_or_else(|| -> anyhow::Result<PullOpts> {
@@ -108,10 +103,9 @@ impl super::Command for Args {
 
         let mut file = openopts.open(&path)?;
 
-        println!("Getting template {}", template_path);
-        let template = cache.get_template(template_path)?;
-        writeln!(file, "# {}.gitignore", template_path)?;
-        write!(file, "{}", String::from_utf8(template)?)?;
+        println!("Getting template {}", template.name);
+        writeln!(file, "# {}", template.file_name)?;
+        write!(file, "{}", template.contents)?;
 
         Ok(())
     }

@@ -163,7 +163,7 @@ WHERE key = ?;
 
     // todo: maybe stream this into tui??
     /// List all of the templates in the cache
-    pub async fn list_templates(&self) -> anyhow::Result<Vec<String>> {
+    pub async fn list_templates(&self) -> anyhow::Result<Vec<Gitignore>> {
         let mut conn = self.pool.acquire().await?;
         let query = sqlx::query_as!(
             Gitignore,
@@ -174,7 +174,7 @@ SELECT * FROM gitignores;
         .fetch_all(&mut *conn)
         .await?;
 
-        Ok(query.iter().map(|row| row.name.clone()).collect())
+        Ok(query)
     }
 
     pub async fn search_templates(

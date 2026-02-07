@@ -12,7 +12,7 @@ impl super::Command for Args {
         println!("Available templates:");
 
         for item in templates {
-            println!("  {}", item);
+            println!("  {}", item.name);
         }
 
         println!("\nEnter one of the above names eg. Rust");
