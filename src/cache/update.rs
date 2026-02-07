@@ -7,6 +7,8 @@ use std::{
 
 use serde::{Deserialize, Serialize};
 
+use crate::api::Gitignores;
+
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error("Last update time was not present")]
@@ -24,10 +26,15 @@ pub struct LastUpdate {
 }
 
 impl LastUpdate {
-    pub fn from_data(data: impl AsRef<str>) -> Self {
-        let data = data.as_ref();
+    pub fn from_data(data: &Gitignores) -> Self {
+        let mut entries = data
+            .values()
+            // .map(|(a, b)| (a.clone(), b.clone()))
+            .collect::<Vec<_>>();
+        entries.sort_by_key(|entry| &entry.key);
+
         let mut hasher = DefaultHasher::new();
-        data.hash(&mut hasher);
+        entries.hash(&mut hasher);
         let hash = hasher.finish();
 
         Self {

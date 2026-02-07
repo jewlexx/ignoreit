@@ -4,7 +4,7 @@ use std::collections::HashMap;
 
 pub type Gitignores = HashMap<String, Gitignore>;
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, FromRow)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Hash, FromRow)]
 #[serde(rename_all = "camelCase")]
 pub struct Gitignore {
     pub(crate) name: String,

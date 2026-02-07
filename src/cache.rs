@@ -72,9 +72,9 @@ impl CacheHandler {
 
     async fn update_inner(&self, initial: bool) -> anyhow::Result<()> {
         let raw_response = reqwest::get(ALL_GITIGNORES).await?.text().await?;
-        let update_data = LastUpdate::from_data(&raw_response);
-        update_data.save(self.cache_dir())?;
         let response: Gitignores = serde_json::from_str(&raw_response)?;
+        let update_data = LastUpdate::from_data(&response);
+        update_data.save(self.cache_dir())?;
 
         let mut txn = self.pool.begin().await?;
         for row in response.values() {
