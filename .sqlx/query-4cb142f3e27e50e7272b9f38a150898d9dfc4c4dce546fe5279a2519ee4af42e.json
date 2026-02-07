@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n                                            UPDATE gitignores\n                                            SET contents = ?2, file_name = ?3, name = ?4\n                                            WHERE key = ?1\n                                            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "4cb142f3e27e50e7272b9f38a150898d9dfc4c4dce546fe5279a2519ee4af42e"
+}

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n                                    INSERT INTO gitignores ( key, contents, file_name, name )\n                                    VALUES ( ?1, ?2, ?3, ?4 )\n                                    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "2e79215befffe9067785d3de2094d682f7c17d4a473d486722322fb2349d3eac"
+}
