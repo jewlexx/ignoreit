@@ -1,6 +1,6 @@
-use clap::{ArgGroup, Subcommand};
+use clap::Subcommand;
 
-use crate::{cache::CacheHandler, Args};
+use crate::cache::CacheHandler;
 
 mod list;
 mod pull;

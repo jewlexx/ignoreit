@@ -6,7 +6,7 @@ use clap::Parser;
 use crate::cache::CacheHandler;
 
 #[derive(Debug, Copy, Clone, Parser)]
-#[group(required = true, multiple = false)]
+#[group(multiple = false)]
 pub struct OverwriteOpts {
     /// Append the template to the end an existing gitignore
     #[clap(long)]
@@ -15,7 +15,7 @@ pub struct OverwriteOpts {
     #[clap(long)]
     overwrite: bool,
     /// Exit if the template already exists
-    #[clap(long)]
+    #[clap(long, default_value = "true")]
     no_overwrite: bool,
 }
 
@@ -29,7 +29,7 @@ pub struct Args {
     output: String,
 
     #[clap(flatten)]
-    overwite_opts: Option<OverwriteOpts>,
+    overwite_opts: OverwriteOpts,
 }
 
 impl super::Command for Args {
@@ -45,21 +45,17 @@ impl super::Command for Args {
         openopts.write(true);
 
         if path.exists() {
-            let Some(opts) = self.overwite_opts else {
-                println!("The gitignore file already exists in your current directory");
-                println!("Please elect to either overwrite, append or exit");
-                anyhow::bail!("");
-            };
-
-            if opts.no_overwrite {
-                println!("Goodbye!");
+            if self.overwite_opts.no_overwrite {
+                println!("Ignore file already exists.");
+                println!("Pass --overwrite or --append to edit existing gitignore,");
+                println!("or pass -o <filename> to change the output path.");
                 return Ok(());
             }
-            if opts.append {
+            if self.overwite_opts.append {
                 // Append written content to the end of the existing file
                 openopts.append(true);
             }
-            if opts.overwrite {
+            if self.overwite_opts.overwrite {
                 openopts.write(true);
                 openopts.truncate(true);
             }
