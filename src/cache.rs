@@ -145,8 +145,9 @@ impl CacheHandler {
     }
 
     /// Get a given template by name and return it's byte representation
-    pub async fn get_template(&self, name: String) -> anyhow::Result<Gitignore> {
+    pub async fn get_template(&self, name: impl AsRef<str>) -> anyhow::Result<Gitignore> {
         let mut conn = self.pool.acquire().await?;
+        let name = name.as_ref();
         let query = sqlx::query_as!(
             Gitignore,
             r#"

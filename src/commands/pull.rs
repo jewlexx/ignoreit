@@ -7,8 +7,8 @@ use crate::{cache::CacheHandler, commands::PullOpts};
 
 #[derive(Debug, Parser, Clone)]
 pub struct Args {
-    /// The name fo the template to pull
-    template: Option<String>,
+    /// The name of the template to pull
+    template: String,
 
     /// The path to output the template to
     #[clap(short, long, default_value = ".gitignore")]
@@ -29,38 +29,7 @@ pub struct Args {
 
 impl super::Command for Args {
     async fn run(&self, cache: CacheHandler) -> anyhow::Result<()> {
-        let template_paths = cache.list_templates().await?;
-
-        let template_name = self
-            .template
-            .clone()
-            .or_else(|| {
-                use dialoguer::{theme::ColorfulTheme, Select};
-
-                let mut items = template_paths
-                    .iter()
-                    .map(|template| &template.name)
-                    .collect::<Vec<_>>();
-                items.sort();
-
-                let selection = Select::with_theme(&ColorfulTheme::default())
-                    .with_prompt("Choose one of the following templates")
-                    .items(items)
-                    .default(0)
-                    .interact();
-
-                match selection {
-                    Ok(v) => template_paths.get(v).map(|x| x.key.clone()),
-                    Err(_) => None,
-                }
-            })
-            .context("Failed to get template. Please double check your input")?;
-
-        let template = if let Some(v) = template_paths.iter().find(|f| f.key == template_name) {
-            v
-        } else {
-            return Err(anyhow::anyhow!("Template not found: {}", template_name));
-        };
+        let template = cache.get_template(&self.template).await?;
 
         let path = env::current_dir()
             .with_context(|| "Failed to get current directory")?
