@@ -33,9 +33,7 @@ pub struct Args {
 async fn main() -> anyhow::Result<()> {
     LazyLock::force(&STARTUP_TIMESTAMP);
 
-    let Ok(cache) = cache::CacheHandler::new().await else {
-        anyhow::bail!("failed to initialize cache");
-    };
+    let cache = cache::CacheHandler::new().await?;
 
     let args = Args::parse();
 

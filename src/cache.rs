@@ -38,9 +38,15 @@ impl CacheHandler {
         }
 
         let path = cache_dir.join(DB_PATH);
+        if !path.try_exists()? {
+            std::fs::File::create_new(&path)?;
+        }
+
         let db_url = Url::from_file_path(&path).expect("valid file path url");
         let opts = SqliteConnectOptions::from_url(&db_url)?;
         let pool = SqlitePool::connect_with(opts).await?;
+
+        sqlx::migrate!().run(&pool).await?;
 
         Ok(Self {
             cache_dir: cache_dir.to_owned(),
