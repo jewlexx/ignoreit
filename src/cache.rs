@@ -16,9 +16,12 @@ use anyhow::Context;
 
 use directories::ProjectDirs;
 use reqwest::Url;
-use sqlx::{migrate::Migrate, sqlite::SqliteConnectOptions, ConnectOptions, SqlitePool};
+use sqlx::{sqlite::SqliteConnectOptions, ConnectOptions, SqlitePool};
 
-use crate::{api, cache::update::LastUpdate};
+use crate::{
+    api::{self, Gitignores},
+    cache::update::LastUpdate,
+};
 
 pub const DB_PATH: &str = "gitignores.db";
 
@@ -55,38 +58,52 @@ impl CacheHandler {
     }
 
     pub async fn update(&self, force: bool) -> anyhow::Result<()> {
-        if force {
-            return Self::update_inner(self).await;
-        }
-
         let last_update = LastUpdate::get(self.cache_dir());
 
         match last_update {
-            Ok(last_update) => todo!("handle updating after timeout or forced update"),
+            // todo: handle update time
+            Ok(last_update) => Self::update_inner(&self, false).await,
             Err(error) => match error {
-                update::Error::MissingLastUpdate => Self::update_inner(self).await,
+                update::Error::MissingLastUpdate => Self::update_inner(self, true).await,
                 error => Err(error)?,
             },
         }
     }
 
-    async fn update_inner(&self) -> anyhow::Result<()> {
-        let response: api::Gitignores = reqwest::get(ALL_GITIGNORES).await?.json().await?;
+    async fn update_inner(&self, initial: bool) -> anyhow::Result<()> {
+        let raw_response = reqwest::get(ALL_GITIGNORES).await?.text().await?;
+        let update_data = LastUpdate::from_data(&raw_response);
+        update_data.save(self.cache_dir())?;
+        let response: Gitignores = serde_json::from_str(&raw_response)?;
 
         let mut txn = self.pool.begin().await?;
         for row in response.values() {
-            sqlx::query!(
-                r#"
-INSERT INTO gitignores ( key, contents, file_name, name )
-VALUES ( ?1, ?2, ?3, ?4 )
-                "#,
-                row.key,
-                row.contents,
-                row.file_name,
-                row.name,
-            )
-            .execute(&mut *txn)
-            .await?;
+            let query = if initial {
+                sqlx::query!(
+                    r#"
+                    INSERT INTO gitignores ( key, contents, file_name, name )
+                    VALUES ( ?1, ?2, ?3, ?4 )
+                    "#,
+                    row.key,
+                    row.contents,
+                    row.file_name,
+                    row.name,
+                )
+            } else {
+                sqlx::query!(
+                    r#"
+                    UPDATE gitignores
+                    SET contents = ?2, file_name = ?3, name = ?4
+                    WHERE key = ?1
+                    "#,
+                    row.key,
+                    row.contents,
+                    row.file_name,
+                    row.name,
+                )
+            };
+
+            query.execute(&mut *txn).await?;
         }
 
         txn.commit().await?;

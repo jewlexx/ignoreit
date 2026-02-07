@@ -1,5 +1,6 @@
 use std::{
     fs::File,
+    hash::{DefaultHasher, Hash, Hasher},
     path::{Path, PathBuf},
     time::SystemTime,
 };
@@ -16,12 +17,23 @@ pub enum Error {
     Json(#[from] serde_json::Error),
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct LastUpdate(pub SystemTime);
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
+pub struct LastUpdate {
+    pub time: SystemTime,
+    pub hash: u64,
+}
 
 impl LastUpdate {
-    pub fn now() -> Self {
-        Self(SystemTime::now())
+    pub fn from_data(data: impl AsRef<str>) -> Self {
+        let data = data.as_ref();
+        let mut hasher = DefaultHasher::new();
+        data.hash(&mut hasher);
+        let hash = hasher.finish();
+
+        Self {
+            time: SystemTime::now(),
+            hash,
+        }
     }
 
     pub fn file_name() -> PathBuf {
@@ -36,5 +48,14 @@ impl LastUpdate {
 
         let file = File::create(update_path)?;
         Ok(serde_json::from_reader(file)?)
+    }
+
+    pub fn save(self, parent_dir: impl AsRef<Path>) -> Result<(), Error> {
+        let update_path = parent_dir.as_ref().join(Self::file_name());
+        let mut file = File::create(update_path)?;
+
+        serde_json::to_writer(&mut file, &self)?;
+
+        Ok(())
     }
 }
