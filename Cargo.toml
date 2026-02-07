@@ -21,6 +21,7 @@ parking_lot = "0.12"
 rayon = "1.11"
 reqwest = { version = "0.13", features = ["json", "blocking"] }
 serde_json = "1.0"
+sqlx = "0.8.6"
 
 [profile.release]
 lto = true
