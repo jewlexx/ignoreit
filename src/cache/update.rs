@@ -46,7 +46,7 @@ impl LastUpdate {
             return Err(Error::MissingLastUpdate);
         }
 
-        let file = File::create(update_path)?;
+        let file = File::open(update_path)?;
         Ok(serde_json::from_reader(file)?)
     }
 

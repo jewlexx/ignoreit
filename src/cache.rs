@@ -19,7 +19,7 @@ use reqwest::Url;
 use sqlx::{sqlite::SqliteConnectOptions, ConnectOptions, SqlitePool};
 
 use crate::{
-    api::{self, Gitignores},
+    api::{Gitignore, Gitignores},
     cache::update::LastUpdate,
 };
 
@@ -131,60 +131,33 @@ impl CacheHandler {
     }
 
     /// Get a given template by name and return it's byte representation
-    pub fn get_template(&self, name: &TemplatePath) -> anyhow::Result<Vec<u8>> {
-        let path = self.db_path().join(&name.capped);
+    // pub fn get_template(&self, name: &TemplatePath) -> anyhow::Result<Vec<u8>> {
+    //     let path = self.db_path().join(&name.capped);
 
-        if !path.exists() {
-            Err(anyhow::anyhow!("Template not found"))
-        } else {
-            let mut file = fs::File::open(path).with_context(|| "Failed to open template file")?;
-            let mut bytes = Vec::new();
-            file.read_to_end(&mut bytes)?;
+    //     if !path.exists() {
+    //         Err(anyhow::anyhow!("Template not found"))
+    //     } else {
+    //         let mut file = fs::File::open(path).with_context(|| "Failed to open template file")?;
+    //         let mut bytes = Vec::new();
+    //         file.read_to_end(&mut bytes)?;
 
-            Ok(bytes)
-        }
-    }
+    //         Ok(bytes)
+    //     }
+    // }
 
+    // todo: maybe stream this into tui??
     /// List all of the templates in the cache
-    pub fn get_template_paths(&self) -> anyhow::Result<Vec<TemplatePath>> {
-        let dir: Vec<DirEntry> = fs::read_dir(self.db_path())
-            .context("Failed to read cache directory")?
-            .collect::<Result<_, _>>()?;
+    pub async fn list_templates(&self) -> anyhow::Result<Vec<String>> {
+        let mut conn = self.pool.acquire().await?;
+        let query = sqlx::query_as!(
+            Gitignore,
+            r#"
+SELECT * FROM gitignores;
+        "#
+        )
+        .fetch_all(&mut *conn)
+        .await?;
 
-        let ignores = dir
-            .iter()
-            .filter(|entry| {
-                entry.file_type().unwrap().is_file()
-                    && entry.file_name().to_str().unwrap() != ".hash"
-            })
-            .map(|entry| {
-                let file_name = entry.file_name();
-                let capped = file_name
-                    .to_str()
-                    .expect("invalid utf-8 file name")
-                    .to_string();
-
-                let lower = capped.to_lowercase();
-
-                TemplatePath { lower, capped }
-            })
-            .collect();
-
-        Ok(ignores)
-    }
-}
-
-#[derive(PartialEq, Eq)]
-/// Structural representation of a template path
-pub struct TemplatePath {
-    /// Lowercase name
-    pub lower: String,
-    /// Cased name
-    pub capped: String,
-}
-
-impl std::fmt::Display for TemplatePath {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.capped)
+        Ok(query.iter().map(|row| row.name.clone()).collect())
     }
 }
