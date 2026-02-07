@@ -16,7 +16,10 @@ use anyhow::Context;
 
 use directories::ProjectDirs;
 use reqwest::Url;
-use sqlx::{sqlite::SqliteConnectOptions, ConnectOptions, SqlitePool};
+use sqlx::{
+    sqlite::{SqliteConnectOptions, SqliteQueryResult},
+    ConnectOptions, SqlitePool,
+};
 
 use crate::{
     api::{Gitignore, Gitignores},
@@ -120,17 +123,13 @@ impl CacheHandler {
             };
 
             if let Some(query) = query {
-                query.execute(&mut *txn).await?;
+                let _: SqliteQueryResult = query.execute(&mut *txn).await?;
             }
         }
 
         txn.commit().await?;
 
         Ok(())
-    }
-
-    pub fn db_path(&self) -> PathBuf {
-        self.cache_dir.join(DB_PATH)
     }
 
     pub fn cache_dir(&self) -> &Path {
@@ -148,7 +147,7 @@ impl CacheHandler {
     pub async fn get_template(&self, name: impl AsRef<str>) -> anyhow::Result<Gitignore> {
         let mut conn = self.pool.acquire().await?;
         let name = name.as_ref();
-        let query = sqlx::query_as!(
+        let query: Gitignore = sqlx::query_as!(
             Gitignore,
             r#"
 SELECT * FROM gitignores
@@ -166,7 +165,7 @@ WHERE key = ?;
     /// List all of the templates in the cache
     pub async fn list_templates(&self) -> anyhow::Result<Vec<Gitignore>> {
         let mut conn = self.pool.acquire().await?;
-        let query = sqlx::query_as!(
+        let query: Vec<Gitignore> = sqlx::query_as!(
             Gitignore,
             r#"
 SELECT * FROM gitignores;
@@ -184,7 +183,7 @@ SELECT * FROM gitignores;
     ) -> anyhow::Result<Vec<String>> {
         let mut conn = self.pool.acquire().await?;
         let search_query = format!("%{}%", search_query.as_ref());
-        let query = sqlx::query_as!(
+        let query: Vec<Gitignore> = sqlx::query_as!(
             Gitignore,
             r#"
 SELECT * FROM gitignores
