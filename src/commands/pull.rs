@@ -1,9 +1,6 @@
-use std::{env, fs::OpenOptions, io::Write};
-
-use anyhow::Context;
 use clap::Parser;
 
-use crate::{cache::CacheHandler, commands::PullOpts};
+use crate::cache::CacheHandler;
 
 #[derive(Debug, Parser, Clone)]
 pub struct Args {

@@ -27,10 +27,7 @@ pub struct LastUpdate {
 
 impl LastUpdate {
     pub fn from_data(data: &Gitignores) -> Self {
-        let mut entries = data
-            .values()
-            // .map(|(a, b)| (a.clone(), b.clone()))
-            .collect::<Vec<_>>();
+        let mut entries = data.values().collect::<Vec<_>>();
         entries.sort_by_key(|entry| &entry.key);
 
         let mut hasher = DefaultHasher::new();

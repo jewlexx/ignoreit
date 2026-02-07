@@ -4,7 +4,6 @@ use crate::cache::CacheHandler;
 
 mod list;
 mod pull;
-mod purge;
 
 /// All possible CLI commands
 #[derive(Debug, Subcommand, Clone)]
@@ -21,14 +20,10 @@ pub enum Commands {
 
 impl Command for Commands {
     async fn run(&self, cache: CacheHandler) -> anyhow::Result<()> {
-        cache.update(false).await?;
-
         match self {
             Commands::List(args) => args.run(cache).await?,
             Commands::Pull(args) => args.run(cache).await?,
-            Commands::Purge => {
-                cache.purge()?;
-            }
+            Commands::Purge => cache.purge()?,
         };
 
         Ok(())

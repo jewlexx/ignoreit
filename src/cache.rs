@@ -5,9 +5,9 @@
 mod update;
 
 use std::{
-    fs::{self, DirEntry},
-    io::Read,
+    fs::{self},
     path::{Path, PathBuf},
+    time::{Duration, SystemTime},
 };
 
 const ALL_GITIGNORES: &str = "https://www.toptal.com/developers/gitignore/api/list?format=json";
@@ -24,6 +24,8 @@ use crate::{
 };
 
 pub const DB_PATH: &str = "gitignores.db";
+// todo: configurable update timeout
+pub const UPDATE_TIMEOUT: Duration = Duration::from_hours(1);
 
 pub struct CacheHandler {
     cache_dir: PathBuf,
@@ -61,16 +63,26 @@ impl CacheHandler {
         let last_update = LastUpdate::get(self.cache_dir());
 
         match last_update {
-            // todo: handle update time
-            Ok(last_update) => Self::update_inner(&self, false).await,
+            Ok(last_update) => {
+                if force
+                    || SystemTime::now()
+                        .duration_since(last_update.time)
+                        .expect("time to go forwards")
+                        >= UPDATE_TIMEOUT
+                {
+                    Self::update_inner(self, Some(last_update)).await
+                } else {
+                    Ok(())
+                }
+            }
             Err(error) => match error {
-                update::Error::MissingLastUpdate => Self::update_inner(self, true).await,
+                update::Error::MissingLastUpdate => Self::update_inner(self, None).await,
                 error => Err(error)?,
             },
         }
     }
 
-    async fn update_inner(&self, initial: bool) -> anyhow::Result<()> {
+    async fn update_inner(&self, last_update: Option<LastUpdate>) -> anyhow::Result<()> {
         let raw_response = reqwest::get(ALL_GITIGNORES).await?.text().await?;
         let response: Gitignores = serde_json::from_str(&raw_response)?;
         let update_data = LastUpdate::from_data(&response);
@@ -78,32 +90,38 @@ impl CacheHandler {
 
         let mut txn = self.pool.begin().await?;
         for row in response.values() {
-            let query = if initial {
-                sqlx::query!(
-                    r#"
-                    INSERT INTO gitignores ( key, contents, file_name, name )
-                    VALUES ( ?1, ?2, ?3, ?4 )
-                    "#,
-                    row.key,
-                    row.contents,
-                    row.file_name,
-                    row.name,
-                )
+            let query = if let Some(last_update) = last_update {
+                if last_update.hash != update_data.hash {
+                    Some(sqlx::query!(
+                        r#"
+                                            UPDATE gitignores
+                                            SET contents = ?2, file_name = ?3, name = ?4
+                                            WHERE key = ?1
+                                            "#,
+                        row.key,
+                        row.contents,
+                        row.file_name,
+                        row.name,
+                    ))
+                } else {
+                    None
+                }
             } else {
-                sqlx::query!(
+                Some(sqlx::query!(
                     r#"
-                    UPDATE gitignores
-                    SET contents = ?2, file_name = ?3, name = ?4
-                    WHERE key = ?1
-                    "#,
+                                    INSERT INTO gitignores ( key, contents, file_name, name )
+                                    VALUES ( ?1, ?2, ?3, ?4 )
+                                    "#,
                     row.key,
                     row.contents,
                     row.file_name,
                     row.name,
-                )
+                ))
             };
 
-            query.execute(&mut *txn).await?;
+            if let Some(query) = query {
+                query.execute(&mut *txn).await?;
+            }
         }
 
         txn.commit().await?;
@@ -131,19 +149,20 @@ impl CacheHandler {
     }
 
     /// Get a given template by name and return it's byte representation
-    // pub fn get_template(&self, name: &TemplatePath) -> anyhow::Result<Vec<u8>> {
-    //     let path = self.db_path().join(&name.capped);
+    pub fn get_template(&self, name: String) -> anyhow::Result<Vec<u8>> {
+        //     let path = self.db_path().join(&name.capped);
 
-    //     if !path.exists() {
-    //         Err(anyhow::anyhow!("Template not found"))
-    //     } else {
-    //         let mut file = fs::File::open(path).with_context(|| "Failed to open template file")?;
-    //         let mut bytes = Vec::new();
-    //         file.read_to_end(&mut bytes)?;
+        //     if !path.exists() {
+        //         Err(anyhow::anyhow!("Template not found"))
+        //     } else {
+        //         let mut file = fs::File::open(path).with_context(|| "Failed to open template file")?;
+        //         let mut bytes = Vec::new();
+        //         file.read_to_end(&mut bytes)?;
 
-    //         Ok(bytes)
-    //     }
-    // }
+        //         Ok(bytes)
+        //     }
+        unimplemented!()
+    }
 
     // todo: maybe stream this into tui??
     /// List all of the templates in the cache

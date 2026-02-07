@@ -27,6 +27,10 @@ pub struct Args {
     /// The command to execute
     #[clap(subcommand)]
     pub command: commands::Commands,
+
+    /// Force update cache
+    #[clap(short = 'F', long, default_value = "false")]
+    pub force_update: bool,
 }
 
 #[tokio::main(flavor = "multi_thread")]
@@ -37,6 +41,7 @@ async fn main() -> anyhow::Result<()> {
 
     let args = Args::parse();
 
+    cache.update(args.force_update).await?;
     args.command.run(cache).await?;
 
     Ok(())
