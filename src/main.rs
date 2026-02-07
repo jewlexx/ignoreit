@@ -14,6 +14,7 @@ pub static STARTUP_TIMESTAMP: LazyLock<Duration> = LazyLock::new(|| {
         .expect("time went backwards")
 });
 
+mod api;
 pub mod cache;
 pub mod commands;
 pub mod macros;
@@ -26,18 +27,22 @@ pub struct Args {
     /// The command to execute
     #[clap(subcommand)]
     pub command: commands::Commands,
+
+    /// Force update cache
+    #[clap(short = 'F', long, default_value = "false")]
+    pub force_update: bool,
 }
 
-fn main() -> anyhow::Result<()> {
+#[tokio::main(flavor = "multi_thread")]
+async fn main() -> anyhow::Result<()> {
     LazyLock::force(&STARTUP_TIMESTAMP);
 
-    let Some(cache) = cache::CacheHandler::new() else {
-        anyhow::bail!("failed to initialize cache");
-    };
+    let cache = cache::CacheHandler::new().await?;
 
     let args = Args::parse();
 
-    args.command.run(cache)?;
+    cache.update(args.force_update).await?;
+    args.command.run(cache).await?;
 
     Ok(())
 }

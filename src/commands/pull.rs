@@ -28,8 +28,8 @@ pub struct Args {
 }
 
 impl super::Command for Args {
-    fn run(&self, cache: CacheHandler) -> anyhow::Result<()> {
-        let template_paths = cache.get_template_paths();
+    async fn run(&self, cache: CacheHandler) -> anyhow::Result<()> {
+        let template_paths = cache.list_templates().await?;
 
         let template_name = self
             .template
@@ -37,28 +37,26 @@ impl super::Command for Args {
             .or_else(|| {
                 use dialoguer::{theme::ColorfulTheme, Select};
 
-                let values = match template_paths {
-                    Ok(v) => v,
-                    Err(_) => return None,
-                };
+                let mut items = template_paths
+                    .iter()
+                    .map(|template| &template.name)
+                    .collect::<Vec<_>>();
+                items.sort();
 
                 let selection = Select::with_theme(&ColorfulTheme::default())
                     .with_prompt("Choose one of the following templates")
-                    .items(values.as_slice())
+                    .items(items)
                     .default(0)
                     .interact();
 
                 match selection {
-                    Ok(v) => values.get(v).map(|x| x.to_string()),
+                    Ok(v) => template_paths.get(v).map(|x| x.key.clone()),
                     Err(_) => None,
                 }
             })
             .context("Failed to get template. Please double check your input")?;
 
-        let template_map = cache.get_template_paths()?;
-
-        let template_path = if let Some(v) = template_map.iter().find(|f| f.lower == template_name)
-        {
+        let template = if let Some(v) = template_paths.iter().find(|f| f.key == template_name) {
             v
         } else {
             return Err(anyhow::anyhow!("Template not found: {}", template_name));
@@ -81,7 +79,7 @@ impl super::Command for Args {
 
                     let selection = Select::with_theme(&ColorfulTheme::default())
                         .with_prompt("The gitignore file already exists in your current directory")
-                        .items(&["Append", "Overwrite", "Exit"])
+                        .items(["Append", "Overwrite", "Exit"])
                         .default(0)
                         .interact()?;
 
@@ -111,10 +109,9 @@ impl super::Command for Args {
 
         let mut file = openopts.open(&path)?;
 
-        println!("Getting template {}", template_path);
-        let template = cache.get_template(template_path)?;
-        writeln!(file, "# {}.gitignore", template_path)?;
-        write!(file, "{}", String::from_utf8(template)?)?;
+        println!("Getting template {}", template.name);
+        writeln!(file, "# {}", template.file_name)?;
+        write!(file, "{}", template.contents)?;
 
         Ok(())
     }

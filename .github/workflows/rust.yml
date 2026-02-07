@@ -19,11 +19,14 @@ jobs:
         with:
           profile: minimal
           toolchain: stable
-
       - uses: Swatinem/rust-cache@v2
 
       - name: Check Rust Compiler Version
         run: rustc --version
+      - name: Install sqlx
+        run: cargo install sqlx-cli
+      - name: Setup database
+        run: sqlx db create && sqlx migrate run
       - name: Build
         run: cargo build --verbose
       - name: Run tests

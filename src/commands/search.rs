@@ -2,17 +2,21 @@ use clap::Parser;
 
 use crate::cache::CacheHandler;
 
-#[derive(Debug, Parser, Copy, Clone)]
-pub struct Args;
+#[derive(Debug, Parser, Clone)]
+pub struct Args {
+    /// Query to search for
+    #[clap()]
+    query: String,
+}
 
 impl super::Command for Args {
     async fn run(&self, cache: CacheHandler) -> anyhow::Result<()> {
-        let templates = cache.list_templates().await?;
+        let templates = cache.search_templates(&self.query).await?;
 
         println!("Available templates:");
 
         for item in templates {
-            println!("  {}", item.name);
+            println!("  {}", item);
         }
 
         println!("\nEnter one of the above names eg. Rust");

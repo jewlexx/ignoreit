@@ -3,22 +3,25 @@ name: Build, Test and Release
 on:
   release:
     types: [published]
-  workflow_dispatch:  
-    
+  workflow_dispatch:
+
 env:
   CARGO_TERM_COLOR: always
   CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_PUBLISH_TOKEN }}
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Build
-      run: cargo build --verbose
-    - name: Run tests
-      run: cargo test --verbose
-    - name: Publish to crates.io
-      run: cargo publish
+      - uses: actions/checkout@v3
+      - name: Install sqlx
+        run: cargo install sqlx-cli
+      - name: Setup database
+        run: sqlx db create && sqlx migrate run
+      - name: Build
+        run: cargo build --verbose
+      - name: Run tests
+        run: cargo test --verbose
+      - name: Publish to crates.io
+        run: cargo publish
