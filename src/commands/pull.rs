@@ -37,9 +37,15 @@ impl super::Command for Args {
             .or_else(|| {
                 use dialoguer::{theme::ColorfulTheme, Select};
 
+                let mut items = template_paths
+                    .iter()
+                    .map(|template| &template.name)
+                    .collect::<Vec<_>>();
+                items.sort();
+
                 let selection = Select::with_theme(&ColorfulTheme::default())
                     .with_prompt("Choose one of the following templates")
-                    .items(template_paths.iter().map(|template| &template.name))
+                    .items(items)
                     .default(0)
                     .interact();
 
