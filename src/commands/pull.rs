@@ -14,9 +14,6 @@ pub struct OverwriteOpts {
     /// Overwrite the template if it already exists
     #[clap(long)]
     overwrite: bool,
-    /// Exit if the template already exists
-    #[clap(long, default_value = "true")]
-    no_overwrite: bool,
 }
 
 #[derive(Debug, Parser, Clone)]
@@ -45,19 +42,17 @@ impl super::Command for Args {
         openopts.write(true);
 
         if path.exists() {
-            if self.overwite_opts.no_overwrite {
+            if self.overwite_opts.append {
+                // Append written content to the end of the existing file
+                openopts.append(true);
+            } else if self.overwite_opts.overwrite {
+                openopts.write(true);
+                openopts.truncate(true);
+            } else {
                 println!("Ignore file already exists.");
                 println!("Pass --overwrite or --append to edit existing gitignore,");
                 println!("or pass -o <filename> to change the output path.");
                 return Ok(());
-            }
-            if self.overwite_opts.append {
-                // Append written content to the end of the existing file
-                openopts.append(true);
-            }
-            if self.overwite_opts.overwrite {
-                openopts.write(true);
-                openopts.truncate(true);
             }
         }
 
