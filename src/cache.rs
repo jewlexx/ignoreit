@@ -137,10 +137,6 @@ impl CacheHandler {
         &self.cache_dir
     }
 
-    fn update_path(&self) -> PathBuf {
-        self.cache_dir().join(LastUpdate::file_name())
-    }
-
     /// Purge the current cache
     pub fn purge(&self) -> anyhow::Result<()> {
         fs::remove_dir_all(self.cache_dir()).context("Failed to purge cache")?;
@@ -149,19 +145,20 @@ impl CacheHandler {
     }
 
     /// Get a given template by name and return it's byte representation
-    pub fn get_template(&self, name: String) -> anyhow::Result<Vec<u8>> {
-        //     let path = self.db_path().join(&name.capped);
+    pub async fn get_template(&self, name: String) -> anyhow::Result<Gitignore> {
+        let mut conn = self.pool.acquire().await?;
+        let query = sqlx::query_as!(
+            Gitignore,
+            r#"
+SELECT * FROM gitignores
+WHERE key = ?;
+        "#,
+            name
+        )
+        .fetch_one(&mut *conn)
+        .await?;
 
-        //     if !path.exists() {
-        //         Err(anyhow::anyhow!("Template not found"))
-        //     } else {
-        //         let mut file = fs::File::open(path).with_context(|| "Failed to open template file")?;
-        //         let mut bytes = Vec::new();
-        //         file.read_to_end(&mut bytes)?;
-
-        //         Ok(bytes)
-        //     }
-        unimplemented!()
+        Ok(query)
     }
 
     // todo: maybe stream this into tui??
@@ -173,6 +170,26 @@ impl CacheHandler {
             r#"
 SELECT * FROM gitignores;
         "#
+        )
+        .fetch_all(&mut *conn)
+        .await?;
+
+        Ok(query.iter().map(|row| row.name.clone()).collect())
+    }
+
+    pub async fn search_templates(
+        &self,
+        search_query: impl AsRef<str>,
+    ) -> anyhow::Result<Vec<String>> {
+        let mut conn = self.pool.acquire().await?;
+        let search_query = format!("%{}%", search_query.as_ref());
+        let query = sqlx::query_as!(
+            Gitignore,
+            r#"
+SELECT * FROM gitignores
+WHERE name LIKE ?;
+        "#,
+            search_query,
         )
         .fetch_all(&mut *conn)
         .await?;

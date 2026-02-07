@@ -4,6 +4,7 @@ use crate::cache::CacheHandler;
 
 mod list;
 mod pull;
+mod search;
 
 /// All possible CLI commands
 #[derive(Debug, Subcommand, Clone)]
@@ -14,6 +15,9 @@ pub enum Commands {
     /// List all available templates
     List(list::Args),
 
+    /// Search all available templates
+    Search(search::Args),
+
     /// Purge the cache
     Purge,
 }
@@ -23,6 +27,7 @@ impl Command for Commands {
         match self {
             Commands::List(args) => args.run(cache).await?,
             Commands::Pull(args) => args.run(cache).await?,
+            Commands::Search(args) => args.run(cache).await?,
             Commands::Purge => cache.purge()?,
         };
 
