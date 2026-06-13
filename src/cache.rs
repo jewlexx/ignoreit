@@ -97,10 +97,10 @@ impl CacheHandler {
                 if last_update.hash != update_data.hash {
                     Some(sqlx::query!(
                         r#"
-                                            UPDATE gitignores
-                                            SET contents = ?2, file_name = ?3, name = ?4
-                                            WHERE key = ?1
-                                            "#,
+						UPDATE gitignores
+						SET contents = ?2, file_name = ?3, name = ?4
+						WHERE key = ?1
+						"#,
                         row.key,
                         row.contents,
                         row.file_name,
@@ -112,9 +112,9 @@ impl CacheHandler {
             } else {
                 Some(sqlx::query!(
                     r#"
-                                    INSERT INTO gitignores ( key, contents, file_name, name )
-                                    VALUES ( ?1, ?2, ?3, ?4 )
-                                    "#,
+					INSERT INTO gitignores ( key, contents, file_name, name )
+					VALUES ( ?1, ?2, ?3, ?4 )
+					"#,
                     row.key,
                     row.contents,
                     row.file_name,
@@ -150,9 +150,9 @@ impl CacheHandler {
         let query: Gitignore = sqlx::query_as!(
             Gitignore,
             r#"
-SELECT * FROM gitignores
-WHERE key = ?;
-        "#,
+			SELECT * FROM gitignores
+			WHERE key = ?;
+			"#,
             name
         )
         .fetch_one(&mut *conn)
@@ -168,8 +168,8 @@ WHERE key = ?;
         let query: Vec<Gitignore> = sqlx::query_as!(
             Gitignore,
             r#"
-SELECT * FROM gitignores;
-        "#
+			SELECT * FROM gitignores;
+        	"#
         )
         .fetch_all(&mut *conn)
         .await?;
@@ -186,9 +186,9 @@ SELECT * FROM gitignores;
         let query: Vec<Gitignore> = sqlx::query_as!(
             Gitignore,
             r#"
-SELECT * FROM gitignores
-WHERE name LIKE ?;
-        "#,
+			SELECT * FROM gitignores
+			WHERE name LIKE ?;
+			"#,
             search_query,
         )
         .fetch_all(&mut *conn)
