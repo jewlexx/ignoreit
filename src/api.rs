@@ -31,6 +31,15 @@ impl From<i64> for IsPatch {
     }
 }
 
+impl From<bool> for IsPatch {
+    fn from(value: bool) -> Self {
+        match value {
+            true => Self::True,
+            false => Self::False,
+        }
+    }
+}
+
 impl From<IsPatch> for bool {
     fn from(value: IsPatch) -> Self {
         match value {
