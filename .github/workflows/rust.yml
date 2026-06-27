@@ -26,7 +26,9 @@ jobs:
       - name: Install sqlx
         run: cargo install sqlx-cli
       - name: Setup database
-        run: sqlx db create && sqlx migrate run
+        run: |
+          mkdir debug-cache
+          sqlx db create && sqlx migrate run
       - name: Build
         run: cargo build --verbose
       - name: Run tests
