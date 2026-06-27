@@ -1,0 +1,62 @@
+{
+  "db_name": "SQLite",
+  "query": "\n\t\t\tSELECT * FROM gitignores;\n        \t",
+  "describe": {
+    "columns": [
+      {
+        "name": "key",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "gitignores",
+            "name": "key"
+          }
+        }
+      },
+      {
+        "name": "contents",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "gitignores",
+            "name": "contents"
+          }
+        }
+      },
+      {
+        "name": "file_name",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "gitignores",
+            "name": "file_name"
+          }
+        }
+      },
+      {
+        "name": "name",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "gitignores",
+            "name": "name"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "f570311115585cfee7bc5f3462ea532676bcfbfd5dde1a157b47cf23b8cc617a"
+}

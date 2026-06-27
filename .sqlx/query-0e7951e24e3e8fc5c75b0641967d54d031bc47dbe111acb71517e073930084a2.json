@@ -1,0 +1,62 @@
+{
+  "db_name": "SQLite",
+  "query": "\n\t\t\tSELECT * FROM gitignores\n\t\t\tWHERE name LIKE ?;\n\t\t\t",
+  "describe": {
+    "columns": [
+      {
+        "name": "key",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "gitignores",
+            "name": "key"
+          }
+        }
+      },
+      {
+        "name": "contents",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "gitignores",
+            "name": "contents"
+          }
+        }
+      },
+      {
+        "name": "file_name",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "gitignores",
+            "name": "file_name"
+          }
+        }
+      },
+      {
+        "name": "name",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "gitignores",
+            "name": "name"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "0e7951e24e3e8fc5c75b0641967d54d031bc47dbe111acb71517e073930084a2"
+}
