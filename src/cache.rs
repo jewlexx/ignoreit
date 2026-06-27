@@ -98,13 +98,14 @@ impl CacheHandler {
                     Some(sqlx::query!(
                         r#"
 						UPDATE gitignores
-						SET contents = ?2, file_name = ?3, name = ?4
+						SET contents = ?2, file_name = ?3, name = ?4, is_patch = ?5
 						WHERE key = ?1
 						"#,
                         row.key,
                         row.contents,
                         row.file_name,
                         row.name,
+                        i64::from(row.is_patch),
                     ))
                 } else {
                     None
@@ -112,13 +113,14 @@ impl CacheHandler {
             } else {
                 Some(sqlx::query!(
                     r#"
-					INSERT INTO gitignores ( key, contents, file_name, name )
-					VALUES ( ?1, ?2, ?3, ?4 )
+					INSERT INTO gitignores ( key, contents, file_name, name, is_patch )
+					VALUES ( ?1, ?2, ?3, ?4, ?5 )
 					"#,
                     row.key,
                     row.contents,
                     row.file_name,
                     row.name,
+                    i64::from(row.is_patch),
                 ))
             };
 

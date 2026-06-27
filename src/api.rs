@@ -12,12 +12,14 @@ pub struct Gitignore {
     pub(crate) file_name: String,
     pub(crate) key: String,
     #[sqlx(try_from = "i64")]
+    #[serde(skip)]
     pub(crate) is_patch: IsPatch,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Hash)]
+#[derive(Debug, Default, Copy, Clone, PartialEq, Serialize, Deserialize, Hash)]
 pub enum IsPatch {
     True,
+    #[default]
     False,
 }
 
@@ -27,6 +29,15 @@ impl From<i64> for IsPatch {
             0 => Self::False,
             1 => Self::True,
             _ => unreachable!(),
+        }
+    }
+}
+
+impl From<IsPatch> for i64 {
+    fn from(value: IsPatch) -> Self {
+        match value {
+            IsPatch::True => 1,
+            IsPatch::False => 0,
         }
     }
 }
