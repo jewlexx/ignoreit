@@ -8,6 +8,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  SQLX_OFFLINE: 1
 
 jobs:
   build:
@@ -23,12 +24,6 @@ jobs:
 
       - name: Check Rust Compiler Version
         run: rustc --version
-      - name: Install sqlx
-        run: cargo install sqlx-cli
-      - name: Setup database
-        run: |
-          mkdir debug-cache
-          sqlx db create && sqlx migrate run
       - name: Build
         run: cargo build --verbose
       - name: Run tests
