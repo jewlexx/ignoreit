@@ -46,12 +46,24 @@
             "name": "name"
           }
         }
+      },
+      {
+        "name": "is_patch",
+        "ordinal": 4,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "gitignores",
+            "name": "is_patch"
+          }
+        }
       }
     ],
     "parameters": {
       "Right": 1
     },
     "nullable": [
+      false,
       false,
       false,
       false,
