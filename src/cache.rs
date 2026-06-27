@@ -37,12 +37,16 @@ pub struct CacheHandler {
 
 impl CacheHandler {
     pub async fn new() -> anyhow::Result<Self> {
-        let dirs = ProjectDirs::from("dev", "cordor", "ignoreit")
-            .context("project directories creation")?;
-        let cache_dir = dirs.cache_dir();
+        let cache_dir = if cfg!(debug_assertions) {
+            std::env::current_dir()?.join("debug-cache")
+        } else {
+            let dirs = ProjectDirs::from("dev", "cordor", "ignoreit")
+                .context("project directories creation")?;
+            dirs.cache_dir().to_owned()
+        };
 
         if !cache_dir.try_exists()? {
-            std::fs::create_dir_all(cache_dir)?;
+            std::fs::create_dir_all(&cache_dir)?;
         }
 
         let path = cache_dir.join(DB_PATH);
@@ -56,10 +60,7 @@ impl CacheHandler {
 
         sqlx::migrate!().run(&pool).await?;
 
-        Ok(Self {
-            cache_dir: cache_dir.to_owned(),
-            pool,
-        })
+        Ok(Self { cache_dir, pool })
     }
 
     pub async fn update(&self, force: bool) -> anyhow::Result<()> {

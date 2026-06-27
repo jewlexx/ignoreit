@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n\t\t\t\t\t\tUPDATE gitignores\n\t\t\t\t\t\tSET contents = ?2, file_name = ?3, name = ?4, is_patch = ?5\n\t\t\t\t\t\tWHERE key = ?1\n\t\t\t\t\t\t",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 5
+    },
+    "nullable": []
+  },
+  "hash": "603da52c632fdfe066293a49c721b75e0d6f056f16a6f39b0f5bfcd084a1bf93"
+}
