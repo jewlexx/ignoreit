@@ -1,8 +1,36 @@
 use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    ops::{Deref, DerefMut},
+};
 
-pub type Gitignores = HashMap<String, Gitignore>;
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct Gitignores(HashMap<String, Gitignore>);
+
+impl Gitignores {
+    /// See [`Gitignore::normalise`]
+    pub fn normalise(&mut self) {
+        for (_key, value) in self.0.iter_mut() {
+            value.normalise();
+        }
+    }
+}
+
+impl Deref for Gitignores {
+    type Target = HashMap<String, Gitignore>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for Gitignores {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Hash, FromRow)]
 #[serde(rename_all = "camelCase")]
@@ -14,6 +42,20 @@ pub struct Gitignore {
     #[sqlx(try_from = "i64")]
     #[serde(skip)]
     pub(crate) is_patch: IsPatch,
+}
+
+impl Gitignore {
+    /// Normalises the [`Gitignore`] type structure
+    ///
+    /// Currently does the following:
+    /// - Checks for patch name schemes and marks it as a patch if that scheme is present
+    pub fn normalise(&mut self) {
+        if self.name.contains('+') {
+            self.is_patch = true.into();
+        } else {
+            self.is_patch = false.into();
+        }
+    }
 }
 
 #[derive(Debug, Default, Copy, Clone, PartialEq, Serialize, Deserialize, Hash)]
