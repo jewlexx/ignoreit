@@ -37,10 +37,13 @@ async fn main() -> anyhow::Result<()> {
     LazyLock::force(&STARTUP_TIMESTAMP);
 
     let cache = cache::CacheHandler::new().await?;
+    let just_updated = cache.update(false).await?;
 
     let args = Args::parse();
 
-    cache.update(args.force_update).await?;
+    if !just_updated && args.force_update {
+        cache.update(true).await?;
+    }
     args.command.run(cache).await?;
 
     Ok(())

@@ -50,7 +50,9 @@ impl Gitignore {
     /// Currently does the following:
     /// - Checks for patch name schemes and marks it as a patch if that scheme is present
     pub fn normalise(&mut self) {
-        if self.name.contains('+') {
+        if let Some(plus_pos) = self.name.find('+')
+            && plus_pos != self.name.len() - 1
+        {
             self.is_patch = true.into();
         } else {
             self.is_patch = false.into();

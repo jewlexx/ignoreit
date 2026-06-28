@@ -17,8 +17,8 @@ use anyhow::Context;
 use directories::ProjectDirs;
 use reqwest::Url;
 use sqlx::{
-    sqlite::{SqliteConnectOptions, SqliteQueryResult},
     ConnectOptions, SqlitePool,
+    sqlite::{SqliteConnectOptions, SqliteQueryResult},
 };
 
 use crate::{
@@ -63,7 +63,7 @@ impl CacheHandler {
         Ok(Self { cache_dir, pool })
     }
 
-    pub async fn update(&self, force: bool) -> anyhow::Result<()> {
+    pub async fn update(&self, force: bool) -> anyhow::Result<bool> {
         let last_update = LastUpdate::get(self.cache_dir());
 
         match last_update {
@@ -74,13 +74,17 @@ impl CacheHandler {
                         .expect("time to go forwards")
                         >= UPDATE_TIMEOUT
                 {
-                    Self::update_inner(self, Some(last_update)).await
+                    Self::update_inner(self, Some(last_update)).await?;
+                    Ok(true)
                 } else {
-                    Ok(())
+                    Ok(false)
                 }
             }
             Err(error) => match error {
-                update::Error::MissingLastUpdate => Self::update_inner(self, None).await,
+                update::Error::MissingLastUpdate => {
+                    Self::update_inner(self, None).await?;
+                    Ok(true)
+                }
                 error => Err(error)?,
             },
         }

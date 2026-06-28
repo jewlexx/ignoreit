@@ -2,7 +2,7 @@
 authors = ["Juliette Cordor"]
 categories = ["command-line-utilities", "development-tools"]
 description = "Quickly load .gitignore templates"
-edition = "2021"
+edition = "2024"
 keywords = ["git", "ignore", "developer", "tools", "gitignore"]
 license = "MIT"
 name = "ignoreit"
