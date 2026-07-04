@@ -15,6 +15,8 @@ const ALL_GITIGNORES: &str = "https://www.toptal.com/developers/gitignore/api/li
 use anyhow::Context;
 
 use directories::ProjectDirs;
+use futures_util::StreamExt;
+use indicatif::ProgressStyle;
 use reqwest::Url;
 use sqlx::{
     ConnectOptions, SqlitePool,
@@ -74,7 +76,7 @@ impl CacheHandler {
                         .expect("time to go forwards")
                         >= UPDATE_TIMEOUT
                 {
-                    Self::update_inner(self, Some(last_update)).await?;
+                    self.update_inner(Some(last_update)).await?;
                     Ok(true)
                 } else {
                     Ok(false)
@@ -82,7 +84,7 @@ impl CacheHandler {
             }
             Err(error) => match error {
                 update::Error::MissingLastUpdate => {
-                    Self::update_inner(self, None).await?;
+                    self.update_inner(None).await?;
                     Ok(true)
                 }
                 error => Err(error)?,
@@ -91,7 +93,20 @@ impl CacheHandler {
     }
 
     async fn update_inner(&self, last_update: Option<LastUpdate>) -> anyhow::Result<()> {
-        let raw_response = reqwest::get(ALL_GITIGNORES).await?.text().await?;
+        let resp = reqwest::get(ALL_GITIGNORES).await?;
+        let length = resp
+            .content_length()
+            .context("failed to get content length")?;
+        let pb = indicatif::ProgressBar::new(length).with_message("Updating cache").with_style(ProgressStyle::with_template("{spinner:.green} {msg} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {bytes}/{total_bytes} ({bytes_per_sec}, {eta})")?);
+        let mut response_bytes = Vec::with_capacity(length as usize);
+        let mut stream = resp.bytes_stream();
+        while let Some(chunk_res) = stream.next().await {
+            let chunk = chunk_res?;
+            let chunk_len = chunk.len();
+            response_bytes.append(&mut chunk.into());
+            pb.inc(chunk_len as u64);
+        }
+        let raw_response = String::try_from(response_bytes)?;
         let mut response: Gitignores = serde_json::from_str(&raw_response)?;
         response.normalise();
         let update_data = LastUpdate::from_data(&response);
